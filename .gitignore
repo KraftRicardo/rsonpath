@@ -1,3 +1,7 @@
 /target/*
 /.vscode/*.log
 /simd-benchmarks/plot.svg
+
+# Added by Ricardo
+/.a_ricardo/*
+Cargo.lock
