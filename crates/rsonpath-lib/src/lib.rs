@@ -196,7 +196,7 @@ mod depth;
 pub mod engine;
 pub mod error;
 pub mod input;
-pub mod lut_counter;
+pub mod lookup_table;
 pub mod result;
 
 cfg_if::cfg_if! {
