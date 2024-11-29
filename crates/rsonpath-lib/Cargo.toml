@@ -62,6 +62,9 @@ pretty_assertions = "1.4.0"
 proptest = "1.4.0"
 test-case = "3.3.1"
 
+# Added by Ricardo
+test-log = "0.2.16"
+
 [features]
 default = ["simd"]
 arbitrary = ["dep:arbitrary"]
