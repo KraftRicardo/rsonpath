@@ -63,7 +63,7 @@ proptest = "1.4.0"
 test-case = "3.3.1"
 
 # Added by Ricardo
-test-log = "0.2.16"
+simple_logger = "4.3.3"
 
 [features]
 default = ["simd"]
