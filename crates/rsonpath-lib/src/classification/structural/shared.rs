@@ -236,9 +236,9 @@ macro_rules! structural_classifier {
                 }
             }
 
-            fn jump_to_idx(&mut self, idx: usize){
+            fn jump_to_idx(&mut self, idx: usize) -> Result<(), InputError>{
                 // TODO Ricardo copy the nosimd implementation
-                // todo()
+                todo!()
             }
         }
     };
