@@ -8,6 +8,7 @@ use crate::{
 use crate::input::MmapInput;
 use crate::lookup_table::implementations::lut_hash_map;
 use crate::lookup_table::performance::lut_query_data::*;
+use rsonpath_lib_ref::engine::{Compiler as CompilerLegacy, Engine as EngineLegacy};
 use std::{
     fs,
     io::{BufReader, Read},
@@ -15,7 +16,7 @@ use std::{
 
 // Run with: cargo run --bin lut --release -- test-query
 pub fn test_build_and_queries() {
-    let cutoff = 64 * 7;
+    let cutoff = 64 * 2;
 
     // ###########
     // ## BUILD ##
@@ -100,15 +101,15 @@ pub fn test_build_and_queries() {
     // test_query_correctness_count(QUERY_WALMART_SHORT, cutoff);
 
     // GB_1
-    // test_query_correctness_count(QUERY_BESTBUY, cutoff);
-    // test_query_correctness_count(QUERY_CROSSREF1, cutoff);
-    // test_query_correctness_count(QUERY_CROSSREF2, cutoff);
-    // test_query_correctness_count(QUERY_CROSSREF4, cutoff);
+    test_query_correctness_count(QUERY_BESTBUY, cutoff);
+    test_query_correctness_count(QUERY_CROSSREF1, cutoff);
+    test_query_correctness_count(QUERY_CROSSREF2, cutoff);
+    test_query_correctness_count(QUERY_CROSSREF4, cutoff);
     test_query_correctness_count(QUERY_GOOGLE, cutoff);
-    // test_query_correctness_count(QUERY_NSPL, cutoff);
-    // test_query_correctness_count(QUERY_TWITTER, cutoff);
-    // test_query_correctness_count(QUERY_WALMART, cutoff);
-    // test_query_correctness_count(QUERY_WIKI, cutoff);
+    test_query_correctness_count(QUERY_NSPL, cutoff);
+    test_query_correctness_count(QUERY_TWITTER, cutoff);
+    test_query_correctness_count(QUERY_WALMART, cutoff);
+    test_query_correctness_count(QUERY_WIKI, cutoff);
 
     // GB_25
     // test_query_correctness_count_big_json(QUERY_NESTED_COL, cutoff);
@@ -148,34 +149,50 @@ fn test_query_correctness_count(test_data: (&str, &[(&str, &str)]), cutoff: usiz
 
     // Run all queries
     println!("Checking queries:");
+
+    let input = {
+        let mut file = BufReader::new(fs::File::open(json_path).expect("Fail @ open File"));
+        let mut buf = vec![];
+        file.read_to_end(&mut buf).expect("Fail @ file read");
+        OwnedBytes::new(buf)
+    };
+
     for &(query_name, query_text) in queries {
-        print!(" Query: {} = \"{}\" ... ", query_name, query_text);
-        let input = {
+        println!(" Query: {} = \"{}\" ... ", query_name, query_text);
+
+        // ITE (LEGACY)
+        let legacy_input = {
             let mut file = BufReader::new(fs::File::open(json_path).expect("Fail @ open File"));
             let mut buf = vec![];
             file.read_to_end(&mut buf).expect("Fail @ file read");
-            OwnedBytes::new(buf)
+            rsonpath_lib_ref::input::OwnedBytes::new(buf)
         };
-        let query = rsonpath_syntax::parse(query_text).expect("Fail @ parse query");
 
-        // Query normally and skip iteratively (ITE)
+        let legacy_query = syntax_ref::parse(query_text).expect("Fail @ parse query");
+        let legacy_engine = rsonpath_lib_ref::engine::RsonpathEngine::compile_query(&legacy_query)
+            .expect("Fail @ compile query legacy");
+        let legacy_count = legacy_engine
+            .count(&legacy_input)
+            .expect("Failed to run query normally");
+
         // println!("---- ITE STYLE ----");
+        let query = rsonpath_syntax::parse(query_text).expect("Fail @ parse query");
         let mut engine = RsonpathEngine::compile_query(&query).expect("Fail @ compile query");
         let count = engine.count(&input).expect("Failed to run query normally");
 
-        // Query normally and skip using the lookup table (LUT)
         // println!("---- LUT STYLE ----");
         engine.add_lut(lut);
         let lut_count = engine.count(&input).expect("LUT: Failed to run query normally");
 
-        if lut_count != count {
-            println!("\n  Found {}, Expected {}", lut_count, count);
-        } else {
-            println!("  Correct: Found {}, Expected {}", lut_count, count);
+        if legacy_count != count {
+            println!("\n  ITE INCORRECT: Found {}, Expected {}", lut_count, count);
+        }
+        if legacy_count != lut_count {
+            println!("\n  LUT INCORRECT: Found {}, Expected {}", lut_count, count);
+        }
 
-            if count == 0 {
-                println!("DO NOT USE THIS QUERY. IT HAS NO RESULTS!")
-            }
+        if legacy_count == 0 {
+            println!("DO NOT USE THIS QUERY. IT HAS NO RESULTS!")
         }
 
         lut = engine.take_lut().expect("Failed to retrieve LUT from engine");

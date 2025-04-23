@@ -30,8 +30,9 @@ pub fn evaluate() {
     }
     // let cutoffs = vec![64, 128, 192, 256, 320, 384, 448, 512];
     // let cutoffs = vec![64, 512, 1024, 2048, 4096, 8192];
-    let cutoffs = vec![128];
+    let cutoffs = vec![512, 8192];
 
+    // only_plot(QUERY_GOOGLE);
     // only_plot(QUERY_BESTBUY);
     // only_plot(QUERY_CROSSREF1);
     // only_plot(QUERY_CROSSREF2);
@@ -39,15 +40,15 @@ pub fn evaluate() {
     // only_plot(QUERY_TWITTER);
 
     // GB_1
-    // eval_all(QUERY_BESTBUY, &cutoffs);
-    // eval_all(QUERY_CROSSREF1, &cutoffs);
-    // eval_all(QUERY_CROSSREF2, &cutoffs);
-    // eval_all(QUERY_CROSSREF4, &cutoffs);
+    eval_all(QUERY_BESTBUY, &cutoffs);
+    eval_all(QUERY_CROSSREF1, &cutoffs);
+    eval_all(QUERY_CROSSREF2, &cutoffs);
+    eval_all(QUERY_CROSSREF4, &cutoffs);
     eval_all(QUERY_GOOGLE, &cutoffs);
-    // eval_all(QUERY_NSPL, &cutoffs);
-    // eval_all(QUERY_TWITTER, &cutoffs);
-    // eval_all(QUERY_WALMART, &cutoffs);
-    // eval_all(QUERY_WIKI, &cutoffs);
+    eval_all(QUERY_NSPL, &cutoffs);
+    eval_all(QUERY_TWITTER, &cutoffs);
+    eval_all(QUERY_WALMART, &cutoffs);
+    eval_all(QUERY_WIKI, &cutoffs);
 }
 
 fn only_plot(test_data: (&str, &[(&str, &str)])) {
@@ -139,25 +140,31 @@ fn eval_lut(
         // Append each query result
         let mut wtr_query = Writer::from_writer(fs::OpenOptions::new().append(true).open(query_csv).unwrap());
 
+        let input = {
+            let mut file = BufReader::new(fs::File::open(json_path).expect("Fail @ open File"));
+            let mut buf = vec![];
+            file.read_to_end(&mut buf).expect("Fail @ file read");
+            OwnedBytes::new(buf)
+        };
+
         for (query_id, query_text) in queries {
             let query = rsonpath_syntax::parse(query_text).expect("Fail @ parse query");
             let mut engine = RsonpathEngine::compile_query(&query).expect("Fail @ compile query");
             engine.add_lut(lut);
 
-            let start_query = std::time::Instant::now();
+            let mut result: u64 = 0;
+            let mut query_time_total = 0.0;
             for _ in 0..QUERY_REPETITIONS {
-                let input = {
-                    let mut file = BufReader::new(fs::File::open(json_path).expect("Fail @ open File"));
-                    let mut buf = vec![];
-                    file.read_to_end(&mut buf).expect("Fail @ file read");
-                    OwnedBytes::new(buf)
-                };
-                // TODO this is not correctly measured!
-                let _ = engine.count(&input).expect("Failed to run query normally");
+                let start_query = std::time::Instant::now();
+                result = engine.count(&input).expect("Failed to run query normally");
+                query_time_total += start_query.elapsed().as_secs_f64();
             }
-            let query_time_average = start_query.elapsed().as_secs_f64() / (QUERY_REPETITIONS as f64);
+            let query_time_average = query_time_total / (QUERY_REPETITIONS as f64);
             lut = engine.take_lut().expect("Fail at taking LUT back");
-            println!("  - query = {query_id}, time = {:.5}s ", query_time_average);
+            println!(
+                "  - query = {query_id}, time = {:.5}s, result = {}",
+                query_time_average, result
+            );
 
             wtr_query
                 .write_record(&[
@@ -195,23 +202,29 @@ fn eval_ite(json_path: &str, filename: &str, queries: &[(&str, &str)], build_csv
     // Append query results
     let mut wtr_query = Writer::from_writer(fs::OpenOptions::new().append(true).open(query_csv).unwrap());
 
+    let input = {
+        let mut file = BufReader::new(fs::File::open(json_path).expect("Fail @ open File"));
+        let mut buf = vec![];
+        file.read_to_end(&mut buf).expect("Fail @ file read");
+        OwnedBytes::new(buf)
+    };
+
     for (query_id, query_text) in queries {
         let query = rsonpath_syntax::parse(query_text).expect("Fail @ parse query");
         let engine = RsonpathEngine::compile_query(&query).expect("Fail @ compile query");
 
-        let input = {
-            let mut file = BufReader::new(fs::File::open(json_path).expect("Fail @ open File"));
-            let mut buf = vec![];
-            file.read_to_end(&mut buf).expect("Fail @ file read");
-            OwnedBytes::new(buf)
-        };
-
-        let start_query = std::time::Instant::now();
+        let mut result: u64 = 0;
+        let mut query_time_total = 0.0;
         for _ in 0..QUERY_REPETITIONS {
-            let _ = engine.count(&input).expect("Failed to run query normally");
+            let start_query = std::time::Instant::now();
+            result = engine.count(&input).expect("Failed to run query normally");
+            query_time_total += start_query.elapsed().as_secs_f64();
         }
-        let query_time_average = start_query.elapsed().as_secs_f64() / (QUERY_REPETITIONS as f64);
-        println!("  - query = {query_id}, time = {:.5}s ", query_time_average);
+        let query_time_average = query_time_total / (QUERY_REPETITIONS as f64);
+        println!(
+            "  - query = {query_id}, time = {:.5}s, result = {}",
+            query_time_average, result
+        );
 
         wtr_query
             .write_record(&[
