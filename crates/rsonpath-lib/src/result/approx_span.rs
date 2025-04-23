@@ -43,6 +43,11 @@ where
     fn record_block_start(&self, _new_block: B) {
         // Intentionally left empty.
     }
+
+    #[inline(always)]
+    fn must_record_blocks(&self) -> bool {
+        false
+    }
 }
 
 impl<B: Deref<Target = [u8]>, S> Recorder<B> for ApproxSpanRecorder<'_, S>
