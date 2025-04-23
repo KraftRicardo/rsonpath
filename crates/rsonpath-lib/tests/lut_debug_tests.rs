@@ -26,6 +26,7 @@ use rsonpath::{
 use serde_json::json;
 
 /// cargo test --test lut_debug_tests -- test_build_and_queries --nocapture | rg "(lut_debug_tests)"
+/// cargo test --test lut_debug_tests -- test_build_and_queries --nocapture | rg "(tail_skipping)" > log.txt
 /// cargo test --test lut_debug_tests -- test_build_and_queries --nocapture | rg "(tail_skipping|lut_debug_tests|main)"
 /// cargo test --test lut_debug_tests -- test_build_and_queries --nocapture | rg "(tail_skipping|lut_debug_tests|main|lut_hash_map)"
 #[test]
@@ -54,7 +55,11 @@ fn test_build_and_queries() {
     // test_query_correctness(QUERY_PRETTY_PEOPLE, cutoff);
     // test_query_correctness(QUERY_TWITTER_MINI, cutoff);
 
-    test_bug();
+    // test_query_correctness(QUERY_GOOGLE, cutoff);
+
+    // test_bug();
+
+    debug_skips();
 }
 
 fn test_build_correctness(test_data: (&str, &[(&str, &str)]), cutoff: usize) {
@@ -86,6 +91,25 @@ fn test_build_correctness(test_data: (&str, &[(&str, &str)]), cutoff: usize) {
     debug!(" Incorrect {}/{}", count_incorrect, keys.len());
 
     drop(lut);
+}
+
+fn debug_skips() {
+    let json_path = "../../.a_lut_tests/test_data/GB_1/google_map_large_record_(1.1GB).json";
+    let query_text = "$[0:81].routes[*].legs[*].steps[*].polyline.points";
+
+    let input = {
+        let mut file = BufReader::new(fs::File::open(json_path).expect("Fail @ open File"));
+        let mut buf = vec![];
+        file.read_to_end(&mut buf).expect("Fail @ file read");
+        OwnedBytes::new(buf)
+    };
+    let query = rsonpath_syntax::parse(query_text).expect("Fail @ parse query");
+
+    // Query normally and skip iteratively (ITE)
+    debug!("---- ITE STYLE ----");
+    let mut engine = RsonpathEngine::compile_query(&query).expect("Fail @ compile query");
+    let ite_count = engine.count(&input).expect("Failed to run query normally");
+    debug!("ITE: result count =  {}", ite_count);
 }
 
 fn test_query_correctness(test_data: (&str, &[(&str, &str)]), cutoff: usize) {

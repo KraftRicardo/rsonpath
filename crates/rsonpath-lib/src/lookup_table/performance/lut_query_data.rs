@@ -583,23 +583,23 @@ pub const QUERY_CROSSREF4: (&str, &[(&str, &str)]) = (
 pub const QUERY_GOOGLE: (&str, &[(&str, &str)]) = (
     ".a_lut_tests/test_data/GB_1/google_map_large_record_(1.1GB).json",
     &[
-        ("0", "$[4000].routes[*].bounds"), // 0.999989
-                                           // ("1", "$[*].routes[*].legs[*].steps[*].html_instructions"),     // 0.965067
-                                           // ("2", "$[*].routes[*].legs[*].steps[*].distance.text"),         // 0.821380
-                                           // ("3", "$[*].routes[*].legs[*].steps[*].distance"),              // 0.819461
-                                           // ("4", "$[*].routes[*].legs[*].steps[*].maneuver"),              // 0.745787
-                                           // ("5", "$[*].routes[*].legs[*].steps[*].start_location"),        // 0.673776
-                                           // ("6", "$[*].routes[*].legs[*].steps[*].start_location.lat"),    // 0.665473
-                                           // ("7", "$[1:2000].routes[*].legs[*].steps[*].polyline.points"),  // 0.654228
-                                           // ("8", "$[*].routes[*].legs[*].steps[*].duration"),              // 0.594071
-                                           // ("9", "$[*].routes[*].legs[*].steps[*].end_location"),          // 0.532257
-                                           // ("10", "$[1:3000].routes[*].legs[*].steps[*].polyline.points"), // 0.467309
-                                           // ("11", "$[*].routes[*].legs[*].steps[*]"),                      // 0.432387
-                                           // ("12", "$[1:4000].routes[*].legs[*].steps[*].polyline.points"), // 0.269475
-                                           // ("13", "$[*].routes[*].legs[*].steps[*].polyline"),             // 0.225161
-                                           // ("14", "$[*].routes[*].legs[*].steps[*].polyline.points"),      // 0.173328
-                                           // ("15", "$[*].routes[*].legs[*]..lat"),                          // 0.006689
-                                           // ("16", "$[*]..bounds"),                                         // 0.000000
+        ("0", "$[4000].routes[*].bounds"),                              // 0.999989
+        ("1", "$[*].routes[*].legs[*].steps[*].html_instructions"),     // 0.965067
+        ("2", "$[*].routes[*].legs[*].steps[*].distance.text"),         // 0.821380
+        ("3", "$[*].routes[*].legs[*].steps[*].distance"),              // 0.819461
+        ("4", "$[*].routes[*].legs[*].steps[*].maneuver"),              // 0.745787
+        ("5", "$[*].routes[*].legs[*].steps[*].start_location"),        // 0.673776
+        ("6", "$[*].routes[*].legs[*].steps[*].start_location.lat"),    // 0.665473
+        ("7", "$[1:2000].routes[*].legs[*].steps[*].polyline.points"),  // 0.654228
+        ("8", "$[*].routes[*].legs[*].steps[*].duration"),              // 0.594071
+        ("9", "$[*].routes[*].legs[*].steps[*].end_location"),          // 0.532257
+        ("10", "$[1:3000].routes[*].legs[*].steps[*].polyline.points"), // 0.467309
+        ("11", "$[*].routes[*].legs[*].steps[*]"),                      // 0.432387
+        ("12", "$[1:4000].routes[*].legs[*].steps[*].polyline.points"), // 0.269475
+        ("13", "$[*].routes[*].legs[*].steps[*].polyline"),             // 0.225161
+        ("14", "$[*].routes[*].legs[*].steps[*].polyline.points"),      // 0.173328
+        ("15", "$[*].routes[*].legs[*]..lat"),                          // 0.006689
+        ("16", "$[*]..bounds"),                                         // 0.000000
     ],
 );
 
@@ -632,41 +632,41 @@ pub const QUERY_TWITTER: (&str, &[(&str, &str)]) = (
     ".a_lut_tests/test_data/GB_1/twitter_large_record_(843MB).json",
     &[
         // Picked
-        // ("1", "$[*].user..url.*"),                        // 0.000000
-        // ("2", "$[1:150000]..user"),                       // 0.035640
-        // ("3", "$[1:140000]..user"),                       // 0.101083
-        // ("4", "$[1:130000]..user"),                       // 0.165078
-        // ("5", "$[1:120000]..user"),                       // 0.228623
-        // ("6", "$[1:110000]..user"),                       // 0.292380
-        // ("7", "$[1:100000]..user"),                       // 0.356660
-        // ("8", "$[1:90000]..user"),                        // 0.417997
-        // ("9", "$[1:80000]..user"),                        // 0.481244
-        // ("10", "$[1:70000]..user"),                       // 0.545231
-        // ("11", "$[1:60000]..user"),                       // 0.572430
-        // ("12", "$[1:50000]..user"),                       // 0.609424
-        // ("13", "$[1:40000]..user"),                       // 0.661039
-        // ("14", "$[1:30000]..user"),                       // 0.675647
-        // ("15", "$[1:20000]..user"),                       // 0.708100
-        // ("16", "$[1:10000]..user"),                       // 0.741561
-        // ("17", "$[*].user.profile_sidebar_border_color"), // 0.751322
-        // ("18", "$[*].user.profile_image_url_https"),      // 0.780070
-        // ("19", "$[*].retweeted_status.filter_level"),     // 0.805593
-        // ("20", "$[*].retweeted_status.user.name"),        // 0.807400
-        // ("21", "$[*].user.created_at"),                   // 0.834220
-        // ("22", "$[*].retweeted_status.id"),               // 0.870497
-        // ("23", "$[*].user.screen_name"),                  // 0.872362
-        // ("24", "$[*].source"),                            // 0.889281
-        // ("25", "$[*].id"),                                // 0.901908
-        // ("26", "$[*].geo"),                               // 0.936339
-        // ("27", "$[*].retweeted_status[*]"),               // 0.954362
-        // ("28", "$[*]..id"),                               // 0.989802
-        // Queries where LUT is faster than ITE
-        ("200", "$[*].entities..symbols[*]"),
-        ("201", "$[*].entities..url"),
-        ("202", "$[*].entities.symbols[*]"),
-        ("203", "$[*].entities.symbols[1]"),
-        ("204", "$[*].entities.urls[*].display_url"),
-        ("205", "$[*].timestamp_ms"),
+        ("1", "$[*].user..url.*"),                        // 0.000000
+        ("2", "$[1:150000]..user"),                       // 0.035640
+        ("3", "$[1:140000]..user"),                       // 0.101083
+        ("4", "$[1:130000]..user"),                       // 0.165078
+        ("5", "$[1:120000]..user"),                       // 0.228623
+        ("6", "$[1:110000]..user"),                       // 0.292380
+        ("7", "$[1:100000]..user"),                       // 0.356660
+        ("8", "$[1:90000]..user"),                        // 0.417997
+        ("9", "$[1:80000]..user"),                        // 0.481244
+        ("10", "$[1:70000]..user"),                       // 0.545231
+        ("11", "$[1:60000]..user"),                       // 0.572430
+        ("12", "$[1:50000]..user"),                       // 0.609424
+        ("13", "$[1:40000]..user"),                       // 0.661039
+        ("14", "$[1:30000]..user"),                       // 0.675647
+        ("15", "$[1:20000]..user"),                       // 0.708100
+        ("16", "$[1:10000]..user"),                       // 0.741561
+        ("17", "$[*].user.profile_sidebar_border_color"), // 0.751322
+        ("18", "$[*].user.profile_image_url_https"),      // 0.780070
+        ("19", "$[*].retweeted_status.filter_level"),     // 0.805593
+        ("20", "$[*].retweeted_status.user.name"),        // 0.807400
+        ("21", "$[*].user.created_at"),                   // 0.834220
+        ("22", "$[*].retweeted_status.id"),               // 0.870497
+        ("23", "$[*].user.screen_name"),                  // 0.872362
+        ("24", "$[*].source"),                            // 0.889281
+        ("25", "$[*].id"),                                // 0.901908
+        ("26", "$[*].geo"),                               // 0.936339
+        ("27", "$[*].retweeted_status[*]"),               // 0.954362
+        ("28", "$[*]..id"),                               // 0.989802
+                                                          // Queries where LUT is faster than ITE
+                                                          // ("200", "$[*].entities..symbols[*]"),
+                                                          // ("201", "$[*].entities..url"),
+                                                          // ("202", "$[*].entities.symbols[*]"),
+                                                          // ("203", "$[*].entities.symbols[1]"),
+                                                          // ("204", "$[*].entities.urls[*].display_url"),
+                                                          // ("205", "$[*].timestamp_ms"),
     ],
 );
 

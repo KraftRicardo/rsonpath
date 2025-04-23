@@ -171,7 +171,7 @@ fn test_query_correctness_count(test_data: (&str, &[(&str, &str)]), cutoff: usiz
         if lut_count != count {
             println!("\n  Found {}, Expected {}", lut_count, count);
         } else {
-            println!("  Correct");
+            println!("  Correct: Found {}, Expected {}", lut_count, count);
 
             if count == 0 {
                 println!("DO NOT USE THIS QUERY. IT HAS NO RESULTS!")

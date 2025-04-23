@@ -309,6 +309,7 @@ where
             if let Some(err) = err {
                 Err(err.into())
             } else {
+                debug!("{}", idx);
                 Ok(idx)
             }
         })
@@ -320,26 +321,26 @@ where
 }
 
 fn debug_msg(prefix: &str, idx: usize, idx_open: usize, idx_close: usize, padding: usize) {
-    let distance = idx_close - idx_open;
-    if idx >= padding && idx_open >= padding && idx_close >= padding {
-        debug!(
-            "{}[dst={}]: idx={}: (idx_open={} -> idx_close={}) No-PAD: {}, ({} -> {}), padding={}",
-            prefix,
-            distance,
-            idx,
-            idx_open,
-            idx_close,
-            idx - padding,
-            idx_open - padding,
-            idx_close - padding,
-            padding,
-        );
-    } else {
-        debug!(
-            "{}[dst={}]: idx={}: (idx_open={} -> idx_close={}) No-PAD: not possible because padding = {} is too high.",
-            prefix, distance, idx, idx_open, idx_close, padding
-        );
-    }
+    // let distance = idx_close - idx_open;
+    // if idx >= padding && idx_open >= padding && idx_close >= padding {
+    //     debug!(
+    //         "{}[dst={}]: idx={}: (idx_open={} -> idx_close={}) No-PAD: {}, ({} -> {}), padding={}",
+    //         prefix,
+    //         distance,
+    //         idx,
+    //         idx_open,
+    //         idx_close,
+    //         idx - padding,
+    //         idx_open - padding,
+    //         idx_close - padding,
+    //         padding,
+    //     );
+    // } else {
+    //     debug!(
+    //         "{}[dst={}]: idx={}: (idx_open={} -> idx_close={}) No-PAD: not possible because padding = {} is too high.",
+    //         prefix, distance, idx, idx_open, idx_close, padding
+    //     );
+    // }
 }
 
 // Only for tracking jumps and not needed in normal runs

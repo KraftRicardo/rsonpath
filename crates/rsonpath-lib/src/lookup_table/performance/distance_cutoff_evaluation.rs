@@ -152,6 +152,7 @@ fn eval_lut(
                     file.read_to_end(&mut buf).expect("Fail @ file read");
                     OwnedBytes::new(buf)
                 };
+                // TODO this is not correctly measured!
                 let _ = engine.count(&input).expect("Failed to run query normally");
             }
             let query_time_average = start_query.elapsed().as_secs_f64() / (QUERY_REPETITIONS as f64);
@@ -198,14 +199,15 @@ fn eval_ite(json_path: &str, filename: &str, queries: &[(&str, &str)], build_csv
         let query = rsonpath_syntax::parse(query_text).expect("Fail @ parse query");
         let engine = RsonpathEngine::compile_query(&query).expect("Fail @ compile query");
 
+        let input = {
+            let mut file = BufReader::new(fs::File::open(json_path).expect("Fail @ open File"));
+            let mut buf = vec![];
+            file.read_to_end(&mut buf).expect("Fail @ file read");
+            OwnedBytes::new(buf)
+        };
+
         let start_query = std::time::Instant::now();
         for _ in 0..QUERY_REPETITIONS {
-            let input = {
-                let mut file = BufReader::new(fs::File::open(json_path).expect("Fail @ open File"));
-                let mut buf = vec![];
-                file.read_to_end(&mut buf).expect("Fail @ file read");
-                OwnedBytes::new(buf)
-            };
             let _ = engine.count(&input).expect("Failed to run query normally");
         }
         let query_time_average = start_query.elapsed().as_secs_f64() / (QUERY_REPETITIONS as f64);
