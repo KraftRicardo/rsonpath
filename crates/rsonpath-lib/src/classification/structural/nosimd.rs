@@ -121,19 +121,21 @@ where
     #[inline]
     fn reclassify(&mut self, idx: usize) {
         if let Some(block) = self.block.take() {
-            let quote_classified_block = block.quote_classified;
-            let relevant_idx = idx + 1;
-            let block_idx = (idx + 1) % N;
-            debug!("relevant_idx is {relevant_idx}.");
+            if idx < self.iter.get_offset() {
+                let quote_classified_block = block.quote_classified;
+                let relevant_idx = idx + 1;
+                let block_idx = (idx + 1) % N;
+                debug!("relevant_idx is {relevant_idx}.");
 
-            if block_idx != 0 || relevant_idx == self.iter.get_offset() {
-                let new_block = Block::from_idx(
-                    quote_classified_block,
-                    block_idx,
-                    self.are_colons_on,
-                    self.are_commas_on,
-                );
-                self.block = Some(new_block);
+                if block_idx != 0 || relevant_idx == self.iter.get_offset() {
+                    let new_block = Block::from_idx(
+                        quote_classified_block,
+                        block_idx,
+                        self.are_colons_on,
+                        self.are_commas_on,
+                    );
+                    self.block = Some(new_block);
+                }
             }
         }
     }
