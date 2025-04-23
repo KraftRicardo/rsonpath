@@ -41,6 +41,11 @@ where
     fn record_block_start(&self, new_block: B) {
         self.internal.borrow_mut().record_block(new_block)
     }
+
+    #[inline(always)]
+    fn must_record_blocks(&self) -> bool {
+        self.internal.borrow().must_record_blocks()
+    }
 }
 
 impl<B, S> Recorder<B> for NodesRecorder<'_, B, S>
@@ -189,6 +194,14 @@ where
             Self::Transition => unreachable!(),
         }
     }
+
+    fn must_record_blocks(&self) -> bool {
+        match self {
+            Self::Simple(r) => r.must_record_blocks(),
+            Self::Stack(r) => r.must_record_blocks(),
+            Self::Transition => unreachable!(),
+        }
+    }
 }
 
 struct SimpleRecorder<'s, B, S> {
@@ -233,6 +246,10 @@ where
 
         self.current_block = Some(block);
         debug!("New block, idx = {}", self.idx);
+    }
+
+    fn must_record_blocks(&self) -> bool {
+        true
     }
 
     fn record_value_terminator(&mut self, idx: usize, depth: Depth) -> Result<(), EngineError> {
@@ -347,6 +364,10 @@ where
 
         self.current_block = Some(block);
         debug!("New block, idx = {}", self.idx);
+    }
+
+    fn must_record_blocks(&self) -> bool {
+        true
     }
 
     fn record_match(&mut self, idx: usize, depth: Depth, ty: MatchedNodeType) {
