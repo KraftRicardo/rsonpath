@@ -1,6 +1,9 @@
 use crate::lookup_table::performance::distance_cutoff_evaluation;
 use crate::lookup_table::performance::lut_evaluation::HEAP_TRACKER;
-use crate::lookup_table::performance::lut_query_data::{QUERY_BESTBUY, QUERY_CROSSREF1};
+use crate::lookup_table::performance::lut_query_data::{
+    QUERY_BESTBUY, QUERY_CROSSREF1, QUERY_CROSSREF2, QUERY_CROSSREF4, QUERY_GOOGLE, QUERY_NSPL, QUERY_TWITTER,
+    QUERY_WALMART, QUERY_WIKI,
+};
 use csv::Writer;
 use distance_cutoff_evaluation::heap_value;
 use serde_json::Value;
@@ -12,12 +15,15 @@ use std::path::Path;
 use std::time::Instant;
 use std::{fs, io::BufReader};
 
-pub const QUERY_REPETITIONS: usize = 1;
-pub const BUILD_REPETITIONS: usize = 1;
-pub const WARM_UP_REPETITIONS: usize = 1;
+pub const QUERY_REPETITIONS: usize = 10;
+pub const WARM_UP_QUERY_REPETITIONS: usize = 10;
+pub const BUILD_REPETITIONS: usize = 3;
+pub const WARM_UP_BUILD_REPETITIONS: usize = 1;
 
 // Run with: cargo run --bin lut --release -- eval-serde .a_test_data .a_final_results
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
+    println!("serde_json_path");
+
     // Create rsults dir
     let result_dir_path = format!("{}/speed/serde", base_path);
     fs::create_dir_all(&result_dir_path).expect("Failed to create directory");
@@ -25,13 +31,13 @@ pub fn evaluate(data_dir_path: &str, base_path: &str) {
     // GB_1
     eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);
     eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
 }
 
 pub fn plot() {
@@ -49,26 +55,6 @@ fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&st
 
     measure_build(&json_path, result_dir_path, filename);
     measure_query(&json_path, &result_dir_path, filename, queries);
-}
-
-fn eval_serde(json_value: &Value, query_text: &str) -> (f64, u64) {
-    // Parse the JSONPath query
-    let path = JsonPath::parse(query_text).expect("Could not parse query JSON");
-
-    let mut query_time_total = 0.0;
-    let mut result = 0;
-
-    for _ in 0..QUERY_REPETITIONS {
-        let start_query = std::time::Instant::now();
-        let nodes = path.query(&json_value);
-        query_time_total += start_query.elapsed().as_secs_f64();
-        result = nodes.len() as u64;
-    }
-
-    let query_time_average = query_time_total / (QUERY_REPETITIONS as f64);
-    println!("  - SERDE: Time = {:.5}s Result = {}", query_time_average, result);
-
-    (query_time_average, result)
 }
 
 // Measure query time
@@ -101,7 +87,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
         let path = JsonPath::parse(query_text).expect("Could not parse query JSON");
 
         // Warm up
-        for _ in 0..WARM_UP_REPETITIONS {
+        for _ in 0..WARM_UP_QUERY_REPETITIONS {
             let _ = path.query(&json_value);
         }
 
@@ -117,7 +103,10 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
         }
 
         let avg_time = total_time / (QUERY_REPETITIONS as f64);
-        println!("  - SERDE: Time = {:.5}s Result = {}", avg_time, result);
+        println!(
+            "  - query = {}, query_text={}, time = {:.5}s, result = {}",
+            query_id, query_text, avg_time, result
+        );
 
         wrt.write_record(&[query_id, query_text, &format!("{:.5}", avg_time)])
             .expect("Failed to write to CSV");
@@ -158,7 +147,7 @@ fn measure_build(json_path: &str, serde_dir_path: &str, filename: &str) {
     drop(json_value);
 
     // Warm-up
-    for _ in 0..WARM_UP_REPETITIONS {
+    for _ in 0..WARM_UP_BUILD_REPETITIONS {
         let file = fs::File::open(json_path).expect("Failed to open file");
         let reader = BufReader::new(file);
         let _: Value = serde_json::from_reader(reader).expect("Failed to parse JSON");

@@ -27,8 +27,10 @@ pub const WARM_UP_REPETITIONS: usize = 3;
 // run with: cargo run --bin lut --release -- cutoff .a_test_data .a_final_results
 // run with: cargo run --bin lut --release -- cutoff ricardo-jsons final-results
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
+    println!("lut_ptrhash_double_empty_list_opt");
+
     // let cutoffs = vec![64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960, 1024, 2048, 4096, 8192 ];
-    let cutoffs = vec![64, 128, 192, 256, 320, 384, 448, 512, 1024, 2048, 4096, 8192];
+    let cutoffs: Vec<usize> = vec![64, 128, 192, 256, 320, 384, 448, 512, 1024, 2048, 4096, 8192];
     // let cutoffs = vec![64, 128];
 
     if SKIP_MODE != SkipMode::OFF || !USE_SKIP_ABORT_STRATEGY {
@@ -142,7 +144,10 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, cutoff:
         let avg_time = total_time / QUERY_REPETITIONS as f64;
         lut = engine.take_lut().expect("Failed to retrieve LUT");
 
-        println!("  - query = {query_id}, time = {:.5}s, result = {}", avg_time, result);
+        println!(
+            "  - query = {}, query_text={}, time = {:.5}s, result = {}",
+            query_id, query_text, avg_time, result
+        );
 
         wrt.write_record(&[query_id, query_text, &format!("{:.5}", avg_time)])
             .expect("Failed to write to CSV");
