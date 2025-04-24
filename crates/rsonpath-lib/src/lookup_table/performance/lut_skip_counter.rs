@@ -32,15 +32,15 @@ pub fn track_skips() {
     let cutoff = 0;
 
     // GB_1
-    track_skip_count(QUERY_BESTBUY, cutoff);
-    track_skip_count(QUERY_CROSSREF1, cutoff);
-    track_skip_count(QUERY_CROSSREF2, cutoff);
-    track_skip_count(QUERY_CROSSREF4, cutoff);
+    // track_skip_count(QUERY_BESTBUY, cutoff);
+    // track_skip_count(QUERY_CROSSREF1, cutoff);
+    // track_skip_count(QUERY_CROSSREF2, cutoff);
+    // track_skip_count(QUERY_CROSSREF4, cutoff);
     track_skip_count(QUERY_GOOGLE, cutoff);
-    track_skip_count(QUERY_NSPL, cutoff);
-    track_skip_count(QUERY_TWITTER, cutoff);
-    track_skip_count(QUERY_WALMART, cutoff);
-    track_skip_count(QUERY_WIKI, cutoff);
+    // track_skip_count(QUERY_NSPL, cutoff);
+    // track_skip_count(QUERY_TWITTER, cutoff);
+    // track_skip_count(QUERY_WALMART, cutoff);
+    // track_skip_count(QUERY_WIKI, cutoff);
 }
 
 fn track_skip_count(test_data: (&str, &[(&str, &str)]), cutoff: usize) {

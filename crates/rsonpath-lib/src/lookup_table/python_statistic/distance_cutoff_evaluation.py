@@ -21,9 +21,11 @@ def plot_all(build_csv_path: str, query_csv_path: str, counter_csv_path: str, to
     build_df = pd.read_csv(build_csv_path)
     counter_df = pd.read_csv(counter_csv_path)
 
-#     cutoffs = [0, 1, 128]
-#     query_df = query_df[query_df["CUTOFF"].isin(cutoffs)]
-#     build_df = build_df[build_df["CUTOFF"].isin(cutoffs)]
+    # Normalize query times relative to CUTOFF=0
+    base_times = query_df[query_df["CUTOFF"] == 0][["QUERY_ID", "QUERY_TIME_SECONDS"]].copy()
+    base_times = base_times.set_index("QUERY_ID")["QUERY_TIME_SECONDS"]
+    query_df["BASE_TIME"] = query_df["QUERY_ID"].map(base_times)
+    query_df["RELATIVE_QUERY_TIME"] = query_df["QUERY_TIME_SECONDS"] / query_df["BASE_TIME"]
 
     # Sort counter_df by TOTAL_PERCENT_SKIP & filter relevant query names
     counter_df = counter_df.sort_values(
@@ -66,20 +68,20 @@ def plot_all(build_csv_path: str, query_csv_path: str, counter_csv_path: str, to
         for i, cutoff in enumerate(unique_cutoffs)
     }
 
-    # --- Plot 1: Query Time Line Plot ---
+    # --- Plot 1: Relative Query Time Line Plot ---
     ax1 = fig.add_subplot(2, 2, 1)
     for i, (cutoff, group) in enumerate(query_df.groupby("CUTOFF")):
         ax1.plot(
             group["QUERY_ID"].astype(str),
-            group["QUERY_TIME_SECONDS"],
+            group["RELATIVE_QUERY_TIME"],
             marker='o',
             label=f"Cutoff {cutoff}",
             color=cutoff_color_map[cutoff],
             alpha=0.4
         )
     ax1.set_xlabel("Query ID")
-    ax1.set_ylabel("Query Time (seconds)")
-    ax1.set_title("Query Time by Query ID (Grouped by Cutoff)")
+    ax1.set_ylabel("Relative Query Time")
+    ax1.set_title("Relative Query Time by Query ID (Normalized to CUTOFF=0)")
     ax1.grid(True)
     ax1.set_xticklabels(group["QUERY_ID"].astype(str), rotation=90, fontsize=9)
 

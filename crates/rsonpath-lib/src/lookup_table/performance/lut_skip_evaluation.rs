@@ -35,9 +35,9 @@ pub fn skip_evaluation() {
 
     let cutoff = 0;
 
-    // eval_test_data(QUERY_GOOGLE, cutoff);
+    eval_test_data(QUERY_GOOGLE, cutoff);
     // eval_test_data(QUERY_BESTBUY, cutoff);
-    eval_test_data(QUERY_TWITTER, cutoff);
+    // eval_test_data(QUERY_TWITTER, cutoff);
 }
 
 pub fn add_skip_time(added_time: u64) {
