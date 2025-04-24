@@ -7,3 +7,5 @@
 /crates/rsonpath-lib/tests/json/*
 Cargo.lock
 **/__pycache__/
+.idea/*
+log.txt
