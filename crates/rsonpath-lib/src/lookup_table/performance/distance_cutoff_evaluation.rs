@@ -21,13 +21,13 @@ use std::{
 };
 
 pub const QUERY_REPETITIONS: usize = 10;
-pub const BUILD_REPETITIONS: usize = 10;
+pub const BUILD_REPETITIONS: usize = 3;
+pub const WARM_UP_REPETITIONS: usize = 3;
 
 // run with: cargo run --bin lut --release -- cutoff .a_test_data .a_final_results
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
-    let cutoffs = vec![
-        64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960, 1024, 2048, 4096, 8192,
-    ];
+    // let cutoffs = vec![64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960, 1024, 2048, 4096, 8192 ];
+    let cutoffs = vec![64, 128, 192, 256, 320, 384, 448, 512, 1024, 2048, 4096, 8192];
     // let cutoffs = vec![64, 128];
 
     if SKIP_MODE != SkipMode::OFF || !USE_SKIP_ABORT_STRATEGY {
@@ -124,7 +124,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, cutoff:
         engine.add_lut(lut);
 
         // Warm up
-        for _ in 0..QUERY_REPETITIONS {
+        for _ in 0..WARM_UP_REPETITIONS {
             let _ = engine.count(&input).expect("Query execution failed");
         }
 
@@ -176,11 +176,11 @@ fn measure_build(json_path: &str, cutoff_dir_path: &str, filename: &str, cutoff:
     let start_heap = Region::new(HEAP_TRACKER);
     let lut = LUT::build(json_path, cutoff).expect("Failed to build LUT");
     let heap_bytes = heap_value(start_heap.change());
-    println!("cutoff={}", lut.get_cutoff());
+    println!("Measured heap with cutoff={}", lut.get_cutoff());
     drop(lut);
 
     // Warm-up
-    for _ in 0..BUILD_REPETITIONS {
+    for _ in 0..WARM_UP_REPETITIONS {
         let _ = LUT::build(json_path, cutoff).expect("Warm-up build failed");
     }
 
@@ -204,7 +204,7 @@ fn measure_build(json_path: &str, cutoff_dir_path: &str, filename: &str, cutoff:
 
 // We take the allocated bytes minus the deallocated and ignore the reallocated bytes because we are interested
 // in the total heap space taken
-fn heap_value(stats: stats_alloc::Stats) -> isize {
+pub fn heap_value(stats: stats_alloc::Stats) -> isize {
     stats.bytes_allocated as isize - stats.bytes_deallocated as isize
 }
 

@@ -1,6 +1,7 @@
 use clap::{Parser, Subcommand};
+use rsonpath::lookup_table::final_results::eval_serde;
 use rsonpath::lookup_table::performance::lut_hot::test_hotness;
-use rsonpath::lookup_table::performance::{eval_rq_vs_rq_lut, lut_query_correctness};
+use rsonpath::lookup_table::performance::lut_query_correctness;
 use rsonpath::lookup_table::{
     analysis::{
         distance_distribution, json_size_distribution::create_json_size_csv,
@@ -66,8 +67,11 @@ enum Commands {
         json_folder_path: String,
     },
     Hot {},
-    RqVsLut {},
-    RqVsLutPlot {},
+    EvalSerde {
+        data_dir_path: String,
+        result_dir_path: String,
+    },
+    EvalSerdePlot {},
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -125,11 +129,14 @@ fn main() -> Result<(), Box<dyn Error>> {
         Commands::Hot {} => {
             test_hotness();
         }
-        Commands::RqVsLut {} => {
-            eval_rq_vs_rq_lut::evaluate();
+        Commands::EvalSerde {
+            data_dir_path,
+            result_dir_path,
+        } => {
+            eval_serde::evaluate(data_dir_path, result_dir_path);
         }
-        Commands::RqVsLutPlot {} => {
-            eval_rq_vs_rq_lut::plot();
+        Commands::EvalSerdePlot {} => {
+            eval_serde::plot();
         }
     }
 
