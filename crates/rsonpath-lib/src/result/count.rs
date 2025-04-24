@@ -27,11 +27,6 @@ impl<B: Deref<Target = [u8]>> InputRecorder<B> for CountRecorder {
     fn record_block_start(&self, _new_block: B) {
         // Intentionally left empty.
     }
-
-    #[inline(always)]
-    fn must_record_blocks(&self) -> bool {
-        false
-    }
 }
 
 impl<B: Deref<Target = [u8]>> Recorder<B> for CountRecorder {

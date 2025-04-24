@@ -146,10 +146,8 @@ macro_rules! quote_classifier {
                     );
 
                     // 3. Q tells the InputIterator to jump
-                    if !self.iter.try_jump_blocks(distance - 1).e()? {
-                        for _ in 0..distance - 1 {
-                            self.iter.next().e()?;
-                        }
+                    for _ in 0..distance - 1 {
+                        self.iter.next().e()?;
                     }
 
                     // 5. Q needs to reclassify the new current block.

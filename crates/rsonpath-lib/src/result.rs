@@ -202,10 +202,6 @@ pub trait InputRecorder<B: Deref<Target = [u8]>> {
     /// The recorder may assume that only matches or terminators with indices pointing to
     /// the block that was last recorded as started are reported.
     fn record_block_start(&self, new_block: B);
-
-    /// Must all block starts be recorded, or is the Recorder currently in an "empty" state
-    /// that does not care about the contents.
-    fn must_record_blocks(&self) -> bool;
 }
 
 /// An observer that can determine the query result

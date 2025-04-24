@@ -281,16 +281,6 @@ where
     }
 
     #[inline(always)]
-    fn try_jump_blocks(&mut self, count: usize) -> Result<bool, Self::Error> {
-        if self.recorder.must_record_blocks() {
-            Ok(false)
-        } else {
-            self.idx += count * N;
-            Ok(true)
-        }
-    }
-
-    #[inline(always)]
     fn offset(&mut self, count: isize) {
         assert!(count >= 0);
         debug!("offsetting input iter by {count}");
@@ -342,16 +332,6 @@ where
             }
 
             block
-        }
-    }
-
-    #[inline(always)]
-    fn try_jump_blocks(&mut self, count: usize) -> Result<bool, Self::Error> {
-        if self.recorder.must_record_blocks() {
-            Ok(false)
-        } else {
-            self.idx += count * N;
-            Ok(true)
         }
     }
 

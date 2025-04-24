@@ -180,14 +180,6 @@ pub trait InputBlockIterator<'i, const N: usize> {
     ///
     /// The `count` parameter must be greater than 0.
     fn offset(&mut self, count: isize);
-
-    /// Try to jump `count` full blocks forward, but only if the inner recorder is not interested
-    /// in their contents.
-    ///
-    /// Returns `true` on a successful jump, `false` if nothing was changed.
-    fn try_jump_blocks(&mut self, count: usize) -> Result<bool, Self::Error> {
-        Ok(false)
-    }
 }
 
 /// A block of bytes of size `N` returned from [`InputBlockIterator`].
