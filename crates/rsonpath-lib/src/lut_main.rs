@@ -57,7 +57,11 @@ enum Commands {
     Pokemon {
         json_path: String,
     },
-    Cutoff {},
+    Cutoff {
+        data_dir_path: String,
+        result_dir_path: String,
+    },
+    CutoffPlot {},
     Analysis {
         json_folder_path: String,
     },
@@ -109,8 +113,14 @@ fn main() -> Result<(), Box<dyn Error>> {
         Commands::Pokemon { json_path } => {
             pokemon_test_data_generator::generate_bigger_version(json_path);
         }
-        Commands::Cutoff {} => {
-            distance_cutoff_evaluation::evaluate();
+        Commands::Cutoff {
+            data_dir_path,
+            result_dir_path,
+        } => {
+            distance_cutoff_evaluation::evaluate(data_dir_path, result_dir_path);
+        }
+        Commands::CutoffPlot {} => {
+            distance_cutoff_evaluation::plot();
         }
         Commands::Hot {} => {
             test_hotness();

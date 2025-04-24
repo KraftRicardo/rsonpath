@@ -9,3 +9,5 @@ Cargo.lock
 **/__pycache__/
 .idea/*
 log.txt
+.a_final_results
+.a_test_data

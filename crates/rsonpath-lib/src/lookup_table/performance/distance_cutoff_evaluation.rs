@@ -1,248 +1,231 @@
+use crate::lookup_table::performance::lut_query_data::{
+    QUERY_BESTBUY, QUERY_CROSSREF1, QUERY_CROSSREF2, QUERY_CROSSREF4, QUERY_GOOGLE, QUERY_NSPL, QUERY_TWITTER,
+    QUERY_WALMART, QUERY_WIKI,
+};
+use crate::lookup_table::performance::lut_skip_evaluation::SkipMode;
+use crate::lookup_table::{SKIP_MODE, USE_SKIP_ABORT_STRATEGY};
+use crate::{
+    engine::{Compiler, Engine, RsonpathEngine},
+    input::OwnedBytes,
+    lookup_table::{performance::lut_evaluation::HEAP_TRACKER, util_path, LookUpTable, LUT},
+};
+use csv::Writer;
+use stats_alloc::Region;
+use std::fs::OpenOptions;
+use std::path::Path;
+use std::time::Instant;
 use std::{
     fs,
     io::{self, BufReader, Read, Write},
     process::Command,
 };
 
-use csv::Writer;
-use stats_alloc::Region;
+pub const QUERY_REPETITIONS: usize = 10;
+pub const BUILD_REPETITIONS: usize = 10;
 
-use super::lut_query_data;
-use crate::lookup_table::performance::lut_query_data::{
-    QUERY_BESTBUY, QUERY_CROSSREF1, QUERY_CROSSREF2, QUERY_CROSSREF4, QUERY_GOOGLE, QUERY_NSPL, QUERY_TWITTER,
-    QUERY_WALMART, QUERY_WIKI,
-};
-use crate::lookup_table::performance::lut_skip_evaluation::SkipMode;
-use crate::lookup_table::{QUERY_REPETITIONS, SKIP_MODE, USE_SKIP_ABORT_STRATEGY};
-use crate::{
-    engine::{Compiler, Engine, RsonpathEngine},
-    input::OwnedBytes,
-    lookup_table::{performance::lut_evaluation::HEAP_TRACKER, util_path, LookUpTable, LUT},
-};
+// run with: cargo run --bin lut --release -- cutoff .a_test_data .a_final_results
+pub fn evaluate(data_dir_path: &str, base_path: &str) {
+    let cutoffs = vec![
+        64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960, 1024, 2048, 4096, 8192,
+    ];
+    // let cutoffs = vec![64, 128];
 
-const RESULTS_PATH: &str = ".a_lut_tests/performance/distance_cutoff_evaluation";
-
-// run with: cargo run --bin lut --release -- cutoff
-pub fn evaluate() {
     if SKIP_MODE != SkipMode::OFF || !USE_SKIP_ABORT_STRATEGY {
         println!("Skipping mode or Strategy are not set correctly. Aborting");
         return;
     }
-    // let cutoffs = vec![64, 128, 192, 256, 320, 384, 448, 512];
-    // let cutoffs = vec![64, 512, 1024, 2048, 4096, 8192];
-    let cutoffs = vec![128, 512, 8192];
 
-    only_plot(QUERY_GOOGLE);
-    // only_plot(QUERY_BESTBUY);
-    // only_plot(QUERY_CROSSREF1);
-    // only_plot(QUERY_CROSSREF2);
-    // only_plot(QUERY_CROSSREF4);
-    // only_plot(QUERY_TWITTER);
+    let result_dir_path = format!("{}/speed/lut_ptrhash_double_empty_list_opt", base_path);
+    fs::create_dir_all(&result_dir_path).expect("Failed to create directory");
 
     // GB_1
-    // eval_all(QUERY_BESTBUY, &cutoffs);
-    // eval_all(QUERY_CROSSREF1, &cutoffs);
-    // eval_all(QUERY_CROSSREF2, &cutoffs);
-    // eval_all(QUERY_CROSSREF4, &cutoffs);
-    // eval_all(QUERY_GOOGLE, &cutoffs);
-    // eval_all(QUERY_NSPL, &cutoffs);
-    // eval_all(QUERY_TWITTER, &cutoffs);
-    // eval_all(QUERY_WALMART, &cutoffs);
-    // eval_all(QUERY_WIKI, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI, &cutoffs);
 }
 
-fn only_plot(test_data: (&str, &[(&str, &str)])) {
-    // Extract input
-    let (json_path, queries) = test_data;
-    let filename = util_path::extract_filename(json_path);
-    println!("JSON: {}", json_path);
-
-    // All necessary paths to CSV and PNG
-    let build_csv = format!("{}/{}_build_results.csv", RESULTS_PATH, filename);
-    let query_csv = format!("{}/{}_query_results.csv", RESULTS_PATH, filename);
-    let counter_csv_path = format!("{}/../skip_tracker/COUNTER_{}.csv", RESULTS_PATH, filename);
-    let distance_image_path = format!(
-        "{}/../../analysis/distance_distribution/{}_plot.png",
-        RESULTS_PATH, filename
-    );
-    fs::create_dir_all(&RESULTS_PATH).expect("Could not create results directory");
-
-    // Plot it with python
-    run_python_statistics_builder(&build_csv, &query_csv, &counter_csv_path, &distance_image_path);
+// run with: cargo run --bin lut --release -- cutoff-plot
+pub fn plot() {
+    // GB_1
+    // plot_all(QUERY_BESTBUY);
+    // plot_all(QUERY_CROSSREF1);
+    // plot_all(QUERY_CROSSREF2);
+    // plot_all(QUERY_CROSSREF4);
+    // plot_all(QUERY_GOOGLE);
+    // plot_all(QUERY_NSPL);
+    // plot_all(QUERY_TWITTER);
+    // plot_all(QUERY_WALMART);
+    // plot_all(QUERY_WIKI);
 }
 
-fn eval_all(test_data: (&str, &[(&str, &str)]), cutoffs: &Vec<usize>) {
+fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&str, &str)]), cutoffs: &Vec<usize>) {
     // Extract input
-    let (json_path, queries) = test_data;
-    let filename = util_path::extract_filename(json_path);
-    println!("JSON: {}", json_path);
-
-    // All necessary paths to CSV and PNG
-    let build_csv = format!("{}/{}_build_results.csv", RESULTS_PATH, filename);
-    let query_csv = format!("{}/{}_query_results.csv", RESULTS_PATH, filename);
-    let counter_csv_path = format!("{}/../skip_tracker/COUNTER_{}.csv", RESULTS_PATH, filename);
-    let distance_image_path = format!(
-        "{}/../../analysis/distance_distribution/{}_plot.png",
-        RESULTS_PATH, filename
-    );
-    fs::create_dir_all(&RESULTS_PATH).expect("Could not create results directory");
-
-    // Write headers for the CSV files
-    let mut wtr = Writer::from_path(&build_csv).expect("Could not open build CSV");
-    wtr.write_record(&["JSON", "CUTOFF", "BUILD_TIME_SECONDS", "SIZE_IN_BYTES"])
-        .unwrap();
-    wtr.flush().unwrap();
-
-    let mut wtr = Writer::from_path(&query_csv).expect("Could not open query CSV");
-    wtr.write_record(&["JSON", "CUTOFF", "QUERY_ID", "QUERY_TIME_SECONDS"])
-        .unwrap();
-    wtr.flush().unwrap();
+    let (json_filename, queries) = test_data;
+    let filename = json_filename.strip_suffix(".json").unwrap();
+    println!("JSON: {}", filename);
 
     // Measurements
-    eval_lut(&json_path, &filename, &queries, &build_csv, &query_csv, &cutoffs);
-    eval_ite(&json_path, &filename, &queries, &build_csv, &query_csv);
-
-    // Plot it with python
-    run_python_statistics_builder(&build_csv, &query_csv, &counter_csv_path, &distance_image_path);
-}
-
-fn eval_lut(
-    json_path: &str,
-    filename: &str,
-    queries: &[(&str, &str)],
-    build_csv: &str,
-    query_csv: &str,
-    cutoffs: &Vec<usize>,
-) {
-    let mut lut;
     for cutoff in cutoffs {
         print!("  cutoff {cutoff}");
 
-        let start_heap = Region::new(HEAP_TRACKER);
-        let start_build = std::time::Instant::now();
-        lut = LUT::build(json_path, *cutoff).expect("Fail @ build lut");
-        let build_time = start_build.elapsed().as_secs_f64();
-        let heap_bytes = heap_value(start_heap.change());
+        // All necessary paths to CSV and PNG
+        let cutoff_dir_path = format!("{}/{}", result_dir_path, cutoff);
+        fs::create_dir_all(&cutoff_dir_path).expect("Failed to create directory");
 
-        println!(" build = {:.5}s, size = {} B", build_time, heap_bytes);
+        let json_path = format!("{}/{}.json", data_dir_path, filename);
 
-        // Append build result
-        let mut wtr = Writer::from_writer(fs::OpenOptions::new().append(true).open(build_csv).unwrap());
-        wtr.write_record(&[
-            filename,
-            &cutoff.to_string(),
-            &format!("{:.5}", build_time),
-            &heap_bytes.to_string(),
-        ])
-        .unwrap();
-        wtr.flush().unwrap();
-
-        // Append each query result
-        let mut wtr_query = Writer::from_writer(fs::OpenOptions::new().append(true).open(query_csv).unwrap());
-
-        let input = {
-            let mut file = BufReader::new(fs::File::open(json_path).expect("Fail @ open File"));
-            let mut buf = vec![];
-            file.read_to_end(&mut buf).expect("Fail @ file read");
-            OwnedBytes::new(buf)
-        };
-
-        for (query_id, query_text) in queries {
-            let query = rsonpath_syntax::parse(query_text).expect("Fail @ parse query");
-            let mut engine = RsonpathEngine::compile_query(&query).expect("Fail @ compile query");
-            engine.add_lut(lut);
-
-            let mut result: u64 = 0;
-            let mut query_time_total = 0.0;
-            for _ in 0..QUERY_REPETITIONS {
-                let start_query = std::time::Instant::now();
-                result = engine.count(&input).expect("Failed to run query normally");
-                query_time_total += start_query.elapsed().as_secs_f64();
-            }
-            let query_time_average = query_time_total / (QUERY_REPETITIONS as f64);
-            lut = engine.take_lut().expect("Fail at taking LUT back");
-            println!(
-                "  - query = {query_id}, time = {:.5}s, result = {}",
-                query_time_average, result
-            );
-
-            wtr_query
-                .write_record(&[
-                    filename,
-                    &cutoff.to_string(),
-                    query_id,
-                    &format!("{:.5}", query_time_average),
-                ])
-                .unwrap();
-        }
-
-        wtr_query.flush().unwrap();
-        drop(lut);
+        measure_build(&json_path, &cutoff_dir_path, filename, *cutoff);
+        measure_query(&json_path, &result_dir_path, filename, *cutoff, queries);
     }
 }
 
-fn eval_ite(json_path: &str, filename: &str, queries: &[(&str, &str)], build_csv: &str, query_csv: &str) {
-    let cutoff: usize = 0;
-    let build_time: f64 = 0.0;
-    let heap_bytes: usize = 0;
+// Measure query time
+fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, cutoff: usize, queries: &[(&str, &str)]) {
+    // Ensure the result directory exists
+    fs::create_dir_all(result_dir_path).expect("Failed to create results directory");
 
-    print!("  ITE");
+    let query_csv_path = format!("{}/{}/{}.csv", result_dir_path, cutoff, filename);
+    let csv_exists = Path::new(&query_csv_path).exists();
 
-    // Append build info
-    let mut wtr = Writer::from_writer(fs::OpenOptions::new().append(true).open(build_csv).unwrap());
-    wtr.write_record(&[
-        filename,
-        &cutoff.to_string(),
-        &format!("{:.5}", build_time),
-        &heap_bytes.to_string(),
-    ])
-    .unwrap();
-    wtr.flush().unwrap();
+    // Open CSV in append mode
+    let mut wrt = Writer::from_writer(
+        OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&query_csv_path)
+            .expect("Failed to open query CSV"),
+    );
 
-    // Append query results
-    let mut wtr_query = Writer::from_writer(fs::OpenOptions::new().append(true).open(query_csv).unwrap());
+    // Write header if the file is new
+    if !csv_exists {
+        wrt.write_record(&["QUERY_ID", "QUERY_TEXT", "QUERY_TIME_SECONDS"])
+            .expect("Failed to write header");
+    }
+
+    // Build LUT once and read input file into memory
+    let mut lut = LUT::build(json_path, cutoff).expect("Failed to build LUT");
 
     let input = {
-        let mut file = BufReader::new(fs::File::open(json_path).expect("Fail @ open File"));
         let mut buf = vec![];
-        file.read_to_end(&mut buf).expect("Fail @ file read");
+        let mut file = BufReader::new(fs::File::open(json_path).expect("Failed to open input file"));
+        file.read_to_end(&mut buf).expect("Failed to read input file");
         OwnedBytes::new(buf)
     };
 
-    for (query_id, query_text) in queries {
-        let query = rsonpath_syntax::parse(query_text).expect("Fail @ parse query");
-        let engine = RsonpathEngine::compile_query(&query).expect("Fail @ compile query");
+    for &(query_id, query_text) in queries {
+        let query = rsonpath_syntax::parse(query_text).expect("Failed to parse query");
+        let mut engine = RsonpathEngine::compile_query(&query).expect("Failed to compile query");
+        engine.add_lut(lut);
 
-        let mut result: u64 = 0;
-        let mut query_time_total = 0.0;
+        // Warm up
         for _ in 0..QUERY_REPETITIONS {
-            let start_query = std::time::Instant::now();
-            result = engine.count(&input).expect("Failed to run query normally");
-            query_time_total += start_query.elapsed().as_secs_f64();
+            let _ = engine.count(&input).expect("Query execution failed");
         }
-        let query_time_average = query_time_total / (QUERY_REPETITIONS as f64);
-        println!(
-            "  - query = {query_id}, time = {:.5}s, result = {}",
-            query_time_average, result
-        );
 
-        wtr_query
-            .write_record(&[
-                filename,
-                &cutoff.to_string(),
-                query_id,
-                &format!("{:.5}", query_time_average),
-            ])
-            .unwrap();
+        // Measure query time
+        let mut result = 0;
+        let mut total_time = 0.0;
+
+        for _ in 0..QUERY_REPETITIONS {
+            let start = Instant::now();
+            result = engine.count(&input).expect("Query execution failed");
+            total_time += start.elapsed().as_secs_f64();
+        }
+
+        let avg_time = total_time / QUERY_REPETITIONS as f64;
+        lut = engine.take_lut().expect("Failed to retrieve LUT");
+
+        println!("  - query = {query_id}, time = {:.5}s, result = {}", avg_time, result);
+
+        wrt.write_record(&[query_id, query_text, &format!("{:.5}", avg_time)])
+            .expect("Failed to write to CSV");
     }
 
-    wtr_query.flush().unwrap();
+    wrt.flush().expect("Failed to flush CSV");
+}
+
+fn measure_build(json_path: &str, cutoff_dir_path: &str, filename: &str, cutoff: usize) {
+    let build_csv = format!("{}/build.csv", cutoff_dir_path);
+    let file_exists = Path::new(&build_csv).exists();
+
+    // Ensure the directory exists
+    fs::create_dir_all(cutoff_dir_path).expect("Failed to create directory");
+
+    // Open CSV in append mode
+    let mut wtr = Writer::from_writer(
+        OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&build_csv)
+            .expect("Failed to open build CSV"),
+    );
+
+    // Write header if the file is new
+    if !file_exists {
+        wtr.write_record(&["JSON", "BUILD_TIME_SECONDS", "SIZE_IN_BYTES"])
+            .expect("Failed to write header");
+    }
+
+    // Measure size
+    let start_heap = Region::new(HEAP_TRACKER);
+    let lut = LUT::build(json_path, cutoff).expect("Failed to build LUT");
+    let heap_bytes = heap_value(start_heap.change());
+    println!("cutoff={}", lut.get_cutoff());
+    drop(lut);
+
+    // Warm-up
+    for _ in 0..BUILD_REPETITIONS {
+        let _ = LUT::build(json_path, cutoff).expect("Warm-up build failed");
+    }
+
+    // Measure build time
+    let mut total_time = 0.0;
+    for _ in 0..BUILD_REPETITIONS {
+        let start = Instant::now();
+        let _ = LUT::build(json_path, cutoff).expect("Timed build failed");
+        total_time += start.elapsed().as_secs_f64();
+    }
+
+    let avg_time = total_time / BUILD_REPETITIONS as f64;
+    println!(" build time = {:.5}s, size = {} B", avg_time, heap_bytes);
+
+    // Write the results
+    wtr.write_record(&[filename, &format!("{:.5}", avg_time), &heap_bytes.to_string()])
+        .expect("Failed to write build record");
+
+    wtr.flush().expect("Failed to flush build CSV");
 }
 
 // We take the allocated bytes minus the deallocated and ignore the reallocated bytes because we are interested
 // in the total heap space taken
 fn heap_value(stats: stats_alloc::Stats) -> isize {
     stats.bytes_allocated as isize - stats.bytes_deallocated as isize
+}
+
+fn plot_all(result_dir_path: &str, test_data: (&str, &[(&str, &str)])) {
+    // Extract input
+    let (json_path, queries) = test_data;
+    let filename = util_path::extract_filename(json_path);
+    println!("JSON: {}", json_path);
+
+    // All necessary paths to CSV and PNG
+    let build_csv = format!("{}/{}_build_results.csv", result_dir_path, filename);
+    let query_csv = format!("{}/{}_query_results.csv", result_dir_path, filename);
+    let counter_csv_path = format!("{}/../skip_tracker/COUNTER_{}.csv", result_dir_path, filename);
+    let distance_image_path = format!(
+        "{}/../../analysis/distance_distribution/{}_plot.png",
+        result_dir_path, filename
+    );
+    fs::create_dir_all(&result_dir_path).expect("Could not create results directory");
+
+    // Plot it with python
+    run_python_statistics_builder(&build_csv, &query_csv, &counter_csv_path, &distance_image_path);
 }
 
 fn run_python_statistics_builder(

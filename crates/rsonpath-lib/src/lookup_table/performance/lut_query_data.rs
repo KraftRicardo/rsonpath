@@ -81,7 +81,7 @@ pub const QUERY_SMALL: (&str, &[(&str, &str)]) = (".a_lut_tests/test_data/kB_1/s
 // MB_1
 // ##########
 pub const QUERY_CANADA: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/MB_1/canada_(3MB).json",
+    "canada_(3MB).json",
     &[
         ("1", "$.features[0].properties.name"),
         ("2", "$.features[*].properties.name"),
@@ -95,7 +95,7 @@ pub const QUERY_CANADA: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_OPENFOOD: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/MB_1/openfood_(867kB).json",
+    "openfood_(867kB).json",
     &[
         ("1", "$.products[0].brands"),
         ("2", "$.products[*].brands"),
@@ -115,7 +115,7 @@ pub const QUERY_OPENFOOD: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_PEOPLE: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/MB_1/people_(1.2MB).json",
+    "people_(1.2MB).json",
     &[
         ("1", "$[0].name"),
         ("2", "$[*].name"),
@@ -131,7 +131,7 @@ pub const QUERY_PEOPLE: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_PRETTY_PEOPLE: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/MB_1/pretty_people_(1.8MB).json",
+    "pretty_people_(1.8MB).json",
     &[
         ("1", "$.ctRoot[0].name"),
         ("2", "$.ctRoot[*].name"),
@@ -163,7 +163,7 @@ pub const QUERY_PRETTY_PEOPLE: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_TWITTER_MINI: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/MB_1/twitter_(767kB).json",
+    "twitter_(767kB).json",
     &[
         ("1", "$.statuses[0].metadata.result_type"),
         ("2", "$.statuses[0].metadata.iso_language_code"),
@@ -187,7 +187,7 @@ pub const QUERY_TWITTER_MINI: (&str, &[(&str, &str)]) = (
 // MB_15
 // ##########
 pub const QUERY_AST: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/MB_15/ast_(26MB).json",
+    "ast_(26MB).json",
     &[
         ("1", "$.inner[0].name"),
         ("2", "$.inner[1].name"),
@@ -205,7 +205,7 @@ pub const QUERY_AST: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_DUMMY_10: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/MB_15/dummy_(10MB).json",
+    "dummy_(10MB).json",
     &[
         ("1", "$[0].name"),
         ("2", "$[*].name"),
@@ -227,7 +227,7 @@ pub const QUERY_DUMMY_10: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_DUMMY_20: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/MB_15/dummy_(20MB).json",
+    "dummy_(20MB).json",
     &[
         ("1", "$[*].name"),
         ("2", "$[1].email"),
@@ -253,7 +253,7 @@ pub const QUERY_DUMMY_20: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_POKEMON_MINI: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/MB_15/pokemon_(6MB).json",
+    "pokemon_(6MB).json",
     &[
         ("1", "$.cfgs[*].Name"),
         ("2", "$.cfgs[1].ID"),
@@ -275,7 +275,7 @@ pub const QUERY_POKEMON_MINI: (&str, &[(&str, &str)]) = (
 // MB_100
 // ##########
 pub const QUERY_APP: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/MB_100/app_(97MB).json",
+    "app_(97MB).json",
     &[
         // ("1", "$.['All ASCII'].here"),
         ("2", "$..here"),
@@ -285,7 +285,7 @@ pub const QUERY_APP: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_BESTBUY_SHORT: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/MB_100/bestbuy_short_(103MB).json",
+    "bestbuy_short_(103MB).json",
     &[
         ("101", "$.products[*].videoChapters"),
         ("102", "$.products[*].videoChapters[1].chapter"),
@@ -325,7 +325,7 @@ pub const QUERY_BESTBUY_SHORT: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_CROSSREF0: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/MB_100/crossref0_(320MB).json",
+    "crossref0_(320MB).json",
     &[
         ("1", "$.items[*].URL"),
         ("2", "$.items[*].resource.primary.URL"),
@@ -349,7 +349,7 @@ pub const QUERY_CROSSREF0: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_GOOGLE_SHORT: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/MB_100/google_map_short_(107MB).json",
+    "google_map_short_(107MB).json",
     &[
         ("0", "$[*]..bounds"),
         ("1", "$[*]..bounds.northeast"),
@@ -403,7 +403,7 @@ pub const QUERY_GOOGLE_SHORT: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_POKEMON: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/MB_100/pokemon_(173MB).json",
+    "pokemon_(173MB).json",
     &[
         ("1", "$.cfg1[0].Name"),
         ("5", "$.cfg1[*].Abilities[0]"),
@@ -418,7 +418,7 @@ pub const QUERY_POKEMON: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_TWITTER_SHORT: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/MB_100/twitter_short_(80MB).json",
+    "twitter_short_(80MB).json",
     &[
         ("1", "$[*].geo"),
         ("2", "$[*].id"),
@@ -449,7 +449,7 @@ pub const QUERY_TWITTER_SHORT: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_WALMART_SHORT: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/MB_100/walmart_short_(95MB).json",
+    "walmart_short_(95MB).json",
     &[
         ("1", "$.items[*].itemId"),
         ("2", "$.items[*].name"),
@@ -478,7 +478,7 @@ pub const QUERY_WALMART_SHORT: (&str, &[(&str, &str)]) = (
 // GB_1
 // ##########
 pub const QUERY_BESTBUY: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/GB_1/bestbuy_large_record_(1GB).json",
+    "bestbuy_large_record_(1GB).json",
     &[
         ("1", "$.products[4].categoryPath[2]"),                             // 0.999999
         ("2", "$.products[*].categoryPath[2]"),                             // 0.827555
@@ -500,7 +500,7 @@ pub const QUERY_BESTBUY: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_CROSSREF1: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/GB_1/crossref1_(551MB).json",
+    "crossref1_(551MB).json",
     &[
         ("1", "$.items[2].resource.primary.URL"), // 1.000000
         ("2", "$.items[*].URL"),                  // 0.963846
@@ -527,7 +527,7 @@ pub const QUERY_CROSSREF1: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_CROSSREF2: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/GB_1/crossref2_(1.1GB).json",
+    "crossref2_(1.1GB).json",
     &[
         ("1", "$.items[2].resource.primary.URL"), // 1.000000
         ("2", "$.items[*].URL"),                  // 0.963846
@@ -554,7 +554,7 @@ pub const QUERY_CROSSREF2: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_CROSSREF4: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/GB_1/crossref4_(2.1GB).json",
+    "crossref4_(2.1GB).json",
     &[
         ("1", "$.items[2].resource.primary.URL"), // 1.000000
         ("2", "$.items[*].URL"),                  // 0.963846
@@ -581,7 +581,7 @@ pub const QUERY_CROSSREF4: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_GOOGLE: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/GB_1/google_map_large_record_(1.1GB).json",
+    "google_map_large_record_(1.1GB).json",
     &[
         ("0", "$[4000].routes[*].bounds"),                              // 0.999989
         ("1", "$[*].routes[*].legs[*].steps[*].html_instructions"),     // 0.965067
@@ -604,7 +604,7 @@ pub const QUERY_GOOGLE: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_NSPL: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/GB_1/nspl_large_record_(1.2GB).json",
+    "nspl_large_record_(1.2GB).json",
     &[
         ("0", "$.meta.view.id"),        // 1.000000
         ("1", "$.data[0:100000][*]"),   // 0.938919
@@ -629,7 +629,7 @@ pub const QUERY_NSPL: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_TWITTER: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/GB_1/twitter_large_record_(843MB).json",
+    "twitter_large_record_(843MB).json",
     &[
         // Picked
         ("1", "$[*].user..url.*"),                        // 0.000000
@@ -660,18 +660,18 @@ pub const QUERY_TWITTER: (&str, &[(&str, &str)]) = (
         ("26", "$[*].geo"),                               // 0.936339
         ("27", "$[*].retweeted_status[*]"),               // 0.954362
         ("28", "$[*]..id"),                               // 0.989802
-                                                          // Queries where LUT is faster than ITE
-                                                          // ("200", "$[*].entities..symbols[*]"),
-                                                          // ("201", "$[*].entities..url"),
-                                                          // ("202", "$[*].entities.symbols[*]"),
-                                                          // ("203", "$[*].entities.symbols[1]"),
-                                                          // ("204", "$[*].entities.urls[*].display_url"),
-                                                          // ("205", "$[*].timestamp_ms"),
+        // Queries where LUT is faster than ITE
+        ("200", "$[*].entities..symbols[*]"),
+        ("201", "$[*].entities..url"),
+        ("202", "$[*].entities.symbols[*]"),
+        ("203", "$[*].entities.symbols[1]"),
+        ("204", "$[*].entities.urls[*].display_url"),
+        ("205", "$[*].timestamp_ms"),
     ],
 );
 
 pub const QUERY_WALMART: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/GB_1/walmart_large_record_(995MB).json",
+    "walmart_large_record_(995MB).json",
     &[
         ("0", "$.category"),                     // 1.000000
         ("1", "$.items[*].itemId"),              // 0.996712
@@ -693,7 +693,7 @@ pub const QUERY_WALMART: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_WIKI: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/GB_1/wiki_large_record_(1.1GB).json",
+    "wiki_large_record_(1.1GB).json",
     &[
         ("1", "$[0].id"),                // 1.000000
         ("2", "$[1:1000]..fr"),          // 0.981716
@@ -720,7 +720,7 @@ pub const QUERY_WIKI: (&str, &[(&str, &str)]) = (
 
 // GB_25
 pub const QUERY_NESTED_COL: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/GB_25/nested_col_(27.7GB).json",
+    "nested_col_(27.7GB).json",
     &[
         ("1", "$[*].c_custkey"),
         ("2", "$[*].c_name"),
