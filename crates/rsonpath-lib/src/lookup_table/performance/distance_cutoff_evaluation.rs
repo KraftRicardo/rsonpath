@@ -25,6 +25,7 @@ pub const BUILD_REPETITIONS: usize = 3;
 pub const WARM_UP_REPETITIONS: usize = 3;
 
 // run with: cargo run --bin lut --release -- cutoff .a_test_data .a_final_results
+// run with: cargo run --bin lut --release -- cutoff ricardo-jsons final-results
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
     // let cutoffs = vec![64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960, 1024, 2048, 4096, 8192 ];
     let cutoffs = vec![64, 128, 192, 256, 320, 384, 448, 512, 1024, 2048, 4096, 8192];
@@ -72,7 +73,7 @@ fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&st
 
     // Measurements
     for cutoff in cutoffs {
-        print!("  cutoff {cutoff}");
+        println!("  cutoff {cutoff}");
 
         // All necessary paths to CSV and PNG
         let cutoff_dir_path = format!("{}/{}", result_dir_path, cutoff);
