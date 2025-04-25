@@ -2,24 +2,33 @@ use crate::lookup_table::performance::lut_query_data::{
     QUERY_BESTBUY, QUERY_CROSSREF1, QUERY_CROSSREF2, QUERY_CROSSREF4, QUERY_GOOGLE, QUERY_NSPL, QUERY_TWITTER,
     QUERY_WALMART, QUERY_WIKI,
 };
+use crate::{
+    engine::{Compiler, Engine, RsonpathEngine},
+    input::OwnedBytes,
+};
 use csv::Writer;
-use rsonpath_lib_ref::engine::Compiler;
-use rsonpath_lib_ref::engine::{Compiler as CompilerLegacy, Engine as EngineLegacy};
 use std::fs::OpenOptions;
-use std::io::{Read, Write};
 use std::path::Path;
 use std::time::Instant;
-use std::{fs, io::BufReader};
+use std::{
+    fs,
+    io::{BufReader, Read, Write},
+};
 
 pub const QUERY_REPETITIONS: usize = 10;
 pub const WARM_UP_QUERY_REPETITIONS: usize = 10;
 
-// Run with: cargo run --bin lut --release -- eval-rq-legacy .a_test_data .a_final_results
+// Run with: cargo run --bin lut --release -- eval-rq-lut-no-lut .a_test_data .a_final_results
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
-    println!("rq-legacy");
+    println!("rq-lut-no-lut");
+
+    if !(cfg! {feature = "empty-list-opt"}) {
+        println!("empty-list-opt not set, aborting");
+        return;
+    }
 
     // Create results dir
-    let result_dir_path = format!("{}/speed/rq-legacy", base_path);
+    let result_dir_path = format!("{}/speed/rq-lut-no-lut", base_path);
     fs::create_dir_all(&result_dir_path).expect("Failed to create directory");
 
     // GB_1
@@ -69,20 +78,20 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
     }
 
     // Read legacy input once
-    let legacy_input = {
-        let mut file = BufReader::new(fs::File::open(json_path).expect("Fail @ open File"));
+    let input = {
         let mut buf = vec![];
-        file.read_to_end(&mut buf).expect("Fail @ file read");
-        rsonpath_lib_ref::input::OwnedBytes::new(buf)
+        let mut file = BufReader::new(fs::File::open(json_path).expect("Failed to open input file"));
+        file.read_to_end(&mut buf).expect("Failed to read input file");
+        OwnedBytes::new(buf)
     };
 
     for &(query_id, query_text) in queries {
-        let legacy_query = syntax_ref::parse(query_text).expect("Fail @ parse query");
-        let legacy_engine = rsonpath_lib_ref::engine::RsonpathEngine::compile_query(&legacy_query).expect("Fail query");
+        let query = rsonpath_syntax::parse(query_text).expect("Failed to parse query");
+        let mut engine = RsonpathEngine::compile_query(&query).expect("Failed to compile query");
 
         // Warm up
         for _ in 0..WARM_UP_QUERY_REPETITIONS {
-            let _ = legacy_engine.count(&legacy_input).expect("Failed count");
+            let _ = engine.count(&input).expect("Failed count");
         }
 
         // Measure query time
@@ -91,7 +100,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
 
         for _ in 0..crate::lookup_table::performance::distance_cutoff_evaluation::QUERY_REPETITIONS {
             let start = Instant::now();
-            result = legacy_engine.count(&legacy_input).expect("Fail count");
+            result = engine.count(&input).expect("Fail count");
             total_time += start.elapsed().as_secs_f64();
         }
 

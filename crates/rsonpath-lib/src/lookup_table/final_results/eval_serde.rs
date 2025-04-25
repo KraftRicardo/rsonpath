@@ -38,6 +38,8 @@ pub fn evaluate(data_dir_path: &str, base_path: &str) {
     eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
     eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
     eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
+
+    println!("Done");
 }
 
 pub fn plot() {

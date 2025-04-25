@@ -3,7 +3,7 @@ use crate::lookup_table::performance::lut_query_data::{
     QUERY_WALMART, QUERY_WIKI,
 };
 use crate::lookup_table::performance::lut_skip_evaluation::SkipMode;
-use crate::lookup_table::{SKIP_MODE, USE_SKIP_ABORT_STRATEGY};
+use crate::lookup_table::SKIP_MODE;
 use crate::{
     engine::{Compiler, Engine, RsonpathEngine},
     input::OwnedBytes,
@@ -33,7 +33,7 @@ pub fn evaluate(data_dir_path: &str, base_path: &str) {
     let cutoffs: Vec<usize> = vec![64, 128, 192, 256, 320, 384, 448, 512, 1024, 2048, 4096, 8192];
     // let cutoffs = vec![64, 128];
 
-    if SKIP_MODE != SkipMode::OFF || !USE_SKIP_ABORT_STRATEGY {
+    if SKIP_MODE != SkipMode::OFF {
         println!("Skipping mode or Strategy are not set correctly. Aborting");
         return;
     }
@@ -51,6 +51,8 @@ pub fn evaluate(data_dir_path: &str, base_path: &str) {
     eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER, &cutoffs);
     eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART, &cutoffs);
     eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI, &cutoffs);
+
+    println!("Done");
 }
 
 // run with: cargo run --bin lut --release -- cutoff-plot

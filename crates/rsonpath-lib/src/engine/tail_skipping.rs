@@ -16,7 +16,7 @@ use crate::{
     input::InputBlockIterator,
     lookup_table::{
         performance::lut_skip_evaluation::{self, SkipMode},
-        LookUpTable, LUT, USE_SKIP_ABORT_STRATEGY,
+        LookUpTable, LUT,
     },
     FallibleIterator, MaskType, BLOCK_SIZE,
 };
@@ -75,10 +75,10 @@ where
         padding: usize,
     ) -> Result<usize, EngineError> {
         if let Some(lut) = lut {
-            if USE_SKIP_ABORT_STRATEGY {
-                self.skip_lut_abort(idx_open, idx, bracket_type, lut, padding)
-            } else {
+            if lut.get_cutoff() == 0 {
                 self.skip_lut(idx_open, idx, bracket_type, lut, padding)
+            } else {
+                self.skip_lut_abort(idx_open, idx, bracket_type, lut, padding)
             }
         } else {
             let idx_close = self.skip_ite(bracket_type)?;
