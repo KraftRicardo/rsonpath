@@ -15,6 +15,7 @@ pub const QUERY_REPETITIONS: usize = 10;
 pub const WARM_UP_QUERY_REPETITIONS: usize = 10;
 
 // Run with: cargo run --bin lut --release -- eval-rq-legacy .a_test_data .a_final_results
+// Run with: cargo run --bin lut --release -- eval-rq-legacy ricardo-jsons final-results-2
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
     println!("rq-legacy");
 
@@ -89,7 +90,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
         let mut result = 0;
         let mut total_time = 0.0;
 
-        for _ in 0..crate::lookup_table::performance::distance_cutoff_evaluation::QUERY_REPETITIONS {
+        for _ in 0..crate::lookup_table::final_results::eval_rq_lut_cutoffs::QUERY_REPETITIONS {
             let start = Instant::now();
             result = legacy_engine.count(&legacy_input).expect("Fail count");
             total_time += start.elapsed().as_secs_f64();

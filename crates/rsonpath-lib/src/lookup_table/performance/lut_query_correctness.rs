@@ -16,7 +16,7 @@ use std::{
 
 // Run with: cargo run --bin lut --release -- test-query
 pub fn test_build_and_queries() {
-    let cutoff = 64 * 2;
+    let cutoff = 64 * 0;
 
     // ###########
     // ## BUILD ##
@@ -143,7 +143,8 @@ fn test_build_correctness(test_data: (&str, &[(&str, &str)]), cutoff: usize) {
 }
 
 fn test_query_correctness_count(test_data: (&str, &[(&str, &str)]), cutoff: usize) {
-    let (json_path, queries) = test_data;
+    let (filename, queries) = test_data;
+    let json_path = format!(".a_test_data/{}", filename);
     println!("Building LUT: {}", json_path);
     let mut lut = LUT::build(&json_path, cutoff).expect("Fail @ building LUT");
 
@@ -151,7 +152,7 @@ fn test_query_correctness_count(test_data: (&str, &[(&str, &str)]), cutoff: usiz
     println!("Checking queries:");
 
     let input = {
-        let mut file = BufReader::new(fs::File::open(json_path).expect("Fail @ open File"));
+        let mut file = BufReader::new(fs::File::open(&json_path).expect("Fail @ open File"));
         let mut buf = vec![];
         file.read_to_end(&mut buf).expect("Fail @ file read");
         OwnedBytes::new(buf)
@@ -162,7 +163,7 @@ fn test_query_correctness_count(test_data: (&str, &[(&str, &str)]), cutoff: usiz
 
         // ITE (LEGACY)
         let legacy_input = {
-            let mut file = BufReader::new(fs::File::open(json_path).expect("Fail @ open File"));
+            let mut file = BufReader::new(fs::File::open(&json_path).expect("Fail @ open File"));
             let mut buf = vec![];
             file.read_to_end(&mut buf).expect("Fail @ file read");
             rsonpath_lib_ref::input::OwnedBytes::new(buf)

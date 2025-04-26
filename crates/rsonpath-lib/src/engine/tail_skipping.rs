@@ -84,7 +84,7 @@ where
             let idx_close = self.skip_ite(bracket_type)?;
 
             // track_skip("ITE", idx_close - idx);
-            debug_msg("ITE", idx, idx_open, idx_close, padding);
+            // debug_msg("ITE", idx, idx_open, idx_close, padding);
             Ok(idx_close)
         }
     }
@@ -102,8 +102,8 @@ where
         if let Some(idx_lut) = lut.get(&(idx_open - padding)) {
             let idx_close = idx_lut + 1 + padding; // Note: shift index by 1 or its off aligned
 
-            track_skip("LUT", idx_close - idx);
-            debug_msg("LUT", idx, idx_open, idx_close, padding);
+            // track_skip("LUT", idx_close - idx);
+            // debug_msg("LUT", idx, idx_open, idx_close, padding);
 
             self.classifier
                 .as_mut()
@@ -116,7 +116,7 @@ where
             let idx_close = self.skip_ite(bracket_type)?;
 
             //track_skip("ITE", idx_close - idx);
-            debug_msg("ITE", idx, idx_open, idx_close, padding);
+            // debug_msg("ITE", idx, idx_open, idx_close, padding);
 
             Ok(idx_close)
         }
@@ -225,8 +225,8 @@ where
                     .expect("tail skip must always hold a classifier")
                     .jump_to_idx(idx_close, false)?;
 
-                track_skip("LUT", idx_close - idx);
-                debug_msg("LUT", idx, idx_open, idx_close, padding);
+                // track_skip("LUT", idx_close - idx);
+                // debug_msg("LUT", idx, idx_open, idx_close, padding);
                 return Ok(idx_close);
             }
 
@@ -234,7 +234,7 @@ where
                 Err(err.into())
             } else {
                 //track_skip("ITE", idx_close - idx);
-                debug_msg("ITE", idx, idx_open, idx_close, padding);
+                // debug_msg("ITE", idx, idx_open, idx_close, padding);
                 Ok(idx_close)
             }
         })
@@ -321,26 +321,26 @@ where
 }
 
 fn debug_msg(prefix: &str, idx: usize, idx_open: usize, idx_close: usize, padding: usize) {
-    // let distance = idx_close - idx_open;
-    // if idx >= padding && idx_open >= padding && idx_close >= padding {
-    //     debug!(
-    //         "{}[dst={}]: idx={}: (idx_open={} -> idx_close={}) No-PAD: {}, ({} -> {}), padding={}",
-    //         prefix,
-    //         distance,
-    //         idx,
-    //         idx_open,
-    //         idx_close,
-    //         idx - padding,
-    //         idx_open - padding,
-    //         idx_close - padding,
-    //         padding,
-    //     );
-    // } else {
-    //     debug!(
-    //         "{}[dst={}]: idx={}: (idx_open={} -> idx_close={}) No-PAD: not possible because padding = {} is too high.",
-    //         prefix, distance, idx, idx_open, idx_close, padding
-    //     );
-    // }
+    let distance = idx_close - idx_open;
+    if idx >= padding && idx_open >= padding && idx_close >= padding {
+        debug!(
+            "{}[dst={}]: idx={}: (idx_open={} -> idx_close={}) No-PAD: {}, ({} -> {}), padding={}",
+            prefix,
+            distance,
+            idx,
+            idx_open,
+            idx_close,
+            idx - padding,
+            idx_open - padding,
+            idx_close - padding,
+            padding,
+        );
+    } else {
+        debug!(
+            "{}[dst={}]: idx={}: (idx_open={} -> idx_close={}) No-PAD: not possible because padding = {} is too high.",
+            prefix, distance, idx, idx_open, idx_close, padding
+        );
+    }
 }
 
 // Only for tracking jumps and not needed in normal runs

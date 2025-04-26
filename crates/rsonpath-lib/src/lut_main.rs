@@ -1,13 +1,12 @@
 use clap::{Parser, Subcommand};
-use rsonpath::lookup_table::final_results::{eval_rq_legacy, eval_rq_lut_no_lut, eval_serde};
+use rsonpath::lookup_table::final_results::{
+    eval_find_pair_data, eval_rq_legacy, eval_rq_lut_cutoffs, eval_rq_lut_no_lut, eval_serde,
+};
 use rsonpath::lookup_table::performance::lut_hot::test_hotness;
 use rsonpath::lookup_table::performance::lut_query_correctness;
 use rsonpath::lookup_table::{
-    analysis::{
-        distance_distribution, json_size_distribution::create_json_size_csv,
-        json_size_estimation_bits::print_estimation,
-    },
-    performance::{self, distance_cutoff_evaluation, lut_query_data, lut_skip_counter, lut_skip_evaluation, EVAL_DIR},
+    analysis::{distance_distribution, json_size_estimation_bits::print_estimation},
+    performance::{self, lut_skip_counter, lut_skip_evaluation, EVAL_DIR},
     pokemon_test_data_generator,
     query_with_lut::query_with_lut,
     sichash_test_data_generator::{self, SICHASH_DATA_DIR},
@@ -60,7 +59,7 @@ enum Commands {
     },
     Cutoff {
         data_dir_path: String,
-        result_dir_path: String,
+        base_dir_path: String,
     },
     CutoffPlot {},
     Analysis {
@@ -77,6 +76,10 @@ enum Commands {
         result_dir_path: String,
     },
     EvalRqLutNoLut {
+        data_dir_path: String,
+        result_dir_path: String,
+    },
+    EvalFindPairData {
         data_dir_path: String,
         result_dir_path: String,
     },
@@ -127,12 +130,12 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
         Commands::Cutoff {
             data_dir_path,
-            result_dir_path,
+            base_dir_path: result_dir_path,
         } => {
-            distance_cutoff_evaluation::evaluate(data_dir_path, result_dir_path);
+            eval_rq_lut_cutoffs::evaluate(data_dir_path, result_dir_path);
         }
         Commands::CutoffPlot {} => {
-            distance_cutoff_evaluation::plot();
+            eval_rq_lut_cutoffs::plot();
         }
         Commands::Hot {} => {
             test_hotness();
@@ -157,6 +160,12 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
         Commands::EvalSerdePlot {} => {
             eval_serde::plot();
+        }
+        Commands::EvalFindPairData {
+            data_dir_path,
+            result_dir_path,
+        } => {
+            eval_find_pair_data::evaluate(data_dir_path, result_dir_path);
         }
     }
 

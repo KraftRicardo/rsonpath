@@ -1,11 +1,11 @@
-use crate::lookup_table::performance::distance_cutoff_evaluation;
+use crate::lookup_table::final_results::eval_rq_lut_cutoffs;
+use crate::lookup_table::final_results::eval_rq_lut_cutoffs::heap_value;
 use crate::lookup_table::performance::lut_evaluation::HEAP_TRACKER;
 use crate::lookup_table::performance::lut_query_data::{
     QUERY_BESTBUY, QUERY_CROSSREF1, QUERY_CROSSREF2, QUERY_CROSSREF4, QUERY_GOOGLE, QUERY_NSPL, QUERY_TWITTER,
     QUERY_WALMART, QUERY_WIKI,
 };
 use csv::Writer;
-use distance_cutoff_evaluation::heap_value;
 use serde_json::Value;
 use serde_json_path::JsonPath;
 use stats_alloc::Region;
@@ -21,6 +21,7 @@ pub const BUILD_REPETITIONS: usize = 3;
 pub const WARM_UP_BUILD_REPETITIONS: usize = 1;
 
 // Run with: cargo run --bin lut --release -- eval-serde .a_test_data .a_final_results
+// Run with: cargo run --bin lut --release -- eval-serde ricardo-jsons final-results-2
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
     println!("serde_json_path");
 
@@ -97,7 +98,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
         let mut result = 0;
         let mut total_time = 0.0;
 
-        for _ in 0..crate::lookup_table::performance::distance_cutoff_evaluation::QUERY_REPETITIONS {
+        for _ in 0..crate::lookup_table::final_results::eval_rq_lut_cutoffs::QUERY_REPETITIONS {
             let start = Instant::now();
             let nodes = path.query(&json_value);
             total_time += start.elapsed().as_secs_f64();

@@ -29,9 +29,8 @@ pub const WARM_UP_REPETITIONS: usize = 3;
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
     println!("lut_ptrhash_double_empty_list_opt");
 
-    // let cutoffs = vec![64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960, 1024, 2048, 4096, 8192 ];
-    let cutoffs: Vec<usize> = vec![64, 128, 192, 256, 320, 384, 448, 512, 1024, 2048, 4096, 8192];
-    // let cutoffs = vec![64, 128];
+    // let cutoffs: Vec<usize> = vec![0, 64, 128, 192, 256, 320, 384, 448, 512, 1024, 2048, 4096, 8192];
+    let cutoffs = vec![0];
 
     if SKIP_MODE != SkipMode::OFF {
         println!("Skipping mode or Strategy are not set correctly. Aborting");

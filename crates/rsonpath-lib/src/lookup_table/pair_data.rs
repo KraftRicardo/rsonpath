@@ -156,7 +156,7 @@ where
                 };
 
                 let distance = idx_close - idx_open;
-                if distance > cutoff {
+                if distance >= cutoff {
                     // Map to correct bucket using the bit mask on the idx_open (= key)
                     let bucket = &mut lut_doubles_pair_data[idx_open & bit_mask];
 
@@ -232,7 +232,7 @@ where
                 };
 
                 let distance = idx_close - idx_open;
-                if distance > cutoff {
+                if distance >= cutoff {
                     keys.push(idx_open);
                     values.push(idx_close);
                 }
@@ -326,7 +326,7 @@ where
                 };
 
                 let distance = idx_close - idx_open;
-                if distance > cutoff {
+                if distance >= cutoff {
                     if b == BracketType::Square {
                         num_squary += 1;
                     }
