@@ -19,10 +19,10 @@ pub static HEAP_TRACKER: &StatsAlloc<System> = &INSTRUMENTED_SYSTEM;
 
 /// Helper struct to reduce the number of parameters when calling functions
 pub struct EvalConfig<'a> {
-    json_path: &'a str,
-    keys: Vec<usize>,
-    head_line: &'a mut String,
-    data_line: &'a mut String,
+    pub(crate) json_path: &'a str,
+    pub(crate) keys: Vec<usize>,
+    pub(crate) head_line: &'a mut String,
+    pub(crate) data_line: &'a mut String,
 }
 
 pub fn evaluate(json_path: &str, csv_path: &str) -> Result<(), Box<dyn std::error::Error>> {

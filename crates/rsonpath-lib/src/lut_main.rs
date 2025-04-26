@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 use rsonpath::lookup_table::final_results::{
-    eval_find_pair_data, eval_rq_legacy, eval_rq_lut_cutoffs, eval_rq_lut_no_lut, eval_serde,
+    eval_final, eval_find_pair_data, eval_rq_legacy, eval_rq_lut_cutoffs, eval_rq_lut_no_lut, eval_serde,
 };
 use rsonpath::lookup_table::performance::lut_hot::test_hotness;
 use rsonpath::lookup_table::performance::lut_query_correctness;
@@ -61,7 +61,6 @@ enum Commands {
         data_dir_path: String,
         base_dir_path: String,
     },
-    CutoffPlot {},
     Analysis {
         json_folder_path: String,
     },
@@ -80,6 +79,10 @@ enum Commands {
         result_dir_path: String,
     },
     EvalFindPairData {
+        data_dir_path: String,
+        result_dir_path: String,
+    },
+    EvalFinal {
         data_dir_path: String,
         result_dir_path: String,
     },
@@ -134,9 +137,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         } => {
             eval_rq_lut_cutoffs::evaluate(data_dir_path, result_dir_path);
         }
-        Commands::CutoffPlot {} => {
-            eval_rq_lut_cutoffs::plot();
-        }
         Commands::Hot {} => {
             test_hotness();
         }
@@ -166,6 +166,12 @@ fn main() -> Result<(), Box<dyn Error>> {
             result_dir_path,
         } => {
             eval_find_pair_data::evaluate(data_dir_path, result_dir_path);
+        }
+        Commands::EvalFinal {
+            data_dir_path,
+            result_dir_path,
+        } => {
+            eval_final::evaluate(data_dir_path, result_dir_path);
         }
     }
 

@@ -7,7 +7,7 @@ use crate::lookup_table::SKIP_MODE;
 use crate::{
     engine::{Compiler, Engine, RsonpathEngine},
     input::OwnedBytes,
-    lookup_table::{performance::lut_evaluation::HEAP_TRACKER, util_path, LookUpTable, LUT},
+    lookup_table::{performance::lut_evaluation::HEAP_TRACKER, LookUpTable, LUT},
 };
 use csv::Writer;
 use stats_alloc::Region;
@@ -16,8 +16,7 @@ use std::path::Path;
 use std::time::Instant;
 use std::{
     fs,
-    io::{self, BufReader, Read, Write},
-    process::Command,
+    io::{BufReader, Read, Write},
 };
 
 pub const QUERY_REPETITIONS: usize = 20;
@@ -54,20 +53,6 @@ pub fn evaluate(data_dir_path: &str, base_path: &str) {
     eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI, &cutoffs);
 
     println!("Done");
-}
-
-// run with: cargo run --bin lut --release -- cutoff-plot
-pub fn plot() {
-    // GB_1
-    // plot_all(QUERY_BESTBUY);
-    // plot_all(QUERY_CROSSREF1);
-    // plot_all(QUERY_CROSSREF2);
-    // plot_all(QUERY_CROSSREF4);
-    // plot_all(QUERY_GOOGLE);
-    // plot_all(QUERY_NSPL);
-    // plot_all(QUERY_TWITTER);
-    // plot_all(QUERY_WALMART);
-    // plot_all(QUERY_WIKI);
 }
 
 fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&str, &str)]), cutoffs: &Vec<usize>) {
@@ -215,49 +200,4 @@ fn measure_build(json_path: &str, cutoff_dir_path: &str, filename: &str, cutoff:
 // in the total heap space taken
 pub fn heap_value(stats: stats_alloc::Stats) -> isize {
     stats.bytes_allocated as isize - stats.bytes_deallocated as isize
-}
-
-fn plot_all(result_dir_path: &str, test_data: (&str, &[(&str, &str)])) {
-    // Extract input
-    let (json_path, queries) = test_data;
-    let filename = util_path::extract_filename(json_path);
-    println!("JSON: {}", json_path);
-
-    // All necessary paths to CSV and PNG
-    let build_csv = format!("{}/{}_build_results.csv", result_dir_path, filename);
-    let query_csv = format!("{}/{}_query_results.csv", result_dir_path, filename);
-    let counter_csv_path = format!("{}/../skip_tracker/COUNTER_{}.csv", result_dir_path, filename);
-    let distance_image_path = format!(
-        "{}/../../analysis/distance_distribution/{}_plot.png",
-        result_dir_path, filename
-    );
-    fs::create_dir_all(&result_dir_path).expect("Could not create results directory");
-
-    // Plot it with python
-    run_python_statistics_builder(&build_csv, &query_csv, &counter_csv_path, &distance_image_path);
-}
-
-fn run_python_statistics_builder(
-    build_csv_path: &str,
-    query_csv_path: &str,
-    counter_csv_path: &str,
-    distance_image_path: &str,
-) {
-    let msg = format!("Failed to open csv_path: {}", build_csv_path);
-    let output = Command::new("python")
-        .arg("crates/rsonpath-lib/src/lookup_table/python_statistic/distance_cutoff_evaluation.py")
-        .arg(build_csv_path)
-        .arg(query_csv_path)
-        .arg(counter_csv_path)
-        .arg(distance_image_path)
-        .output()
-        .expect(&msg);
-
-    if output.status.success() {
-        if let Err(e) = io::stdout().write_all(&output.stdout) {
-            eprintln!("Failed to write stdout: {}", e);
-        }
-    } else {
-        eprintln!("Error: {}", String::from_utf8_lossy(&output.stderr));
-    }
 }
