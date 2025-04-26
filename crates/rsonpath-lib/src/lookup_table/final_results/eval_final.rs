@@ -30,20 +30,20 @@ pub const WARM_UP_QUERY_REPETITIONS: usize = 10;
 pub const WARM_UP_BUILD_REPETITIONS: usize = 1;
 
 // Run with: cargo run --bin lut --release -- eval-final .a_test_data .a_final_results
-// Run with: cargo run --bin lut --release -- eval-final .a_test_data .a_final_results-5
+// Run with: cargo run --bin lut --release -- eval-final ricardo-jsons final_results-6
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
     println!("serde_json_path");
 
     // GB_1
-    eval_all(&data_dir_path, &base_path, QUERY_BESTBUY);
-    eval_all(&data_dir_path, &base_path, QUERY_CROSSREF1);
-    // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF2);
-    // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF4);
-    // eval_all(&data_dir_path, &base_path, QUERY_GOOGLE);
-    // eval_all(&data_dir_path, &base_path, QUERY_NSPL);
-    // eval_all(&data_dir_path, &base_path, QUERY_TWITTER);
-    // eval_all(&data_dir_path, &base_path, QUERY_WALMART);
-    // eval_all(&data_dir_path, &base_path, QUERY_WIKI);
+    // eval_all(&data_dir_path, &base_path, QUERY_BESTBUY); ALREADY MEASURED
+    // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF1); ALREADY MEASURED
+    eval_all(&data_dir_path, &base_path, QUERY_CROSSREF2);
+    eval_all(&data_dir_path, &base_path, QUERY_CROSSREF4);
+    eval_all(&data_dir_path, &base_path, QUERY_GOOGLE);
+    eval_all(&data_dir_path, &base_path, QUERY_NSPL);
+    eval_all(&data_dir_path, &base_path, QUERY_TWITTER);
+    eval_all(&data_dir_path, &base_path, QUERY_WALMART);
+    eval_all(&data_dir_path, &base_path, QUERY_WIKI);
 
     println!("Done");
 }
