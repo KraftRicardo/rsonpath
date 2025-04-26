@@ -29,6 +29,7 @@ pub const BUILD_REPETITIONS: usize = 5;
 pub const WARM_UP_QUERY_REPETITIONS: usize = 10;
 pub const WARM_UP_BUILD_REPETITIONS: usize = 1;
 
+// Run with: cargo run --bin lut --release -- eval-final .a_test_data .a_final_results
 // Run with: cargo run --bin lut --release -- eval-final .a_test_data .a_final_results-5
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
     println!("serde_json_path");
@@ -55,14 +56,15 @@ fn eval_all(data_dir_path: &str, base_path: &str, test_data: (&str, &[(&str, &st
 
     let json_path = format!("{}/{}.json", data_dir_path, filename);
 
+    let final_dir_path = format!("{}/speed/final", base_path);
+    fs::create_dir_all(&final_dir_path).expect("Failed to create directory");
+
     // Measurements
     measure_build(&json_path, filename, base_path);
     measure_query(&json_path, filename, base_path, queries);
 }
 
 fn measure_query(json_path: &str, filename: &str, base_path: &str, queries: &[(&str, &str)]) {
-    let final_dir_path = format!("{}/speed/final", base_path);
-    fs::create_dir_all(&final_dir_path).expect("Failed to create directory");
     let build_csv = format!("{}/speed/final/query.csv", base_path);
     let file_exists = Path::new(&build_csv).exists();
 
