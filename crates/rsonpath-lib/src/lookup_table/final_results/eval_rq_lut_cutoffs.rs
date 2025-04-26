@@ -72,12 +72,18 @@ fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&st
         let json_path = format!("{}/{}.json", data_dir_path, filename);
 
         measure_build(&json_path, &cutoff_dir_path, filename, *cutoff);
-        measure_query(&json_path, &result_dir_path, filename, *cutoff, queries);
+        measure_query_count(&json_path, &result_dir_path, filename, *cutoff, queries);
     }
 }
 
 // Measure query time
-fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, cutoff: usize, queries: &[(&str, &str)]) {
+fn measure_query_count(
+    json_path: &str,
+    result_dir_path: &str,
+    filename: &str,
+    cutoff: usize,
+    queries: &[(&str, &str)],
+) {
     // Ensure the result directory exists
     fs::create_dir_all(result_dir_path).expect("Failed to create results directory");
 

@@ -29,14 +29,19 @@ pub const BUILD_REPETITIONS: usize = 5;
 pub const WARM_UP_QUERY_REPETITIONS: usize = 10;
 pub const WARM_UP_BUILD_REPETITIONS: usize = 1;
 
+// pub const QUERY_REPETITIONS: usize = 1;
+// pub const BUILD_REPETITIONS: usize = 1;
+// pub const WARM_UP_QUERY_REPETITIONS: usize = 0;
+// pub const WARM_UP_BUILD_REPETITIONS: usize = 0;
+
 // Run with: cargo run --bin lut --release -- eval-final .a_test_data .a_final_results
 // Run with: cargo run --bin lut --release -- eval-final ricardo-jsons final_results-6
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
     println!("serde_json_path");
 
     // GB_1
-    // eval_all(&data_dir_path, &base_path, QUERY_BESTBUY); ALREADY MEASURED
-    // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF1); ALREADY MEASURED
+    eval_all(&data_dir_path, &base_path, QUERY_BESTBUY);
+    eval_all(&data_dir_path, &base_path, QUERY_CROSSREF1);
     eval_all(&data_dir_path, &base_path, QUERY_CROSSREF2);
     eval_all(&data_dir_path, &base_path, QUERY_CROSSREF4);
     eval_all(&data_dir_path, &base_path, QUERY_GOOGLE);
@@ -61,10 +66,10 @@ fn eval_all(data_dir_path: &str, base_path: &str, test_data: (&str, &[(&str, &st
 
     // Measurements
     measure_build(&json_path, filename, base_path);
-    measure_query(&json_path, filename, base_path, queries);
+    measure_query_index(&json_path, filename, base_path, queries);
 }
 
-fn measure_query(json_path: &str, filename: &str, base_path: &str, queries: &[(&str, &str)]) {
+fn measure_query_index(json_path: &str, filename: &str, base_path: &str, queries: &[(&str, &str)]) {
     let build_csv = format!("{}/speed/final/query.csv", base_path);
     let file_exists = Path::new(&build_csv).exists();
 
@@ -86,10 +91,10 @@ fn measure_query(json_path: &str, filename: &str, base_path: &str, queries: &[(&
     }
 
     // Measurements
-    let serde_query_times = query_serde(&json_path, queries);
-    let rq_legacy_query_times = query_rq_legacy(&json_path, queries);
-    let rq_lut_cutoff_0_query_times = query_rq_lut(&json_path, queries, 0);
-    let rq_lut_cutoff_512_query_times = query_rq_lut(&json_path, queries, 512);
+    let serde_query_times = query_serde_index(&json_path, queries);
+    let rq_legacy_query_times = query_rq_legacy_index(&json_path, queries);
+    let rq_lut_cutoff_0_query_times = query_rq_lut_index(&json_path, queries, 0);
+    let rq_lut_cutoff_512_query_times = query_rq_lut_index(&json_path, queries, 512);
 
     for (index, (query_id, query_text)) in queries.iter().enumerate() {
         // Write the results
@@ -130,7 +135,7 @@ fn measure_query(json_path: &str, filename: &str, base_path: &str, queries: &[(&
     wtr.flush().expect("Failed to flush build CSV");
 }
 
-fn query_rq_lut(json_path: &str, queries: &[(&str, &str)], cutoff: usize) -> Vec<f64> {
+fn query_rq_lut_index(json_path: &str, queries: &[(&str, &str)], cutoff: usize) -> Vec<f64> {
     let mut lut = LUT::build(json_path, cutoff).expect("Failed to build LUT");
 
     let input = {
@@ -147,16 +152,29 @@ fn query_rq_lut(json_path: &str, queries: &[(&str, &str)], cutoff: usize) -> Vec
         engine.add_lut(lut);
 
         for _ in 0..WARM_UP_QUERY_REPETITIONS {
-            let _ = engine.count(&input).expect("Warmup failed");
+            // COUNT
+            // let _ = engine.count(&input).expect("Warmup failed");
+
+            // INDEX
+            let mut sink = vec![];
+            engine.matches(&input, &mut sink).expect("Fail @ engine matching.");
         }
 
         let mut result = 0;
         let mut total_time = 0.0;
 
         for _ in 0..QUERY_REPETITIONS {
+            // COUNT
+            // let start = Instant::now();
+            // result = engine.count(&input).expect("Query execution failed");
+            // total_time += start.elapsed().as_secs_f64();
+
+            // INDEX
+            let mut sink = vec![];
             let start = Instant::now();
-            result = engine.count(&input).expect("Query execution failed");
+            engine.matches(&input, &mut sink).expect("Fail @ engine matching.");
             total_time += start.elapsed().as_secs_f64();
+            result = sink.len();
         }
 
         let avg_time = total_time / QUERY_REPETITIONS as f64;
@@ -173,7 +191,7 @@ fn query_rq_lut(json_path: &str, queries: &[(&str, &str)], cutoff: usize) -> Vec
     avg_times
 }
 
-fn query_rq_legacy(json_path: &str, queries: &[(&str, &str)]) -> Vec<f64> {
+fn query_rq_legacy_index(json_path: &str, queries: &[(&str, &str)]) -> Vec<f64> {
     let legacy_input = {
         let mut file = BufReader::new(fs::File::open(json_path).expect("Failed to open file"));
         let mut buf = vec![];
@@ -188,16 +206,33 @@ fn query_rq_legacy(json_path: &str, queries: &[(&str, &str)]) -> Vec<f64> {
             rsonpath_lib_ref::engine::RsonpathEngine::compile_query(&legacy_query).expect("Failed to compile query");
 
         for _ in 0..WARM_UP_QUERY_REPETITIONS {
-            let _ = legacy_engine.count(&legacy_input).expect("Warmup failed");
+            // COUNT
+            // let _ = legacy_engine.count(&legacy_input).expect("Warmup failed");
+
+            // INDEX
+            let mut sink = vec![];
+            legacy_engine
+                .matches(&legacy_input, &mut sink)
+                .expect("Fail @ engine matching.");
         }
 
         let mut result = 0;
         let mut total_time = 0.0;
 
         for _ in 0..QUERY_REPETITIONS {
+            // // COUNT
+            // let start = Instant::now();
+            // result = legacy_engine.count(&legacy_input).expect("Query execution failed");
+            // total_time += start.elapsed().as_secs_f64();
+
+            // INDEX
+            let mut sink = vec![];
             let start = Instant::now();
-            result = legacy_engine.count(&legacy_input).expect("Query execution failed");
+            legacy_engine
+                .matches(&legacy_input, &mut sink)
+                .expect("Fail @ engine matching.");
             total_time += start.elapsed().as_secs_f64();
+            result = sink.len();
         }
 
         let avg_time = total_time / QUERY_REPETITIONS as f64;
@@ -212,7 +247,7 @@ fn query_rq_legacy(json_path: &str, queries: &[(&str, &str)]) -> Vec<f64> {
     avg_times
 }
 
-fn query_serde(json_path: &str, queries: &[(&str, &str)]) -> Vec<f64> {
+fn query_serde_index(json_path: &str, queries: &[(&str, &str)]) -> Vec<f64> {
     let file = fs::File::open(json_path).expect("Failed to open file");
     let reader = BufReader::new(file);
     let json_value: Value = serde_json::from_reader(reader).expect("Failed to parse JSON");

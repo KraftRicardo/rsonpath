@@ -1,4 +1,5 @@
 #![allow(clippy::expect_used)] // Enforcing the classifier invariant is clunky without this.
+use crate::lookup_table::final_results::eval_t_optimal::TRACK_SKIP_CUTOFF;
 use crate::lookup_table::{SKIP_MODE, TRACK_SKIPPING_TIME_DURING_PERFORMANCE_TEST};
 use crate::{
     classification::{
@@ -57,10 +58,14 @@ where
     ) -> Result<usize, EngineError> {
         if TRACK_SKIPPING_TIME_DURING_PERFORMANCE_TEST {
             let start_skip = Instant::now();
-            let result = self.skip_choice(idx_open, idx, bracket_type, lut, padding);
+            let result = self.skip_choice(idx_open, idx, bracket_type, lut, padding)?;
             let skip_time = start_skip.elapsed().as_nanos() as u64;
-            lut_skip_evaluation::add_skip_time(skip_time);
-            result
+
+            let distance = result - idx;
+            if distance > TRACK_SKIP_CUTOFF {
+                lut_skip_evaluation::add_skip_time(skip_time);
+            }
+            Ok(result)
         } else {
             self.skip_choice(idx_open, idx, bracket_type, lut, padding)
         }
