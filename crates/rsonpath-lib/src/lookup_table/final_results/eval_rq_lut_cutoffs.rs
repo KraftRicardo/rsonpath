@@ -30,6 +30,7 @@ pub fn evaluate(data_dir_path: &str, base_path: &str) {
     println!("lut_ptrhash_double_empty_list_opt");
 
     // let cutoffs: Vec<usize> = vec![0, 64, 128, 192, 256, 320, 384, 448, 512, 1024, 2048, 4096, 8192];
+
     let cutoffs = vec![0];
 
     if SKIP_MODE != SkipMode::OFF {
