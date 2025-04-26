@@ -20,18 +20,19 @@ use std::{
     process::Command,
 };
 
-pub const QUERY_REPETITIONS: usize = 10;
+pub const QUERY_REPETITIONS: usize = 20;
 pub const BUILD_REPETITIONS: usize = 3;
+pub const WARM_UP_QUERY_REPETITIONS: usize = 10;
 pub const WARM_UP_REPETITIONS: usize = 3;
 
 // run with: cargo run --bin lut --release -- cutoff .a_test_data .a_final_results
-// run with: cargo run --bin lut --release -- cutoff ricardo-jsons final-results
+// run with: cargo run --bin lut --release -- cutoff ricardo-jsons final-results-4
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
     println!("lut_ptrhash_double_empty_list_opt");
 
     // let cutoffs: Vec<usize> = vec![0, 64, 128, 192, 256, 320, 384, 448, 512, 1024, 2048, 4096, 8192];
 
-    let cutoffs = vec![0];
+    let cutoffs = vec![0, 64, 128, 512, 8192];
 
     if SKIP_MODE != SkipMode::OFF {
         println!("Skipping mode or Strategy are not set correctly. Aborting");
@@ -129,7 +130,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, cutoff:
         engine.add_lut(lut);
 
         // Warm up
-        for _ in 0..WARM_UP_REPETITIONS {
+        for _ in 0..WARM_UP_QUERY_REPETITIONS {
             let _ = engine.count(&input).expect("Query execution failed");
         }
 
