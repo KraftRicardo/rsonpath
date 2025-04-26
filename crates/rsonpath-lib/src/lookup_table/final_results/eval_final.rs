@@ -29,7 +29,7 @@ pub const BUILD_REPETITIONS: usize = 5;
 pub const WARM_UP_QUERY_REPETITIONS: usize = 10;
 pub const WARM_UP_BUILD_REPETITIONS: usize = 1;
 
-// Run with: cargo run --bin lut --release -- eval-final .a_test_data .a_final_results
+// Run with: cargo run --bin lut --release -- eval-final .a_test_data .a_final_results-5
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
     println!("serde_json_path");
 
