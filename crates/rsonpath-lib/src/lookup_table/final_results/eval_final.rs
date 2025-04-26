@@ -24,17 +24,10 @@ const RQ_LEGACY_NAME: &str = "rq-legacy";
 const RQ_LUT_CUTOFF_0_NAME: &str = "rq-lut-cutoff-0";
 const RQ_LUT_CUTOFF_512_NAME: &str = "rq-lut-cutoff-512";
 
-// pub const QUERY_REPETITIONS: usize = 5;
-// pub const BUILD_REPETITIONS: usize = 3;
-// pub const WARM_UP_QUERY_REPETITIONS: usize = 10;
-// pub const WARM_UP_BUILD_REPETITIONS: usize = 1;
-// pub const REPETITION_THRESHOLD: usize = 10;
-
-pub const QUERY_REPETITIONS: usize = 1;
-pub const BUILD_REPETITIONS: usize = 1;
-pub const WARM_UP_QUERY_REPETITIONS: usize = 1;
+pub const QUERY_REPETITIONS: usize = 100;
+pub const BUILD_REPETITIONS: usize = 5;
+pub const WARM_UP_QUERY_REPETITIONS: usize = 10;
 pub const WARM_UP_BUILD_REPETITIONS: usize = 1;
-pub const REPETITION_THRESHOLD: usize = 1;
 
 // Run with: cargo run --bin lut --release -- eval-final .a_test_data .a_final_results
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
@@ -68,6 +61,8 @@ fn eval_all(data_dir_path: &str, base_path: &str, test_data: (&str, &[(&str, &st
 }
 
 fn measure_query(json_path: &str, filename: &str, base_path: &str, queries: &[(&str, &str)]) {
+    let final_dir_path = format!("{}/speed/final", base_path);
+    fs::create_dir_all(&final_dir_path).expect("Failed to create directory");
     let build_csv = format!("{}/speed/final/query.csv", base_path);
     let file_exists = Path::new(&build_csv).exists();
 
@@ -83,67 +78,57 @@ fn measure_query(json_path: &str, filename: &str, base_path: &str, queries: &[(&
     // Write header if the file is new
     if !file_exists {
         println!("File did not exist");
-        wtr.write_record(&["JSON", "ALGORITHM", "QUERY_ID", "QUERY_TEXT", "REPETITIONS", "TIME"])
+        wtr.write_record(&["JSON", "ALGORITHM", "QUERY_ID", "QUERY_TEXT", "AVERAGE_TIME"])
             .expect("F");
         wtr.flush().expect("Failed to flush build CSV");
     }
 
     // Measurements
-    let repetitions = vec![1, 5, 10, 20, 30, 40, 50, 100, 200];
-    // let repetitions: Vec<usize> = vec![1, 5, 10];
-    let serde_query_times = query_serde(&json_path, queries, &repetitions);
-    let rq_legacy_query_times = query_rq_legacy(&json_path, queries, &repetitions);
-    let rq_lut_cutoff_0_query_times = query_rq_lut(&json_path, queries, 0, &repetitions);
-    let rq_lut_cutoff_512_query_times = query_rq_lut(&json_path, queries, 512, &repetitions);
+    let serde_query_times = query_serde(&json_path, queries);
+    let rq_legacy_query_times = query_rq_legacy(&json_path, queries);
+    let rq_lut_cutoff_0_query_times = query_rq_lut(&json_path, queries, 0);
+    let rq_lut_cutoff_512_query_times = query_rq_lut(&json_path, queries, 512);
 
-    for (i, (query_id, query_text)) in queries.iter().enumerate() {
-        for (j, repetition) in repetitions.iter().enumerate() {
-            let index = i * repetitions.len() + j;
-
-            // Write the results
-            wtr.write_record(&[
-                filename,
-                SERDE_NAME,
-                query_id,
-                query_text,
-                &format!("{}", repetition),
-                &format!("{:.5}", serde_query_times[index]),
-            ])
-            .expect("Fail write");
-            wtr.write_record(&[
-                filename,
-                RQ_LEGACY_NAME,
-                query_id,
-                query_text,
-                &format!("{}", repetition),
-                &format!("{:.5}", rq_legacy_query_times[index]),
-            ])
-            .expect("Fail write");
-            wtr.write_record(&[
-                filename,
-                RQ_LUT_CUTOFF_0_NAME,
-                query_id,
-                query_text,
-                &format!("{}", repetition),
-                &format!("{:.5}", rq_lut_cutoff_0_query_times[index]),
-            ])
-            .expect("Fail write");
-            wtr.write_record(&[
-                filename,
-                RQ_LUT_CUTOFF_512_NAME,
-                query_id,
-                query_text,
-                &format!("{}", repetition),
-                &format!("{:.5}", rq_lut_cutoff_512_query_times[index]),
-            ])
-            .expect("Fail write");
-        }
+    for (index, (query_id, query_text)) in queries.iter().enumerate() {
+        // Write the results
+        wtr.write_record(&[
+            filename,
+            SERDE_NAME,
+            query_id,
+            query_text,
+            &format!("{:.5}", serde_query_times[index]),
+        ])
+        .expect("Fail write");
+        wtr.write_record(&[
+            filename,
+            RQ_LEGACY_NAME,
+            query_id,
+            query_text,
+            &format!("{:.5}", rq_legacy_query_times[index]),
+        ])
+        .expect("Fail write");
+        wtr.write_record(&[
+            filename,
+            RQ_LUT_CUTOFF_0_NAME,
+            query_id,
+            query_text,
+            &format!("{:.5}", rq_lut_cutoff_0_query_times[index]),
+        ])
+        .expect("Fail write");
+        wtr.write_record(&[
+            filename,
+            RQ_LUT_CUTOFF_512_NAME,
+            query_id,
+            query_text,
+            &format!("{:.5}", rq_lut_cutoff_512_query_times[index]),
+        ])
+        .expect("Fail write");
     }
 
     wtr.flush().expect("Failed to flush build CSV");
 }
 
-fn query_rq_lut(json_path: &str, queries: &[(&str, &str)], cutoff: usize, repetitions: &Vec<usize>) -> Vec<f64> {
+fn query_rq_lut(json_path: &str, queries: &[(&str, &str)], cutoff: usize) -> Vec<f64> {
     let mut lut = LUT::build(json_path, cutoff).expect("Failed to build LUT");
 
     let input = {
@@ -153,7 +138,7 @@ fn query_rq_lut(json_path: &str, queries: &[(&str, &str)], cutoff: usize, repeti
         OwnedBytes::new(buf)
     };
 
-    let mut total_times = vec![];
+    let mut avg_times = vec![];
     for &(query_id, query_text) in queries {
         let query = rsonpath_syntax::parse(query_text).expect("Failed to parse query");
         let mut engine = RsonpathEngine::compile_query(&query).expect("Failed to compile query");
@@ -163,46 +148,30 @@ fn query_rq_lut(json_path: &str, queries: &[(&str, &str)], cutoff: usize, repeti
             let _ = engine.count(&input).expect("Warmup failed");
         }
 
-        for repetition in repetitions {
-            let mut result = 0;
-            let mut total_time = 0.0;
+        let mut result = 0;
+        let mut total_time = 0.0;
 
-            // if repetitions is low add more repetitions to make is statistically stable
-            if *repetition <= REPETITION_THRESHOLD {
-                println!(
-                    "Triggered REPETITION_THRESHOLD = {}, adding more repetitions",
-                    repetition
-                );
-                for _ in 0..*repetition {
-                    for _ in 0..QUERY_REPETITIONS {
-                        let start = Instant::now();
-                        result = engine.count(&input).expect("Query execution failed");
-                        total_time += start.elapsed().as_secs_f64();
-                    }
-                }
-                total_time /= QUERY_REPETITIONS as f64;
-            } else {
-                for _ in 0..*repetition {
-                    let start = Instant::now();
-                    result = engine.count(&input).expect("Query execution failed");
-                    total_time += start.elapsed().as_secs_f64();
-                }
-            }
-
-            println!(
-                "  - query = {}, query_text={}, cutoff={}, repetitions: {}, time = {:.5}s, result = {}",
-                query_id, query_text, cutoff, repetition, total_time, result
-            );
-            total_times.push(total_time);
+        for _ in 0..QUERY_REPETITIONS {
+            let start = Instant::now();
+            result = engine.count(&input).expect("Query execution failed");
+            total_time += start.elapsed().as_secs_f64();
         }
+
+        let avg_time = total_time / QUERY_REPETITIONS as f64;
+
+        println!(
+            "  - LUT ({}): id={}, query_text={}, time={:.5}s, result={}",
+            cutoff, query_id, query_text, avg_time, result
+        );
+        avg_times.push(avg_time);
 
         lut = engine.take_lut().expect("Failed to retrieve LUT");
     }
 
-    total_times
+    avg_times
 }
 
-fn query_rq_legacy(json_path: &str, queries: &[(&str, &str)], repetitions: &Vec<usize>) -> Vec<f64> {
+fn query_rq_legacy(json_path: &str, queries: &[(&str, &str)]) -> Vec<f64> {
     let legacy_input = {
         let mut file = BufReader::new(fs::File::open(json_path).expect("Failed to open file"));
         let mut buf = vec![];
@@ -210,7 +179,7 @@ fn query_rq_legacy(json_path: &str, queries: &[(&str, &str)], repetitions: &Vec<
         rsonpath_lib_ref::input::OwnedBytes::new(buf)
     };
 
-    let mut total_times = vec![];
+    let mut avg_times = vec![];
     for &(query_id, query_text) in queries {
         let legacy_query = syntax_ref::parse(query_text).expect("Failed to parse query");
         let legacy_engine =
@@ -220,49 +189,33 @@ fn query_rq_legacy(json_path: &str, queries: &[(&str, &str)], repetitions: &Vec<
             let _ = legacy_engine.count(&legacy_input).expect("Warmup failed");
         }
 
-        for repetition in repetitions {
-            let mut result = 0;
-            let mut total_time = 0.0;
+        let mut result = 0;
+        let mut total_time = 0.0;
 
-            // if repetitions is low add more repetitions to make is statistically stable
-            if *repetition <= REPETITION_THRESHOLD {
-                println!(
-                    "Triggered REPETITION_THRESHOLD = {}, adding more repetitions",
-                    repetition
-                );
-                for _ in 0..*repetition {
-                    for _ in 0..QUERY_REPETITIONS {
-                        let start = Instant::now();
-                        result = legacy_engine.count(&legacy_input).expect("Query execution failed");
-                        total_time += start.elapsed().as_secs_f64();
-                    }
-                }
-                total_time /= QUERY_REPETITIONS as f64;
-            } else {
-                for _ in 0..*repetition {
-                    let start = Instant::now();
-                    result = legacy_engine.count(&legacy_input).expect("Query execution failed");
-                    total_time += start.elapsed().as_secs_f64();
-                }
-            }
-
-            println!(
-                "  - query = {}, query_text={}, repetitions: {}, time = {:.5}s, result = {}",
-                query_id, query_text, repetition, total_time, result
-            );
-            total_times.push(total_time);
+        for _ in 0..QUERY_REPETITIONS {
+            let start = Instant::now();
+            result = legacy_engine.count(&legacy_input).expect("Query execution failed");
+            total_time += start.elapsed().as_secs_f64();
         }
+
+        let avg_time = total_time / QUERY_REPETITIONS as f64;
+
+        println!(
+            "  - LEGACY: id={}, query_text={}, time={:.5}s, result={}",
+            query_id, query_text, avg_time, result
+        );
+        avg_times.push(avg_time);
     }
 
-    total_times
+    avg_times
 }
 
-fn query_serde(json_path: &str, queries: &[(&str, &str)], repetitions: &Vec<usize>) -> Vec<f64> {
+fn query_serde(json_path: &str, queries: &[(&str, &str)]) -> Vec<f64> {
     let file = fs::File::open(json_path).expect("Failed to open file");
     let reader = BufReader::new(file);
     let json_value: Value = serde_json::from_reader(reader).expect("Failed to parse JSON");
 
-    let mut total_times = vec![];
+    let mut avg_times = vec![];
     for &(query_id, query_text) in queries {
         let path = JsonPath::parse(query_text).expect("Failed to parse JSONPath");
 
@@ -270,42 +223,26 @@ fn query_serde(json_path: &str, queries: &[(&str, &str)], repetitions: &Vec<usiz
             let _ = path.query(&json_value);
         }
 
-        for repetition in repetitions {
-            let mut result = 0;
-            let mut total_time = 0.0;
+        let mut result = 0;
+        let mut total_time = 0.0;
 
-            if *repetition <= REPETITION_THRESHOLD {
-                println!(
-                    "Triggered REPETITION_THRESHOLD = {}, adding more repetitions",
-                    repetition
-                );
-                for _ in 0..*repetition {
-                    for _ in 0..QUERY_REPETITIONS {
-                        let start = Instant::now();
-                        let nodes = path.query(&json_value);
-                        total_time += start.elapsed().as_secs_f64();
-                        result = nodes.len() as u64;
-                    }
-                }
-                total_time /= QUERY_REPETITIONS as f64;
-            } else {
-                for _ in 0..*repetition {
-                    let start = Instant::now();
-                    let nodes = path.query(&json_value);
-                    total_time += start.elapsed().as_secs_f64();
-                    result = nodes.len() as u64;
-                }
-            }
-
-            println!(
-                "  - query = {}, query_text={}, repetitions: {}, time = {:.5}s, result = {}",
-                query_id, query_text, repetition, total_time, result
-            );
-            total_times.push(total_time);
+        for _ in 0..QUERY_REPETITIONS {
+            let start = Instant::now();
+            let nodes = path.query(&json_value);
+            total_time += start.elapsed().as_secs_f64();
+            result = nodes.len() as u64;
         }
+
+        let avg_time = total_time / QUERY_REPETITIONS as f64;
+
+        println!(
+            "  - SERDE: id={}, query_text={}, time={:.5}s, result={}",
+            query_id, query_text, avg_time, result
+        );
+        avg_times.push(avg_time);
     }
 
-    total_times
+    avg_times
 }
 
 fn measure_build(json_path: &str, filename: &str, base_path: &str) {
@@ -318,7 +255,7 @@ fn measure_build(json_path: &str, filename: &str, base_path: &str) {
             .create(true)
             .append(true)
             .open(&build_csv)
-            .expect("Failed to open build CSV"),
+            .expect(&format!("Failed to open build CSV {}", build_csv)),
     );
 
     // Write header if the file is new
