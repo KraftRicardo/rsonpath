@@ -24,11 +24,17 @@ const RQ_LEGACY_NAME: &str = "rq-legacy";
 const RQ_LUT_CUTOFF_0_NAME: &str = "rq-lut-cutoff-0";
 const RQ_LUT_CUTOFF_512_NAME: &str = "rq-lut-cutoff-512";
 
-pub const QUERY_REPETITIONS: usize = 5;
-pub const BUILD_REPETITIONS: usize = 3;
-pub const WARM_UP_QUERY_REPETITIONS: usize = 10;
+// pub const QUERY_REPETITIONS: usize = 5;
+// pub const BUILD_REPETITIONS: usize = 3;
+// pub const WARM_UP_QUERY_REPETITIONS: usize = 10;
+// pub const WARM_UP_BUILD_REPETITIONS: usize = 1;
+// pub const REPETITION_THRESHOLD: usize = 10;
+
+pub const QUERY_REPETITIONS: usize = 1;
+pub const BUILD_REPETITIONS: usize = 1;
+pub const WARM_UP_QUERY_REPETITIONS: usize = 1;
 pub const WARM_UP_BUILD_REPETITIONS: usize = 1;
-pub const REPETITION_THRESHOLD: usize = 10;
+pub const REPETITION_THRESHOLD: usize = 1;
 
 // Run with: cargo run --bin lut --release -- eval-final .a_test_data .a_final_results
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
@@ -83,7 +89,7 @@ fn measure_query(json_path: &str, filename: &str, base_path: &str, queries: &[(&
     }
 
     // Measurements
-    let repetitions = vec![1, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+    let repetitions = vec![1, 5, 10, 20, 30, 40, 50, 100, 200];
     // let repetitions: Vec<usize> = vec![1, 5, 10];
     let serde_query_times = query_serde(&json_path, queries, &repetitions);
     let rq_legacy_query_times = query_rq_legacy(&json_path, queries, &repetitions);
