@@ -8,10 +8,11 @@ use crate::lookup_table::{pair_data, util_path, REPETITIONS};
 use std::fs;
 use std::io::Write;
 
-pub const BUILD_REPETITIONS: usize = 1;
-pub const QUERY_REPETITIONS: usize = 1;
+pub const BUILD_REPETITIONS: usize = 3;
+pub const QUERY_REPETITIONS: usize = 5;
 
 // Run with: cargo run --bin lut --release -- eval-lut-construction .a_test_data .a_final_results
+// Run with: cargo run --bin lut --release -- eval-lut-construction ricardo-jsons final-results-10
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
     println!("lut construction evaluation");
 
