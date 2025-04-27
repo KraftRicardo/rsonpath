@@ -6,12 +6,17 @@ use std::{
 
 use stats_alloc::{Region, StatsAlloc, INSTRUMENTED_SYSTEM};
 
+use crate::lookup_table::final_results::eval_lut_construction::{BUILD_REPETITIONS, QUERY_REPETITIONS};
 use crate::lookup_table::implementations::lut_hash_map::LutHashMap;
+use crate::lookup_table::implementations::lut_hash_map_double::LutHashMapDouble;
 use crate::lookup_table::implementations::lut_hash_map_group::LutHashMapGroup;
+use crate::lookup_table::implementations::lut_perfect_naive::LutPerfectNaive;
+use crate::lookup_table::implementations::lut_phf::LutPHF;
+use crate::lookup_table::implementations::lut_phf_double::LutPHFDouble;
 use crate::lookup_table::implementations::lut_phf_group::LutPHFGroup;
-use crate::lookup_table::{
-    analysis::distance_distribution, pair_data, util_path, LookUpTable, LookUpTableLambda, REPETITIONS,
-};
+use crate::lookup_table::implementations::lut_ptr_hash_double::LutPtrHashDouble;
+use crate::lookup_table::implementations::lut_vfunc_double::LutVFuncDouble;
+use crate::lookup_table::{analysis::distance_distribution, pair_data, util_path, LookUpTable, LookUpTableLambda};
 
 /// Allocator to track how much allocations are happening during a specific time frame
 #[global_allocator]
@@ -45,7 +50,6 @@ pub fn evaluate(json_path: &str, csv_path: &str) -> Result<(), Box<dyn std::erro
         data_line: &mut data_line,
     };
 
-    print!("Measuring LUT size with REPETITIONS = {}", REPETITIONS);
     measure_performance(&mut config, cutoff)?;
 
     // Write CSV header and data
@@ -55,23 +59,21 @@ pub fn evaluate(json_path: &str, csv_path: &str) -> Result<(), Box<dyn std::erro
     }
     writeln!(csv_file, "{}", data_line)?;
 
-    plot_with_python(csv_path);
-
     Ok(())
 }
 
 #[inline]
-fn measure_performance(config: &mut EvalConfig, cutoff: usize) -> Result<(), Box<dyn std::error::Error>> {
+pub fn measure_performance(config: &mut EvalConfig, cutoff: usize) -> Result<(), Box<dyn std::error::Error>> {
     // Measure normal LUTs without any special parameter
     // eval::<LutPerfectNaive>(config, "perfect_naive", cutoff);
-    eval::<LutHashMap>(config, "hash_map", cutoff);
-    // eval::<LutHashMapDouble>(config, "hash_map_double", cutoff);
-    // eval::<LutSicHashDouble>(&mut config, "sic_hash_double", cutoff);
+    // eval::<LutHashMap>(config, "hash_map", cutoff);
+    eval::<LutHashMapDouble>(config, "hash_map_double", cutoff);
+    // eval::<LutSicHashDouble>(config, "sic_hash_double", cutoff); // BROKEN
     // eval::<LutPtrHashDouble>(config, "ptr_hash_double", cutoff);
     // eval::<LutVFuncDouble>(config, "vfunc_double", cutoff);
 
     for bit_mask in [15] {
-        // eval_hash_map_group(config, "hash_map_group", bit_mask, cutoff);
+        // eval_hash_map_group(config, "hash_map_group", bit_mask, cutoff); // BROKEN
     }
 
     // Measure LUTs with lambda parameter
@@ -86,12 +88,16 @@ fn measure_performance(config: &mut EvalConfig, cutoff: usize) -> Result<(), Box
     for lambda in [1, 5] {
         // for bit_mask in [3, 7, 15, 31, 63, 127] {
         // for bit_mask in [63, 127, 255, 511] {
-        for bit_mask in [2047] {
+        for bit_mask in [2047, 4095, 8191] {
             eval_phf_group(config, "phf_group", bit_mask, lambda, false, cutoff);
         }
     }
 
     Ok(())
+}
+
+fn LutSicHashDouble(p0: &mut &mut EvalConfig, p1: &str, p2: usize) {
+    todo!()
 }
 
 fn eval<T: LookUpTable>(config: &mut EvalConfig, name: &str, cutoff: usize) {
@@ -100,12 +106,12 @@ fn eval<T: LookUpTable>(config: &mut EvalConfig, name: &str, cutoff: usize) {
     // Build time
     // We do it like because the drop() of a big LUT could cost time that we do not want to include in the measurement
     let mut build_time: f64 = 0.0;
-    for _i in 0..REPETITIONS {
+    for _i in 0..BUILD_REPETITIONS {
         let start_build = std::time::Instant::now();
         let _ = T::build(config.json_path, cutoff).expect("Fail @ build lut");
         build_time += start_build.elapsed().as_secs_f64();
     }
-    build_time = build_time / (REPETITIONS as f64);
+    build_time = build_time / (BUILD_REPETITIONS as f64);
 
     // Size
     let start_heap = Region::new(HEAP_TRACKER);
@@ -114,12 +120,12 @@ fn eval<T: LookUpTable>(config: &mut EvalConfig, name: &str, cutoff: usize) {
 
     // Query time
     let mut query_time: f64 = 0.0;
-    for _i in 0..REPETITIONS {
+    for _i in 0..QUERY_REPETITIONS {
         let start_query = std::time::Instant::now();
         my_black_box(get_every_key_once(&lut, &config.keys));
         query_time += start_query.elapsed().as_secs_f64();
     }
-    query_time = query_time / (REPETITIONS as f64);
+    query_time = query_time / (QUERY_REPETITIONS as f64);
 
     // Save measurements
     let name = name;
@@ -131,12 +137,12 @@ fn eval_phf<T: LookUpTableLambda>(config: &mut EvalConfig, name: &str, lambda: u
 
     // Build time
     let mut build_time: f64 = 0.0;
-    for _i in 0..REPETITIONS {
+    for _i in 0..BUILD_REPETITIONS {
         let start_build = std::time::Instant::now();
         let _ = T::build_lambda(lambda, config.json_path, 0, threaded).expect("Fail @ build lut");
         build_time += start_build.elapsed().as_secs_f64();
     }
-    build_time = build_time / (REPETITIONS as f64);
+    build_time = build_time / (BUILD_REPETITIONS as f64);
 
     // Size
     let start_heap = Region::new(HEAP_TRACKER);
@@ -145,12 +151,12 @@ fn eval_phf<T: LookUpTableLambda>(config: &mut EvalConfig, name: &str, lambda: u
 
     // Query time
     let mut query_time: f64 = 0.0;
-    for _i in 0..REPETITIONS {
+    for _i in 0..QUERY_REPETITIONS {
         let start_query = std::time::Instant::now();
         my_black_box(get_every_key_once(&lut, &config.keys));
         query_time += start_query.elapsed().as_secs_f64();
     }
-    query_time = query_time / (REPETITIONS as f64);
+    query_time = query_time / (QUERY_REPETITIONS as f64);
 
     // Save measurements
     let name = format!("λ={lambda}:{name}");
@@ -163,13 +169,13 @@ fn eval_phf_group(config: &mut EvalConfig, name: &str, bit_mask: usize, lambda: 
 
     // Build time
     let mut build_time: f64 = 0.0;
-    for _i in 0..REPETITIONS {
+    for _i in 0..BUILD_REPETITIONS {
         let start_build = std::time::Instant::now();
         let _ =
             LutPHFGroup::build_buckets(lambda, config.json_path, cutoff, bit_mask, threaded).expect("Fail @ build lut");
         build_time += start_build.elapsed().as_secs_f64();
     }
-    build_time = build_time / (REPETITIONS as f64);
+    build_time = build_time / (BUILD_REPETITIONS as f64);
 
     // Size
     let start_heap = Region::new(HEAP_TRACKER);
@@ -179,12 +185,12 @@ fn eval_phf_group(config: &mut EvalConfig, name: &str, bit_mask: usize, lambda: 
 
     // Query time
     let mut query_time: f64 = 0.0;
-    for _i in 0..REPETITIONS {
+    for _i in 0..QUERY_REPETITIONS {
         let start_query = std::time::Instant::now();
         my_black_box(get_every_key_once(&lut, &config.keys));
         query_time += start_query.elapsed().as_secs_f64();
     }
-    query_time = query_time / (REPETITIONS as f64);
+    query_time = query_time / (QUERY_REPETITIONS as f64);
 
     // Save measurements
     let name = format!("#{buckets}_λ={lambda}:{name}");
@@ -197,12 +203,12 @@ fn eval_hash_map_group(config: &mut EvalConfig, name: &str, bit_mask: usize, cut
 
     // Build time
     let mut build_time: f64 = 0.0;
-    for _i in 0..REPETITIONS {
+    for _i in 0..BUILD_REPETITIONS {
         let start_build = std::time::Instant::now();
         let _ = LutHashMapGroup::build_buckets(config.json_path, bit_mask, cutoff).expect("Fail @ build lut");
         build_time += start_build.elapsed().as_secs_f64();
     }
-    build_time = build_time / (REPETITIONS as f64);
+    build_time = build_time / (BUILD_REPETITIONS as f64);
 
     // Size
     let start_heap = Region::new(HEAP_TRACKER);
@@ -211,12 +217,12 @@ fn eval_hash_map_group(config: &mut EvalConfig, name: &str, bit_mask: usize, cut
 
     // Query time
     let mut query_time: f64 = 0.0;
-    for _i in 0..REPETITIONS {
+    for _i in 0..QUERY_REPETITIONS {
         let start_query = std::time::Instant::now();
         my_black_box(get_every_key_once(&lut, &config.keys));
         query_time += start_query.elapsed().as_secs_f64();
     }
-    query_time = query_time / (REPETITIONS as f64);
+    query_time = query_time / (QUERY_REPETITIONS as f64);
 
     // Save measurements
     let name = format!("#{buckets}:{name}");
@@ -253,20 +259,3 @@ fn heap_value(stats: stats_alloc::Stats) -> isize {
 // running tests.
 #[inline(never)]
 fn my_black_box<T>(_whatever: T) {}
-
-fn plot_with_python(csv_path: &str) {
-    let msg = format!("Failed to open csv_path: {}", csv_path);
-    let output = Command::new("python")
-        .arg("crates/rsonpath-lib/src/lookup_table/python_statistic/lut_evaluation.py")
-        .arg(csv_path)
-        .output()
-        .expect(&msg);
-
-    if output.status.success() {
-        if let Err(e) = io::stdout().write_all(&output.stdout) {
-            eprintln!("Failed to write stdout: {}", e);
-        }
-    } else {
-        eprintln!("Error: {}", String::from_utf8_lossy(&output.stderr));
-    }
-}
