@@ -24,9 +24,9 @@ const RQ_LEGACY_NAME: &str = "rq-legacy";
 const RQ_LUT_CUTOFF_0_NAME: &str = "rq-lut-cutoff-0";
 const RQ_LUT_CUTOFF_512_NAME: &str = "rq-lut-cutoff-512";
 
-pub const QUERY_REPETITIONS: usize = 100;
-pub const BUILD_REPETITIONS: usize = 5;
-pub const WARM_UP_QUERY_REPETITIONS: usize = 10;
+pub const QUERY_REPETITIONS: usize = 20;
+pub const BUILD_REPETITIONS: usize = 3;
+pub const WARM_UP_QUERY_REPETITIONS: usize = 5;
 pub const WARM_UP_BUILD_REPETITIONS: usize = 1;
 
 // pub const QUERY_REPETITIONS: usize = 1;
@@ -35,7 +35,7 @@ pub const WARM_UP_BUILD_REPETITIONS: usize = 1;
 // pub const WARM_UP_BUILD_REPETITIONS: usize = 0;
 
 // Run with: cargo run --bin lut --release -- eval-final .a_test_data .a_final_results
-// Run with: cargo run --bin lut --release -- eval-final ricardo-jsons final_results-6
+// Run with: cargo run --bin lut --release -- eval-final ricardo-jsons final_results-7
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
     println!("serde_json_path");
 
