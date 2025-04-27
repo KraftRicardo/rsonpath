@@ -26,7 +26,7 @@ static SKIP_TIME_ATOMIC_CUTOFF_1024: AtomicU64 = AtomicU64::new(0);
 static SKIP_TIME_ATOMIC_CUTOFF_2048: AtomicU64 = AtomicU64::new(0);
 
 // Run with: cargo run --bin lut --release -- eval-t-optimal .a_test_data .a_final_results
-// Run with: cargo run --bin lut --release -- eval-final ricardo-jsons final_results-7
+// Run with: cargo run --bin lut --release -- eval-t-optimal ricardo-jsons final_results-9
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
     if SKIP_MODE != SkipMode::TRACK || !TRACK_SKIPPING_ON || cfg! {feature = "empty-list-opt"} {
         println!("Wrong parameters. Abort");

@@ -480,22 +480,22 @@ pub const QUERY_WALMART_SHORT: (&str, &[(&str, &str)]) = (
 pub const QUERY_BESTBUY: (&str, &[(&str, &str)]) = (
     "bestbuy_large_record_(1GB).json",
     &[
-        ("1", "$.products[4].categoryPath[2]"), // 0.999999
-        ("2", "$.products[*].categoryPath[2]"), // 0.827555
-                                                // ("3", "$.products[*].quantityLimit"),                               // 0.803025
-                                                // ("4", "$.products[*].frequentlyPurchasedWith[*]"),                  // 0.775238
-                                                // ("5", "$.products[*].includedItemList[*]"),                         // 0.765115
-                                                // ("6", "$.products[*].homeDelivery"),                                // 0.598374
-                                                // ("7", "$.products[*].freeShipping"),                                // 0.510142
-                                                // ("8", "$.products[*].shipping[*]"),                                 // 0.492032
-                                                // ("9", "$.products[*].shippingLevelsOfService[*].serviceLevelName"), // 0.306224
-                                                // ("10", "$.products[*].shippingLevelsOfService[*]"),                 // 0.295264
-                                                // ("11", "$.products[*].dollarSavings"),                              // 0.162506
-                                                // ("12", "$.products[*].lengthInMinutes"),                            // 0.127193
-                                                // ("13", "$.products[*].screenFormat"),                               // 0.101771
-                                                // ("14", "$.products[*].additionalFeatures[*]"),                      // 0.097107
-                                                // ("15", "$.products[*].videoChapters"),                              // 0.088070
-                                                // ("16", "$..freeShipping"),                                          // 0.000000
+        ("1", "$.products[4].categoryPath[2]"),                             // 0.999999
+        ("2", "$.products[*].categoryPath[2]"),                             // 0.827555
+        ("3", "$.products[*].quantityLimit"),                               // 0.803025
+        ("4", "$.products[*].frequentlyPurchasedWith[*]"),                  // 0.775238
+        ("5", "$.products[*].includedItemList[*]"),                         // 0.765115
+        ("6", "$.products[*].homeDelivery"),                                // 0.598374
+        ("7", "$.products[*].freeShipping"),                                // 0.510142
+        ("8", "$.products[*].shipping[*]"),                                 // 0.492032
+        ("9", "$.products[*].shippingLevelsOfService[*].serviceLevelName"), // 0.306224
+        ("10", "$.products[*].shippingLevelsOfService[*]"),                 // 0.295264
+        ("11", "$.products[*].dollarSavings"),                              // 0.162506
+        ("12", "$.products[*].lengthInMinutes"),                            // 0.127193
+        ("13", "$.products[*].screenFormat"),                               // 0.101771
+        ("14", "$.products[*].additionalFeatures[*]"),                      // 0.097107
+        ("15", "$.products[*].videoChapters"),                              // 0.088070
+        ("16", "$..freeShipping"),                                          // 0.000000
     ],
 );
 
@@ -504,25 +504,25 @@ pub const QUERY_CROSSREF1: (&str, &[(&str, &str)]) = (
     &[
         ("1", "$.items[2].resource.primary.URL"), // 1.000000
         ("2", "$.items[*].URL"),                  // 0.963846
-                                                  // ("3", "$.items[*].member"),               // 0.950990
-                                                  // ("4", "$.items[*].score"),                // 0.948115
-                                                  // ("5", "$.items[*].resource.primary.URL"), // 0.937938
-                                                  // ("6", "$.items[*].issued"),               // 0.922995
-                                                  // ("7", "$.items[*].author[*].given"),      // 0.881082
-                                                  // ("8", "$.items[*].author[*].family"),     // 0.865040
-                                                  // ("9", "$.items[*].author[*].sequence"),   // 0.852936
-                                                  // ("10", "$.items[*].author[*]"),           // 0.849213
-                                                  // ("11", "$.items[*].institution[*].name"), // 0.808941
-                                                  // ("12", "$.items[*].link[*]..URL"),        // 0.804825
-                                                  // ("13", "$.items[*].assertion[*]..name"),  // 0.796434
-                                                  // ("14", "$.items[*].reference[*].key"),    // 0.732995
-                                                  // ("15", "$.items[*].reference[*].author"), // 0.545019
-                                                  // ("16", "$.items[*].reference[*].DOI"),    // 0.490577
-                                                  // ("17", "$.items[*].reference[*].year"),   // 0.374631
-                                                  // ("18", "$.items[*].reference[*].issue"),  // 0.338667
-                                                  // ("19", "$.items[*].reference[*].volume"), // 0.313539
-                                                  // ("20", "$.items[*].reference[*]"),        // 0.256538
-                                                  // ("21", "$..URL"),                         // 0.000000
+        ("3", "$.items[*].member"),               // 0.950990
+        ("4", "$.items[*].score"),                // 0.948115
+        ("5", "$.items[*].resource.primary.URL"), // 0.937938
+        ("6", "$.items[*].issued"),               // 0.922995
+        ("7", "$.items[*].author[*].given"),      // 0.881082
+        ("8", "$.items[*].author[*].family"),     // 0.865040
+        ("9", "$.items[*].author[*].sequence"),   // 0.852936
+        ("10", "$.items[*].author[*]"),           // 0.849213
+        ("11", "$.items[*].institution[*].name"), // 0.808941
+        ("12", "$.items[*].link[*]..URL"),        // 0.804825
+        ("13", "$.items[*].assertion[*]..name"),  // 0.796434
+        ("14", "$.items[*].reference[*].key"),    // 0.732995
+        ("15", "$.items[*].reference[*].author"), // 0.545019
+        ("16", "$.items[*].reference[*].DOI"),    // 0.490577
+        ("17", "$.items[*].reference[*].year"),   // 0.374631
+        ("18", "$.items[*].reference[*].issue"),  // 0.338667
+        ("19", "$.items[*].reference[*].volume"), // 0.313539
+        ("20", "$.items[*].reference[*]"),        // 0.256538
+        ("21", "$..URL"),                         // 0.000000
     ],
 );
 
