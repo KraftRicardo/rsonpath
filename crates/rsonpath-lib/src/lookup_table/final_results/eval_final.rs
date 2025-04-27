@@ -40,10 +40,10 @@ pub fn evaluate(data_dir_path: &str, base_path: &str) {
     println!("serde_json_path");
 
     // GB_1
-    eval_all(&data_dir_path, &base_path, QUERY_BESTBUY);
-    eval_all(&data_dir_path, &base_path, QUERY_CROSSREF1);
-    eval_all(&data_dir_path, &base_path, QUERY_CROSSREF2);
-    eval_all(&data_dir_path, &base_path, QUERY_CROSSREF4);
+    // eval_all(&data_dir_path, &base_path, QUERY_BESTBUY);
+    // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF1);
+    // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF2);
+    // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF4);
     eval_all(&data_dir_path, &base_path, QUERY_GOOGLE);
     eval_all(&data_dir_path, &base_path, QUERY_NSPL);
     eval_all(&data_dir_path, &base_path, QUERY_TWITTER);
