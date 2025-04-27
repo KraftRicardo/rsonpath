@@ -17,8 +17,8 @@ pub mod sichash_test_data_generator;
 pub mod util_path;
 
 // CONFIG
-pub const SKIP_MODE: SkipMode = SkipMode::OFF;
-pub const TRACK_SKIPPING_TIME_DURING_PERFORMANCE_TEST: bool = false;
+pub const SKIP_MODE: SkipMode = SkipMode::TRACK;
+pub const TRACK_SKIPPING_ON: bool = true;
 pub const REPETITIONS: u64 = 1;
 
 // pub type LUT = LutHashMap;

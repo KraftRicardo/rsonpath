@@ -19,7 +19,7 @@ pub const QUERY_REPETITIONS: usize = 10;
 pub const WARM_UP_QUERY_REPETITIONS: usize = 10;
 
 // Run with: cargo run --bin lut --release -- eval-rq-lut-no-lut .a_test_data .a_final_results
-// Run with: cargo run --bin lut --release -- eval-rq-lut-no-lut ricardo-jsons final-results-2
+// Run with:
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
     println!("rq-lut-no-lut");
 

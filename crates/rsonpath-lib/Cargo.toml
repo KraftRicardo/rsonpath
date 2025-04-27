@@ -70,7 +70,8 @@ proptest = { workspace = true }
 test-case = { workspace = true }
 
 [features]
-default = ["simd", "empty-list-opt"]
+#default = ["simd", "empty-list-opt"]
+default = ["simd"]
 arbitrary = ["dep:arbitrary"]
 simd = []
 empty-list-opt = []
