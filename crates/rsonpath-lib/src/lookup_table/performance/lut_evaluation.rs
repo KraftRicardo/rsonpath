@@ -65,9 +65,9 @@ pub fn evaluate(json_path: &str, csv_path: &str) -> Result<(), Box<dyn std::erro
 #[inline]
 pub fn measure_performance(config: &mut EvalConfig, cutoff: usize) -> Result<(), Box<dyn std::error::Error>> {
     // Measure normal LUTs without any special parameter
-    // eval::<LutPerfectNaive>(config, "perfect_naive", cutoff);
-    // eval::<LutHashMap>(config, "hash_map", cutoff);
-    eval::<LutHashMapDouble>(config, "hash_map_double", cutoff);
+    eval::<LutPerfectNaive>(config, "perfect_naive", cutoff);
+    eval::<LutHashMap>(config, "hash_map", cutoff);
+    // eval::<LutHashMapDouble>(config, "hash_map_double", cutoff);
     // eval::<LutSicHashDouble>(config, "sic_hash_double", cutoff); // BROKEN
     // eval::<LutPtrHashDouble>(config, "ptr_hash_double", cutoff);
     // eval::<LutVFuncDouble>(config, "vfunc_double", cutoff);
@@ -79,7 +79,7 @@ pub fn measure_performance(config: &mut EvalConfig, cutoff: usize) -> Result<(),
     // Measure LUTs with lambda parameter
     for lambda in [1, 5] {
         for threaded in [false] {
-            // eval_phf::<LutPHF>(config, "phf", lambda, threaded, cutoff);
+            eval_phf::<LutPHF>(config, "phf", lambda, threaded, cutoff);
             // eval_phf::<LutPHFDouble>(config, "phf_double", lambda, threaded, cutoff);
         }
     }
@@ -88,9 +88,9 @@ pub fn measure_performance(config: &mut EvalConfig, cutoff: usize) -> Result<(),
     for lambda in [1, 5] {
         // for bit_mask in [3, 7, 15, 31, 63, 127] {
         // for bit_mask in [63, 127, 255, 511] {
-        for bit_mask in [2047, 4095, 8191] {
-            eval_phf_group(config, "phf_group", bit_mask, lambda, false, cutoff);
-        }
+        // for bit_mask in [2047, 4095, 8191] {
+        //     eval_phf_group(config, "phf_group", bit_mask, lambda, false, cutoff);
+        // }
     }
 
     Ok(())
@@ -231,7 +231,7 @@ fn eval_hash_map_group(config: &mut EvalConfig, name: &str, bit_mask: usize, cut
 
 fn save_measurements(config: &mut EvalConfig, f: &str, build: f64, query: f64, heap: isize) {
     config.head_line.push_str(&format!("{f}_BUILD,{f}_QUERY,{f}_HEAP,",));
-    config.data_line.push_str(&format!("{build},{query},{heap}"));
+    config.data_line.push_str(&format!("{build},{query},{heap},"));
 
     println!("    - Build time:      {build}");
     println!("    - Query time:      {query}");

@@ -2,7 +2,8 @@ use crate::lookup_table::analysis::distance_distribution;
 use crate::lookup_table::performance::lut_evaluation::{measure_performance, EvalConfig};
 use crate::lookup_table::performance::lut_query_data::{
     QUERY_BESTBUY, QUERY_BESTBUY_SHORT, QUERY_CROSSREF0, QUERY_CROSSREF1, QUERY_CROSSREF2, QUERY_CROSSREF4,
-    QUERY_GOOGLE, QUERY_NSPL, QUERY_TWITTER, QUERY_WALMART, QUERY_WIKI,
+    QUERY_GOOGLE, QUERY_GOOGLE_SHORT, QUERY_NSPL, QUERY_TWITTER, QUERY_TWITTER_SHORT, QUERY_WALMART,
+    QUERY_WALMART_SHORT, QUERY_WIKI,
 };
 use crate::lookup_table::{pair_data, util_path, REPETITIONS};
 use std::fs;
@@ -22,6 +23,9 @@ pub fn evaluate(data_dir_path: &str, base_path: &str) {
     // MB_1
     // eval_all(&data_dir_path, &final_dir_path, QUERY_BESTBUY_SHORT);
     // eval_all(&data_dir_path, &final_dir_path, QUERY_CROSSREF0);
+    // eval_all(&data_dir_path, &final_dir_path, QUERY_GOOGLE_SHORT);
+    // eval_all(&data_dir_path, &final_dir_path, QUERY_TWITTER_SHORT);
+    // eval_all(&data_dir_path, &final_dir_path, QUERY_WALMART_SHORT);
 
     // GB_1
     eval_all(&data_dir_path, &final_dir_path, QUERY_BESTBUY);
@@ -63,7 +67,7 @@ fn eval_all(data_dir_path: &str, final_dir_path: &str, test_data: (&str, &[(&str
         data_line: &mut data_line,
     };
 
-    print!("Measuring LUT size with REPETITIONS = {}", REPETITIONS);
+    println!("Measuring LUT size with REPETITIONS = {}", REPETITIONS);
     measure_performance(&mut config, cutoff).expect("Fail");
 
     // Write CSV header and data
