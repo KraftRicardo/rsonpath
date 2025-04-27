@@ -69,7 +69,7 @@ pub fn measure_performance(config: &mut EvalConfig, cutoff: usize) -> Result<(),
     // eval::<LutHashMap>(config, "hash_map", cutoff);
     eval::<LutHashMapDouble>(config, "hash_map_double", cutoff);
     // eval::<LutSicHashDouble>(config, "sic_hash_double", cutoff); // BROKEN
-    // eval::<LutPtrHashDouble>(config, "ptr_hash_double", cutoff);
+    eval::<LutPtrHashDouble>(config, "ptr_hash_double", cutoff);
     // eval::<LutVFuncDouble>(config, "vfunc_double", cutoff);
 
     for bit_mask in [15] {
@@ -88,7 +88,8 @@ pub fn measure_performance(config: &mut EvalConfig, cutoff: usize) -> Result<(),
     for lambda in [1, 5] {
         // for bit_mask in [3, 7, 15, 31, 63, 127] {
         // for bit_mask in [63, 127, 255, 511] {
-        for bit_mask in [2047, 4095, 8191] {
+        // for bit_mask in [2047, 4095, 8191] {
+        for bit_mask in [2047] {
             eval_phf_group(config, "phf_group", bit_mask, lambda, false, cutoff);
         }
     }
