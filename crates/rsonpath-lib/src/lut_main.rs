@@ -26,7 +26,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Apply a query on the a given JSON file
+    /// Apply a query on the given JSON file
     Query {
         /// Query to be applied
         json_query: String,
@@ -70,7 +70,6 @@ enum Commands {
         data_dir_path: String,
         result_dir_path: String,
     },
-    EvalSerdePlot {},
     EvalRqLegacy {
         data_dir_path: String,
         result_dir_path: String,
@@ -166,9 +165,6 @@ fn main() -> Result<(), Box<dyn Error>> {
             result_dir_path,
         } => {
             eval_rq_lut_no_lut::evaluate(data_dir_path, result_dir_path);
-        }
-        Commands::EvalSerdePlot {} => {
-            eval_serde::plot();
         }
         Commands::EvalFindPairData {
             data_dir_path,

@@ -43,10 +43,6 @@ pub fn evaluate(data_dir_path: &str, base_path: &str) {
     println!("Done");
 }
 
-pub fn plot() {
-    todo!()
-}
-
 fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&str, &str)])) {
     // Extract input
     let (json_filename, queries) = test_data;

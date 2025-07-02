@@ -2,7 +2,7 @@ use crate::lookup_table::analysis::distance_distribution;
 use crate::lookup_table::performance::lut_evaluation::{measure_performance, EvalConfig};
 use crate::lookup_table::performance::lut_query_data::{
     QUERY_BESTBUY, QUERY_BESTBUY_SHORT, QUERY_CROSSREF0, QUERY_CROSSREF1, QUERY_CROSSREF2, QUERY_CROSSREF4,
-    QUERY_GOOGLE, QUERY_GOOGLE_SHORT, QUERY_NSPL, QUERY_TWITTER, QUERY_TWITTER_SHORT, QUERY_WALMART,
+    QUERY_GOOGLE, QUERY_GOOGLE_SHORT, QUERY_NESTED_COL, QUERY_NSPL, QUERY_TWITTER, QUERY_TWITTER_SHORT, QUERY_WALMART,
     QUERY_WALMART_SHORT, QUERY_WIKI,
 };
 use crate::lookup_table::{pair_data, util_path, REPETITIONS};
@@ -28,15 +28,18 @@ pub fn evaluate(data_dir_path: &str, base_path: &str) {
     // eval_all(&data_dir_path, &final_dir_path, QUERY_WALMART_SHORT);
 
     // GB_1
-    eval_all(&data_dir_path, &final_dir_path, QUERY_BESTBUY);
-    eval_all(&data_dir_path, &final_dir_path, QUERY_CROSSREF1);
-    eval_all(&data_dir_path, &final_dir_path, QUERY_CROSSREF2);
-    eval_all(&data_dir_path, &final_dir_path, QUERY_CROSSREF4);
-    eval_all(&data_dir_path, &final_dir_path, QUERY_GOOGLE);
-    eval_all(&data_dir_path, &final_dir_path, QUERY_NSPL);
-    eval_all(&data_dir_path, &final_dir_path, QUERY_TWITTER);
-    eval_all(&data_dir_path, &final_dir_path, QUERY_WALMART);
-    eval_all(&data_dir_path, &final_dir_path, QUERY_WIKI);
+    // eval_all(&data_dir_path, &final_dir_path, QUERY_BESTBUY);
+    // eval_all(&data_dir_path, &final_dir_path, QUERY_CROSSREF1);
+    // eval_all(&data_dir_path, &final_dir_path, QUERY_CROSSREF2);
+    // eval_all(&data_dir_path, &final_dir_path, QUERY_CROSSREF4);
+    // eval_all(&data_dir_path, &final_dir_path, QUERY_GOOGLE);
+    // eval_all(&data_dir_path, &final_dir_path, QUERY_NSPL);
+    // eval_all(&data_dir_path, &final_dir_path, QUERY_TWITTER);
+    // eval_all(&data_dir_path, &final_dir_path, QUERY_WALMART);
+    // eval_all(&data_dir_path, &final_dir_path, QUERY_WIKI);
+
+    // 25 GB
+    eval_all(&data_dir_path, &final_dir_path, QUERY_NESTED_COL);
 
     println!("Done");
 }

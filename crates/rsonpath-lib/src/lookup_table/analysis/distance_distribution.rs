@@ -65,6 +65,7 @@ pub fn count_num_pairs(json_path: &str) -> usize {
     distance_frequencies.values().sum()
 }
 
+// Saves the result in .csv files
 fn count_distances_with_simd(json_path: &str, result_dir: &str) {
     let file = std::fs::File::open(json_path).expect("Fail to open file");
     let filename = util_path::extract_filename(json_path);
@@ -94,9 +95,6 @@ fn count_distances_with_simd(json_path: &str, result_dir: &str) {
             .expect("Failed to write record");
     }
     wtr.flush().expect("Failed to flush CSV writer");
-
-    // Plot it with python
-    run_python_statistics_builder(&path);
 }
 
 fn count_distances<I, V>(input: &I, simd: V) -> HashMap<usize, usize>
@@ -142,21 +140,4 @@ where
     }
 
     distance_frequencies
-}
-
-fn run_python_statistics_builder(csv_path: &str) {
-    let msg = format!("Failed to open csv_path: {}", csv_path);
-    let output = Command::new("python")
-        .arg("crates/rsonpath-lib/src/lookup_table/python_statistic/distance_distribution.py")
-        .arg(csv_path)
-        .output()
-        .expect(&msg);
-
-    if output.status.success() {
-        if let Err(e) = io::stdout().write_all(&output.stdout) {
-            eprintln!("Failed to write stdout: {}", e);
-        }
-    } else {
-        eprintln!("Error: {}", String::from_utf8_lossy(&output.stderr));
-    }
 }

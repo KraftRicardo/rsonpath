@@ -90,6 +90,7 @@ pub fn measure_performance(config: &mut EvalConfig, cutoff: usize) -> Result<(),
         // for bit_mask in [63, 127, 255, 511] {
         // for bit_mask in [2047, 4095, 8191] {
         // for bit_mask in [2047] {
+        // for bit_mask in [63] {
         //     eval_phf_group(config, "phf_group", bit_mask, lambda, false, cutoff);
         // }
     }
