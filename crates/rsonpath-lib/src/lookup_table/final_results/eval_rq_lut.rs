@@ -20,7 +20,7 @@ use std::{fs, io::BufReader};
 // per query (x-axis).
 //
 // Run with: cargo run --bin lut --release -- eval-rq-lut .a_test_data .a_final_results/speed/rq-lut
-// Run with: cargo run --bin lut --release -- cutoff ricardo-jsons final-results-4
+// Run with: cargo run --bin lut --release -- cutoff ricardo-jsons plot-results
 //
 // "data_dir_path" path to the folder holding the input JSON files.
 // "base_path" path to the folder where the results will be saved
@@ -33,12 +33,13 @@ pub fn evaluate(data_dir_path: &str, base_path: &str) {
 
     // 2^40 = 1,099,511,627,776, we basically use a cutoff so high we do not trigger it. We
     // want to see how slow the overall application is.
-    let cutoffs = vec![0, 64, 128, 512, 8192, 1099511627776];
+    // let cutoffs = vec![0, 64, 128, 512, 8192, 1099511627776];
+    let cutoffs = vec![0];
 
     if TRACK_SKIPPING_ON || SKIP_MODE != OFF || !cfg! {feature = "empty-list-opt"} {
         println!(
             "Disable tracking of skips before running because it slows down the algorithm.\
-        Also turn the empty-list-opt feature for better performance!"
+            Also turn the empty-list-opt feature for better performance!"
         );
         return;
     }
@@ -50,13 +51,15 @@ pub fn evaluate(data_dir_path: &str, base_path: &str) {
     // TODO reset query repetition!
     eval_all(&data_dir_path, &base_path, QUERY_BESTBUY, &cutoffs);
     // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF1, &cutoffs);
-    // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF2, &cutoffs);
-    // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF4, &cutoffs);
     // eval_all(&data_dir_path, &base_path, QUERY_GOOGLE, &cutoffs);
     // eval_all(&data_dir_path, &base_path, QUERY_NSPL, &cutoffs);
     // eval_all(&data_dir_path, &base_path, QUERY_TWITTER, &cutoffs);
     // eval_all(&data_dir_path, &base_path, QUERY_WALMART, &cutoffs);
     // eval_all(&data_dir_path, &base_path, QUERY_WIKI, &cutoffs);
+
+    // Practically the same as crossref1
+    // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF2, &cutoffs);
+    // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF4, &cutoffs);
 
     println!("Done");
 }
