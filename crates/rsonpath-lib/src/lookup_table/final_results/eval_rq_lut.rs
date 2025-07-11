@@ -20,21 +20,22 @@ use std::{fs, io::BufReader};
 // per query (x-axis).
 //
 // Run with: cargo run --bin lut --release -- eval-rq-lut .a_test_data .a_final_results/speed/rq-lut
-// Run with: cargo run --bin lut --release -- cutoff ricardo-jsons plot-results
+// Run with: cargo run --bin lut --release -- eval-rq-lut ricardo-jsons plot-results
 //
 // "data_dir_path" path to the folder holding the input JSON files.
 // "base_path" path to the folder where the results will be saved
 //
 // Data will be saved in "{base_path}/rq_lut_time.csv"
 // Example structure of the csv:
-//  TODO
+//  JSON,CUTOFF,QUERY_ID,QUERY_TEXT,QUERY_TIME_SECONDS
+//  google_map_large_record_(1.1GB),0,0,$[4000].routes[*].bounds,0.00652
+//  google_map_large_record_(1.1GB),0,1,$[*].routes[*].legs[*].steps[*].html_instructions,0.47458
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
     println!("rq_lut");
 
-    // 2^40 = 1,099,511,627,776, we basically use a cutoff so high we do not trigger it. We
-    // want to see how slow the overall application is.
-    // let cutoffs = vec![0, 64, 128, 512, 8192, 1099511627776];
-    let cutoffs = vec![0];
+    // 2^40 = 1,099,511,627,776, we basically use a cutoff so high we do not trigger the skipping
+    // with the lut. We want to see how slow the overall application is.
+    let cutoffs = vec![0, 64, 128, 512, 8192, 1099511627776];
 
     if TRACK_SKIPPING_ON || SKIP_MODE != OFF || !cfg! {feature = "empty-list-opt"} {
         println!(
@@ -48,14 +49,13 @@ pub fn evaluate(data_dir_path: &str, base_path: &str) {
     fs::create_dir_all(&base_path).expect("Failed to create directory");
 
     // GB_1
-    // TODO reset query repetition!
     eval_all(&data_dir_path, &base_path, QUERY_BESTBUY, &cutoffs);
-    // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF1, &cutoffs);
-    // eval_all(&data_dir_path, &base_path, QUERY_GOOGLE, &cutoffs);
-    // eval_all(&data_dir_path, &base_path, QUERY_NSPL, &cutoffs);
-    // eval_all(&data_dir_path, &base_path, QUERY_TWITTER, &cutoffs);
-    // eval_all(&data_dir_path, &base_path, QUERY_WALMART, &cutoffs);
-    // eval_all(&data_dir_path, &base_path, QUERY_WIKI, &cutoffs);
+    eval_all(&data_dir_path, &base_path, QUERY_CROSSREF1, &cutoffs);
+    eval_all(&data_dir_path, &base_path, QUERY_GOOGLE, &cutoffs);
+    eval_all(&data_dir_path, &base_path, QUERY_NSPL, &cutoffs);
+    eval_all(&data_dir_path, &base_path, QUERY_TWITTER, &cutoffs);
+    eval_all(&data_dir_path, &base_path, QUERY_WALMART, &cutoffs);
+    eval_all(&data_dir_path, &base_path, QUERY_WIKI, &cutoffs);
 
     // Practically the same as crossref1
     // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF2, &cutoffs);

@@ -13,8 +13,8 @@ use std::path::Path;
 use std::time::Instant;
 use std::{fs, io::BufReader};
 
-pub const QUERY_REPETITIONS: usize = 1;
-pub const WARM_UP_QUERY_REPETITIONS: usize = 1;
+pub const QUERY_REPETITIONS: usize = 10;
+pub const WARM_UP_QUERY_REPETITIONS: usize = 10;
 
 // Measures the time taken for rq-legacy for given JSON+Queries.
 //
