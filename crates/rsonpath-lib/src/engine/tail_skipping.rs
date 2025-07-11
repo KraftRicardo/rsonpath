@@ -87,8 +87,8 @@ where
         } else {
             let idx_close = self.skip_ite(bracket_type)?;
 
-            // track_skip("ITE", idx_close - idx);
-            // debug_msg("ITE", idx, idx_open, idx_close, padding);
+            track_skip("ITE", idx_close - idx);
+            debug_msg("ITE", idx, idx_open, idx_close, padding);
             Ok(idx_close)
         }
     }
@@ -106,8 +106,8 @@ where
         if let Some(idx_lut) = lut.get(&(idx_open - padding)) {
             let idx_close = idx_lut + 1 + padding; // Note: shift index by 1 or its off aligned
 
-            // track_skip("LUT", idx_close - idx);
-            // debug_msg("LUT", idx, idx_open, idx_close, padding);
+            track_skip("LUT", idx_close - idx);
+            debug_msg("LUT", idx, idx_open, idx_close, padding);
 
             self.classifier
                 .as_mut()
@@ -119,8 +119,8 @@ where
             // LUT had no hit, skip ITE style
             let idx_close = self.skip_ite(bracket_type)?;
 
-            //track_skip("ITE", idx_close - idx);
-            // debug_msg("ITE", idx, idx_open, idx_close, padding);
+            track_skip("ITE", idx_close - idx);
+            debug_msg("ITE", idx, idx_open, idx_close, padding);
 
             Ok(idx_close)
         }
@@ -229,22 +229,21 @@ where
                     .expect("tail skip must always hold a classifier")
                     .jump_to_idx(idx_close, false)?;
 
-                // track_skip("LUT", idx_close - idx);
-                // debug_msg("LUT", idx, idx_open, idx_close, padding);
+                track_skip("LUT", idx_close - idx);
+                debug_msg("LUT", idx, idx_open, idx_close, padding);
                 return Ok(idx_close);
             }
 
             if let Some(err) = err {
                 Err(err.into())
             } else {
-                //track_skip("ITE", idx_close - idx);
-                // debug_msg("ITE", idx, idx_open, idx_close, padding);
+                track_skip("ITE", idx_close - idx);
+                debug_msg("ITE", idx, idx_open, idx_close, padding);
                 Ok(idx_close)
             }
         })
     }
 
-    // TODO Ricardo re-enable the out commented debug lines
     fn skip_ite(&mut self, bracket_type: BracketType) -> Result<usize, EngineError> {
         dispatch_simd!(self.simd; self, bracket_type =>
         fn <'i, I, V>(
@@ -280,13 +279,13 @@ where
                 'outer: while let Some(ref mut vector) = current_vector {
                     vector.add_depth(current_depth);
 
-                    // debug!("Fetched vector, current depth is {current_depth}");
-                    // debug!("Estimate: {}", vector.estimate_lowest_possible_depth());
+                    debug!("Fetched vector, current depth is {current_depth}");
+                    debug!("Estimate: {}", vector.estimate_lowest_possible_depth());
 
                     if vector.estimate_lowest_possible_depth() <= 0 {
                         while vector.advance_to_next_depth_decrease() {
                             if vector.get_depth() == 0 {
-                                // debug!("Encountered depth 0, breaking.");
+                                debug!("Encountered depth 0, breaking.");
                                 break 'outer;
                             }
                         }
@@ -303,9 +302,9 @@ where
                     };
                 }
 
-                // debug!("Skipping complete, resuming structural classification.");
+                debug!("Skipping complete, resuming structural classification.");
                 let resume_state = depth_classifier.stop(current_vector);
-                // debug!("Finished at {}", resume_state.get_idx());
+                debug!("Finished at {}", resume_state.get_idx());
                 idx = resume_state.get_idx();
                 tail_skip.simd.resume_structural_classification(resume_state)
             });

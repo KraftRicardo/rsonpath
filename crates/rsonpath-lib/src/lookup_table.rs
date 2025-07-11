@@ -17,17 +17,19 @@ pub mod sichash_test_data_generator;
 pub mod util_path;
 
 // CONFIG
-pub const SKIP_MODE: SkipMode = SkipMode::TRACK;
-pub const TRACK_SKIPPING_ON: bool = true;
+pub const SKIP_MODE: SkipMode = SkipMode::OFF;
+pub const TRACK_SKIPPING_ON: bool = false;
 pub const REPETITIONS: u64 = 1;
 
+// Different LUT implementation approaches and experiments. LutPtrHashDouble and LutVFuncDouble
+// perform the best by far memory, build time and query speed wise.
 // pub type LUT = LutHashMap;
 // pub type LUT = LutHashMapDouble;
 // pub type LUT = LutHashMapGroup;
 // pub type LUT = LutPHF;
 // pub type LUT = LutPHFDouble;
 // pub type LUT = LutPHFGroup;
-// pub type LUT = LutSicHash;
+// pub type LUT = LutSicHash; // bugged and broken
 pub type LUT = LutPtrHashDouble;
 // pub type LUT = LutVFuncDouble;
 

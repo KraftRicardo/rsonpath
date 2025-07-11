@@ -3,7 +3,8 @@ use crate::lookup_table::performance::lut_query_data::{
     QUERY_WALMART, QUERY_WIKI,
 };
 use crate::lookup_table::performance::lut_skip_evaluation::SkipMode;
-use crate::lookup_table::SKIP_MODE;
+use crate::lookup_table::performance::lut_skip_evaluation::SkipMode::OFF;
+use crate::lookup_table::{SKIP_MODE, TRACK_SKIPPING_ON};
 use crate::{
     engine::{Compiler, Engine, RsonpathEngine},
     input::OwnedBytes,
@@ -33,8 +34,8 @@ pub fn evaluate(data_dir_path: &str, base_path: &str) {
 
     let cutoffs = vec![0, 64, 128, 512, 8192];
 
-    if SKIP_MODE != SkipMode::OFF {
-        println!("Skipping mode or Strategy are not set correctly. Aborting");
+    if (TRACK_SKIPPING_ON || SKIP_MODE != OFF) {
+        println!("Disable tracking of skips before running because it slows down the algorithm.");
         return;
     }
 
@@ -42,15 +43,15 @@ pub fn evaluate(data_dir_path: &str, base_path: &str) {
     fs::create_dir_all(&result_dir_path).expect("Failed to create directory");
 
     // GB_1
-    eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY, &cutoffs);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY, &cutoffs);
     eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI, &cutoffs);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2, &cutoffs);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4, &cutoffs);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE, &cutoffs);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL, &cutoffs);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER, &cutoffs);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART, &cutoffs);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI, &cutoffs);
 
     println!("Done");
 }
@@ -63,7 +64,7 @@ fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&st
 
     // Measurements
     for cutoff in cutoffs {
-        println!("  cutoff {cutoff}");
+        println!("  cutoff: {cutoff}");
 
         // All necessary paths to CSV and PNG
         let cutoff_dir_path = format!("{}/{}", result_dir_path, cutoff);
@@ -139,8 +140,8 @@ fn measure_query_count(
         lut = engine.take_lut().expect("Failed to retrieve LUT");
 
         println!(
-            "  - query = {}, query_text={}, time = {:.5}s, result = {}",
-            query_id, query_text, avg_time, result
+            "  - File {}, Query {}: {}, time = {:.5}s, result = {}",
+            filename, query_id, query_text, avg_time, result
         );
 
         wrt.write_record(&[query_id, query_text, &format!("{:.5}", avg_time)])
@@ -148,6 +149,7 @@ fn measure_query_count(
     }
 
     wrt.flush().expect("Failed to flush CSV");
+    println!("Data written to {}", query_csv_path);
 }
 
 fn measure_build(json_path: &str, cutoff_dir_path: &str, filename: &str, cutoff: usize) {

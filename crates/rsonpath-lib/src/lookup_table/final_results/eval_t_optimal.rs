@@ -1,3 +1,4 @@
+use crate::lookup_table::final_results::eval_rq_legacy::QUERY_REPETITIONS;
 use crate::lookup_table::performance::lut_query_data::{
     QUERY_BESTBUY, QUERY_CROSSREF1, QUERY_CROSSREF2, QUERY_CROSSREF4, QUERY_GOOGLE, QUERY_NSPL, QUERY_TWITTER,
     QUERY_WALMART, QUERY_WIKI,
@@ -15,8 +16,6 @@ use std::io::{BufReader, Read};
 use std::path::Path;
 use std::sync::atomic::{AtomicU64, Ordering};
 
-pub const QUERY_REPETITIONS: usize = 5;
-
 static SKIP_TIME_ATOMIC_CUTOFF_0: AtomicU64 = AtomicU64::new(0);
 static SKIP_TIME_ATOMIC_CUTOFF_64: AtomicU64 = AtomicU64::new(0);
 static SKIP_TIME_ATOMIC_CUTOFF_128: AtomicU64 = AtomicU64::new(0);
@@ -25,25 +24,37 @@ static SKIP_TIME_ATOMIC_CUTOFF_512: AtomicU64 = AtomicU64::new(0);
 static SKIP_TIME_ATOMIC_CUTOFF_1024: AtomicU64 = AtomicU64::new(0);
 static SKIP_TIME_ATOMIC_CUTOFF_2048: AtomicU64 = AtomicU64::new(0);
 
+//
 // Run with: cargo run --bin lut --release -- eval-t-optimal .a_test_data .a_final_results
 // Run with: cargo run --bin lut --release -- eval-t-optimal ricardo-jsons final_results-9
+//
+// "data_dir_path" is the path to folder holding the input JSON files.
+// "base_path" is the path to the folder where the results will be saved
+//
+// Data will be saved in "{base_path}/speed/optimal/optimal_time.csv".
+// Result csv structure example:
+//  JSON,CUTOFF,QUERY_ID,QUERY_TEXT,SKIP_TIME_NANO_SECONDS
+//  crossref1_(551MB),0,1,$.items[2].resource.primary.URL,66067533.6
+//  crossref1_(551MB),64,1,$.items[2].resource.primary.URL,66067022.6
+//  ...
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
     if SKIP_MODE != SkipMode::TRACK || !TRACK_SKIPPING_ON || cfg! {feature = "empty-list-opt"} {
-        println!("Wrong parameters. Abort");
+        println!("Enable Skip Tracking first and disable the empty list optimization. Abort");
         return;
     }
 
-    let cutoffs = vec![0, 64, 128, 256, 512, 1024, 2048];
+    // let cutoffs = vec![0, 64, 128, 256, 512, 1024, 2048];
+    let cutoffs = vec![0, 64, 128];
 
-    eval_all(&data_dir_path, &base_path, QUERY_BESTBUY, &cutoffs);
-    eval_all(&data_dir_path, &base_path, QUERY_CROSSREF1, &cutoffs);
-    eval_all(&data_dir_path, &base_path, QUERY_CROSSREF2, &cutoffs);
-    eval_all(&data_dir_path, &base_path, QUERY_CROSSREF4, &cutoffs);
+    // eval_all(&data_dir_path, &base_path, QUERY_BESTBUY, &cutoffs);
+    // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF1, &cutoffs);
+    // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF2, &cutoffs);
+    // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF4, &cutoffs);
     eval_all(&data_dir_path, &base_path, QUERY_GOOGLE, &cutoffs);
-    eval_all(&data_dir_path, &base_path, QUERY_NSPL, &cutoffs);
+    // eval_all(&data_dir_path, &base_path, QUERY_NSPL, &cutoffs);
     eval_all(&data_dir_path, &base_path, QUERY_TWITTER, &cutoffs);
-    eval_all(&data_dir_path, &base_path, QUERY_WALMART, &cutoffs);
-    eval_all(&data_dir_path, &base_path, QUERY_WIKI, &cutoffs);
+    // eval_all(&data_dir_path, &base_path, QUERY_WALMART, &cutoffs);
+    // eval_all(&data_dir_path, &base_path, QUERY_WIKI, &cutoffs);
 }
 
 pub fn add_skip_time(distance: usize, added_time: u64) {
@@ -78,7 +89,7 @@ fn eval_all(data_dir_path: &str, base_path: &str, test_data: (&str, &[(&str, &st
     let results_dir_path = format!("{}/speed/optimal", base_path);
     fs::create_dir_all(&results_dir_path).expect("Failed to create directory");
 
-    let results_csv_path = format!("{}/query.csv", results_dir_path);
+    let results_csv_path = format!("{}/optimal_time.csv", results_dir_path);
     let file_exists = Path::new(&results_csv_path).exists();
 
     let mut wtr = Writer::from_writer(

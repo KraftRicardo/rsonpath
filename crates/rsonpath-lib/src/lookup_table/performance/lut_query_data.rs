@@ -4,7 +4,7 @@
 // kB_1
 // ##########
 pub const QUERY_ALPHABET: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/kB_1/alphabet_(2kB).json",
+    "alphabet_(2kB).json",
     &[
         ("1", "$.alphabet[0]"),
         ("2", "$.alphabet[*]"),
@@ -17,7 +17,7 @@ pub const QUERY_ALPHABET: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_BUGS: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/kB_1/bugs.json",
+    "bugs.json",
     &[
         ("1", "$.a..b"),
         ("2", "$.a"),
@@ -29,7 +29,7 @@ pub const QUERY_BUGS: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_BUGS_2: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/kB_1/bugs_2.json",
+    "bugs_2.json",
     &[
         ("1", "$.b[0]"),
         ("2", "$.a"),
@@ -40,7 +40,7 @@ pub const QUERY_BUGS_2: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_JOHN: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/kB_1/john_119.json",
+    "john_119.json",
     &[
         ("1", "$.name"),
         ("2", "$.age"),
@@ -53,7 +53,7 @@ pub const QUERY_JOHN: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_JOHN_BIG: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/kB_1/john_big.json",
+    "john_big.json",
     &[
         ("1", "$.person.firstName"),
         ("2", "$.person.lastName"),
@@ -66,7 +66,7 @@ pub const QUERY_JOHN_BIG: (&str, &[(&str, &str)]) = (
 );
 
 pub const QUERY_NUMBERS: (&str, &[(&str, &str)]) = (
-    ".a_lut_tests/test_data/kB_1/numbers_117.json",
+    "numbers_117.json",
     &[
         ("1", "$.numbers[0]"),
         ("2", "$.numbers[*]"),
@@ -75,7 +75,7 @@ pub const QUERY_NUMBERS: (&str, &[(&str, &str)]) = (
     ],
 );
 
-pub const QUERY_SMALL: (&str, &[(&str, &str)]) = (".a_lut_tests/test_data/kB_1/small_14.json", &[("1", "$.x")]);
+pub const QUERY_SMALL: (&str, &[(&str, &str)]) = ("small_14.json", &[("1", "$.x")]);
 
 // ##########
 // MB_1
@@ -480,29 +480,29 @@ pub const QUERY_WALMART_SHORT: (&str, &[(&str, &str)]) = (
 pub const QUERY_BESTBUY: (&str, &[(&str, &str)]) = (
     "bestbuy_large_record_(1GB).json",
     &[
-        ("1", "$.products[4].categoryPath[2]"),                             // 0.999999
-        ("2", "$.products[*].categoryPath[2]"),                             // 0.827555
-        ("3", "$.products[*].quantityLimit"),                               // 0.803025
-        ("4", "$.products[*].frequentlyPurchasedWith[*]"),                  // 0.775238
-        ("5", "$.products[*].includedItemList[*]"),                         // 0.765115
-        ("6", "$.products[*].homeDelivery"),                                // 0.598374
-        ("7", "$.products[*].freeShipping"),                                // 0.510142
-        ("8", "$.products[*].shipping[*]"),                                 // 0.492032
+        ("1", "$.products[4].categoryPath[2]"),            // 0.999999 <- Skip Percentage
+        ("2", "$.products[*].categoryPath[2]"),            // 0.827555
+        ("3", "$.products[*].quantityLimit"),              // 0.803025
+        ("4", "$.products[*].frequentlyPurchasedWith[*]"), // 0.775238
+        ("5", "$.products[*].includedItemList[*]"),        // 0.765115
+        ("6", "$.products[*].homeDelivery"),               // 0.598374
+        ("7", "$.products[*].freeShipping"),               // 0.510142
+        ("8", "$.products[*].shipping[*]"),                // 0.492032
         ("9", "$.products[*].shippingLevelsOfService[*].serviceLevelName"), // 0.306224
-        ("10", "$.products[*].shippingLevelsOfService[*]"),                 // 0.295264
-        ("11", "$.products[*].dollarSavings"),                              // 0.162506
-        ("12", "$.products[*].lengthInMinutes"),                            // 0.127193
-        ("13", "$.products[*].screenFormat"),                               // 0.101771
-        ("14", "$.products[*].additionalFeatures[*]"),                      // 0.097107
-        ("15", "$.products[*].videoChapters"),                              // 0.088070
-        ("16", "$..freeShipping"),                                          // 0.000000
+        ("10", "$.products[*].shippingLevelsOfService[*]"), // 0.295264
+        ("11", "$.products[*].dollarSavings"),             // 0.162506
+        ("12", "$.products[*].lengthInMinutes"),           // 0.127193
+        ("13", "$.products[*].screenFormat"),              // 0.101771
+        ("14", "$.products[*].additionalFeatures[*]"),     // 0.097107
+        ("15", "$.products[*].videoChapters"),             // 0.088070
+        ("16", "$..freeShipping"),                         // 0.000000
     ],
 );
 
 pub const QUERY_CROSSREF1: (&str, &[(&str, &str)]) = (
     "crossref1_(551MB).json",
     &[
-        ("1", "$.items[2].resource.primary.URL"), // 1.000000
+        ("1", "$.items[2].resource.primary.URL"), // 1.000000 <- Skip Percentage
         ("2", "$.items[*].URL"),                  // 0.963846
         ("3", "$.items[*].member"),               // 0.950990
         ("4", "$.items[*].score"),                // 0.948115
@@ -529,7 +529,7 @@ pub const QUERY_CROSSREF1: (&str, &[(&str, &str)]) = (
 pub const QUERY_CROSSREF2: (&str, &[(&str, &str)]) = (
     "crossref2_(1.1GB).json",
     &[
-        ("1", "$.items[2].resource.primary.URL"), // 1.000000
+        ("1", "$.items[2].resource.primary.URL"), // 1.000000 <- Skip Percentage
         ("2", "$.items[*].URL"),                  // 0.963846
         ("3", "$.items[*].member"),               // 0.950990
         ("4", "$.items[*].score"),                // 0.948115
@@ -556,7 +556,7 @@ pub const QUERY_CROSSREF2: (&str, &[(&str, &str)]) = (
 pub const QUERY_CROSSREF4: (&str, &[(&str, &str)]) = (
     "crossref4_(2.1GB).json",
     &[
-        ("1", "$.items[2].resource.primary.URL"), // 1.000000
+        ("1", "$.items[2].resource.primary.URL"), // 1.000000 <- Skip Percentage
         ("2", "$.items[*].URL"),                  // 0.963846
         ("3", "$.items[*].member"),               // 0.950990
         ("4", "$.items[*].score"),                // 0.948115
@@ -583,30 +583,30 @@ pub const QUERY_CROSSREF4: (&str, &[(&str, &str)]) = (
 pub const QUERY_GOOGLE: (&str, &[(&str, &str)]) = (
     "google_map_large_record_(1.1GB).json",
     &[
-        ("0", "$[4000].routes[*].bounds"),                              // 0.999989
-        ("1", "$[*].routes[*].legs[*].steps[*].html_instructions"),     // 0.965067
-        ("2", "$[*].routes[*].legs[*].steps[*].distance.text"),         // 0.821380
-        ("3", "$[*].routes[*].legs[*].steps[*].distance"),              // 0.819461
-        ("4", "$[*].routes[*].legs[*].steps[*].maneuver"),              // 0.745787
-        ("5", "$[*].routes[*].legs[*].steps[*].start_location"),        // 0.673776
-        ("6", "$[*].routes[*].legs[*].steps[*].start_location.lat"),    // 0.665473
-        ("7", "$[1:2000].routes[*].legs[*].steps[*].polyline.points"),  // 0.654228
-        ("8", "$[*].routes[*].legs[*].steps[*].duration"),              // 0.594071
-        ("9", "$[*].routes[*].legs[*].steps[*].end_location"),          // 0.532257
+        ("0", "$[4000].routes[*].bounds"), // 0.999989 <- Skip Percentage
+        ("1", "$[*].routes[*].legs[*].steps[*].html_instructions"), // 0.965067
+        ("2", "$[*].routes[*].legs[*].steps[*].distance.text"), // 0.821380
+        ("3", "$[*].routes[*].legs[*].steps[*].distance"), // 0.819461
+        ("4", "$[*].routes[*].legs[*].steps[*].maneuver"), // 0.745787
+        ("5", "$[*].routes[*].legs[*].steps[*].start_location"), // 0.673776
+        ("6", "$[*].routes[*].legs[*].steps[*].start_location.lat"), // 0.665473
+        ("7", "$[1:2000].routes[*].legs[*].steps[*].polyline.points"), // 0.654228
+        ("8", "$[*].routes[*].legs[*].steps[*].duration"), // 0.594071
+        ("9", "$[*].routes[*].legs[*].steps[*].end_location"), // 0.532257
         ("10", "$[1:3000].routes[*].legs[*].steps[*].polyline.points"), // 0.467309
-        ("11", "$[*].routes[*].legs[*].steps[*]"),                      // 0.432387
+        ("11", "$[*].routes[*].legs[*].steps[*]"), // 0.432387
         ("12", "$[1:4000].routes[*].legs[*].steps[*].polyline.points"), // 0.269475
-        ("13", "$[*].routes[*].legs[*].steps[*].polyline"),             // 0.225161
-        ("14", "$[*].routes[*].legs[*].steps[*].polyline.points"),      // 0.173328
-        ("15", "$[*].routes[*].legs[*]..lat"),                          // 0.006689
-        ("16", "$[*]..bounds"),                                         // 0.000000
+        ("13", "$[*].routes[*].legs[*].steps[*].polyline"), // 0.225161
+        ("14", "$[*].routes[*].legs[*].steps[*].polyline.points"), // 0.173328
+        ("15", "$[*].routes[*].legs[*]..lat"), // 0.006689
+        ("16", "$[*]..bounds"),            // 0.000000
     ],
 );
 
 pub const QUERY_NSPL: (&str, &[(&str, &str)]) = (
     "nspl_large_record_(1.2GB).json",
     &[
-        ("0", "$.meta.view.id"),        // 1.000000
+        ("0", "$.meta.view.id"),        // 1.000000 <- Skip Percentage
         ("1", "$.data[0:100000][*]"),   // 0.938919
         ("2", "$.data[0:200000][*]"),   // 0.882185
         ("3", "$.data[0:300000][*]"),   // 0.825455
@@ -632,7 +632,7 @@ pub const QUERY_TWITTER: (&str, &[(&str, &str)]) = (
     "twitter_large_record_(843MB).json",
     &[
         // Picked
-        ("1", "$[*].user..url.*"),                        // 0.000000
+        ("1", "$[*].user..url.*"),                        // 0.000000 <- Skip Percentage
         ("2", "$[1:150000]..user"),                       // 0.035640
         ("3", "$[1:140000]..user"),                       // 0.101083
         ("4", "$[1:130000]..user"),                       // 0.165078
@@ -673,7 +673,7 @@ pub const QUERY_TWITTER: (&str, &[(&str, &str)]) = (
 pub const QUERY_WALMART: (&str, &[(&str, &str)]) = (
     "walmart_large_record_(995MB).json",
     &[
-        ("0", "$.category"),                     // 1.000000
+        ("0", "$.category"),                     // 1.000000 <- Skip Percentage
         ("1", "$.items[*].itemId"),              // 0.996712
         ("2", "$.items[*].name"),                // 0.985764
         ("3", "$.items[*].upc"),                 // 0.955816
@@ -695,7 +695,7 @@ pub const QUERY_WALMART: (&str, &[(&str, &str)]) = (
 pub const QUERY_WIKI: (&str, &[(&str, &str)]) = (
     "wiki_large_record_(1.1GB).json",
     &[
-        ("1", "$[0].id"),                // 1.000000
+        ("1", "$[0].id"),                // 1.000000 <- Skip Percentage
         ("2", "$[1:1000]..fr"),          // 0.981716
         ("3", "$[*].labels.*.language"), // 0.911067
         ("4", "$[*].labels.*.value"),    // 0.861710
@@ -718,7 +718,9 @@ pub const QUERY_WIKI: (&str, &[(&str, &str)]) = (
     ],
 );
 
+// ##########
 // GB_25
+// ##########
 pub const QUERY_NESTED_COL: (&str, &[(&str, &str)]) = (
     "nested_col_(27.7GB).json",
     &[

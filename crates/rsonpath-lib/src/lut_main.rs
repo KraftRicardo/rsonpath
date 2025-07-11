@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
 use rsonpath::lookup_table::final_results::{
-    eval_final, eval_find_pair_data, eval_lut_construction, eval_rq_legacy, eval_rq_lut_cutoffs, eval_rq_lut_no_lut,
-    eval_serde, eval_t_optimal,
+    eval_final, eval_find_pair_data, eval_lut_construction, eval_rq_legacy, eval_rq_lut, eval_rq_lut_cutoffs,
+    eval_rq_lut_no_lut, eval_serde, eval_t_optimal,
 };
 use rsonpath::lookup_table::performance::lut_hot::test_hotness;
 use rsonpath::lookup_table::performance::lut_query_correctness;
@@ -46,6 +46,7 @@ enum Commands {
         out_dir: String,
     },
     Skip {},
+    // Run with: cargo run --bin lut --release -- skip-count
     SkipCount {},
     TestQuery {},
     /// Create the test data used in this project: https://github.com/KraftRicardo/test-SicHash
@@ -71,6 +72,10 @@ enum Commands {
         result_dir_path: String,
     },
     EvalRqLegacy {
+        data_dir_path: String,
+        result_dir_path: String,
+    },
+    EvalRqLut {
         data_dir_path: String,
         result_dir_path: String,
     },
@@ -159,6 +164,12 @@ fn main() -> Result<(), Box<dyn Error>> {
             result_dir_path,
         } => {
             eval_rq_legacy::evaluate(data_dir_path, result_dir_path);
+        }
+        Commands::EvalRqLut {
+            data_dir_path,
+            result_dir_path,
+        } => {
+            eval_rq_lut::evaluate(data_dir_path, result_dir_path);
         }
         Commands::EvalRqLutNoLut {
             data_dir_path,
