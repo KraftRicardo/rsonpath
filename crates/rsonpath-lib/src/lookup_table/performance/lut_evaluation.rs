@@ -1,8 +1,4 @@
-use std::{
-    alloc::System,
-    io::{self, Write},
-    process::Command,
-};
+use std::{alloc::System, io::Write};
 
 use stats_alloc::{Region, StatsAlloc, INSTRUMENTED_SYSTEM};
 
@@ -65,22 +61,22 @@ pub fn evaluate(json_path: &str, csv_path: &str) -> Result<(), Box<dyn std::erro
 #[inline]
 pub fn measure_performance(config: &mut EvalConfig, cutoff: usize) -> Result<(), Box<dyn std::error::Error>> {
     // Measure normal LUTs without any special parameter
-    // eval::<LutPerfectNaive>(config, "perfect_naive", cutoff);
-    // eval::<LutHashMap>(config, "hash_map", cutoff);
-    // eval::<LutHashMapDouble>(config, "hash_map_double", cutoff);
+    eval::<LutPerfectNaive>(config, "perfect_naive", cutoff);
+    eval::<LutHashMap>(config, "hash_map", cutoff);
+    eval::<LutHashMapDouble>(config, "hash_map_double", cutoff);
     // eval::<LutSicHashDouble>(config, "sic_hash_double", cutoff); // BROKEN
     eval::<LutPtrHashDouble>(config, "ptr_hash_double", cutoff);
     eval::<LutVFuncDouble>(config, "vfunc_double", cutoff);
 
     for bit_mask in [15] {
-        // eval_hash_map_group(config, "hash_map_group", bit_mask, cutoff); // BROKEN
+        eval_hash_map_group(config, "hash_map_group", bit_mask, cutoff); // BROKEN
     }
 
     // Measure LUTs with lambda parameter
     for lambda in [1, 5] {
         for threaded in [false] {
-            // eval_phf::<LutPHF>(config, "phf", lambda, threaded, cutoff);
-            // eval_phf::<LutPHFDouble>(config, "phf_double", lambda, threaded, cutoff);
+            eval_phf::<LutPHF>(config, "phf", lambda, threaded, cutoff);
+            eval_phf::<LutPHFDouble>(config, "phf_double", lambda, threaded, cutoff);
         }
     }
 
@@ -90,9 +86,9 @@ pub fn measure_performance(config: &mut EvalConfig, cutoff: usize) -> Result<(),
         // for bit_mask in [63, 127, 255, 511] {
         // for bit_mask in [2047, 4095, 8191] {
         // for bit_mask in [2047] {
-        // for bit_mask in [63] {
-        //     eval_phf_group(config, "phf_group", bit_mask, lambda, false, cutoff);
-        // }
+        for bit_mask in [63] {
+            eval_phf_group(config, "phf_group", bit_mask, lambda, false, cutoff);
+        }
     }
 
     Ok(())

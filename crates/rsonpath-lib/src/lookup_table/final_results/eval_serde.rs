@@ -1,4 +1,3 @@
-use crate::lookup_table::final_results::eval_rq_lut_cutoffs;
 use crate::lookup_table::final_results::eval_rq_lut_cutoffs::heap_value;
 use crate::lookup_table::performance::lut_evaluation::HEAP_TRACKER;
 use crate::lookup_table::performance::lut_query_data::{
