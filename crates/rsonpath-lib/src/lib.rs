@@ -144,10 +144,10 @@ pub mod classification;
 mod depth;
 pub mod engine;
 pub mod error;
+pub mod evaluation;
 pub mod input;
 pub mod result;
 pub(crate) mod string_pattern;
-mod evaluate;
 
 pub use string_pattern::StringPattern;
 

@@ -1,4 +1,6 @@
 #![allow(clippy::expect_used)] // Enforcing the classifier invariant is clunky without this.
+use crate::evaluation::eval_optimal;
+use crate::evaluation::track_config::TRACK_SKIPPING_ON;
 use crate::{
     classification::{
         depth::{DepthBlock, DepthIterator, DepthIteratorResumeOutcome},
@@ -13,6 +15,7 @@ use crate::{
     FallibleIterator, MaskType, BLOCK_SIZE,
 };
 use std::marker::PhantomData;
+use std::time::Instant;
 
 pub(crate) struct TailSkip<'i, I, Q, S, V, const N: usize> {
     classifier: Option<S>,
@@ -33,7 +36,21 @@ where
         }
     }
 
+    // Wrapper for skip_original
     pub(crate) fn skip(&mut self, opening: BracketType) -> Result<usize, EngineError> {
+        if TRACK_SKIPPING_ON {
+            let start_skip = Instant::now();
+            let result = self.skip_original(opening)?;
+            let skip_time = start_skip.elapsed().as_nanos() as u64;
+
+            eval_optimal::add_skip_time(skip_time);
+            Ok(result)
+        } else {
+            self.skip_original(opening)
+        }
+    }
+
+    pub(crate) fn skip_original(&mut self, opening: BracketType) -> Result<usize, EngineError> {
         dispatch_simd!(self.simd; self, opening =>
         fn <'i, I, V>(
             tail_skip: &mut TailSkip<'i, I, V::QuotesClassifier<'i, I>, V::StructuralClassifier<'i, I>, V, BLOCK_SIZE>,
