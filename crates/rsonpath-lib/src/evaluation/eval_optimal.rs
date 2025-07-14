@@ -2,7 +2,7 @@ use crate::evaluation::lut_query_data::{
     QUERY_BESTBUY, QUERY_CROSSREF1, QUERY_CROSSREF2, QUERY_CROSSREF4, QUERY_GOOGLE, QUERY_NSPL, QUERY_TWITTER,
     QUERY_WALMART, QUERY_WIKI,
 };
-use crate::evaluation::track_config::{REPETITIONS, TRACK_SKIPPING_ON};
+use crate::evaluation::track_config::{REPETITIONS, TRACK_SKIPPING_ON, WARM_UP_REPETITIONS};
 use crate::{
     engine::{Compiler, Engine, RsonpathEngine},
     input::OwnedBytes,
@@ -38,12 +38,12 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
     }
 
     eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
 
     // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
     // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
@@ -84,7 +84,7 @@ fn eval_all(data_dir_path: &str, results_dir_path: &str, test_data: (&str, &[(&s
     let json_path = format!("{}/{}.json", data_dir_path, filename);
 
     for (query_id, query_text) in queries {
-        ACCUMULATED_SKIP_TIME.store(0, Ordering::Relaxed);
+
 
         do_query(&json_path, query_id, query_text);
 
@@ -113,9 +113,15 @@ fn do_query(json_path: &str, query_id: &str, query_text: &str) {
     let query = rsonpath_syntax::parse(query_text).expect("Failed to parse query");
     let mut engine = RsonpathEngine::compile_query(&query).expect("Failed to compile query");
 
+    for _ in 0..WARM_UP_REPETITIONS {
+        _ = engine.count(&input).expect("Fail count");
+    }
+
+    ACCUMULATED_SKIP_TIME.store(0, Ordering::Relaxed);
+
     let mut result = 0;
     for _ in 0..REPETITIONS {
         result = engine.count(&input).expect("Fail count");
     }
-    println!("  - Q: {} = {}, Result = {}", query_id, query_text, result);
+    println!("  - File: {}, Q: {} = {}, Result = {}", json_path, query_id, query_text, result);
 }
