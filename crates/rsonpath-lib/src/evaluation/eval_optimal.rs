@@ -17,6 +17,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 static ACCUMULATED_SKIP_TIME: AtomicU64 = AtomicU64::new(0);
 
 // Run with: cargo run --bin eval --release -- eval-optimal ../rsonpath/.a_test_data ../rsonpath/.a_final_results/speed/optimal
+// Run with: cargo run --bin eval --release -- eval-optimal ricardo-jsons plot-results
 //
 // "data_dir_path" is the path to folder holding the input JSON files.
 // "result_dir_path" is the path to the folder where the results will be saved
