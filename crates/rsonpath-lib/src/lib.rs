@@ -147,6 +147,7 @@ pub mod error;
 pub mod input;
 pub mod result;
 pub(crate) mod string_pattern;
+mod evaluate;
 
 pub use string_pattern::StringPattern;
 

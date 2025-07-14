@@ -22,6 +22,11 @@ rust-version = "1.67.1"
 bench = false
 name = "rsonpath"
 
+[[bin]]
+# Added by Ricardo
+name = "eval"
+path = "src/evaluate.rs"
+
 [package.metadata.docs.rs]
 rustdoc-args = ["--cfg", "docsrs"]
 all-features = true
@@ -36,6 +41,9 @@ smallvec = { version = "1.15.1", features = ["union"] }
 static_assertions = "1.1.0"
 thiserror = { workspace = true }
 vector-map = "1.0.2"
+
+# Added by Ricardo
+clap = { version = "4.5.41", features = ["derive"] }
 
 [dev-dependencies]
 ciborium = { workspace = true, default-features = true }

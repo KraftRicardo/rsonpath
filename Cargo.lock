@@ -1214,6 +1214,7 @@ version = "0.9.4"
 dependencies = [
  "cfg-if",
  "ciborium",
+ "clap",
  "insta",
  "itertools",
  "log",
