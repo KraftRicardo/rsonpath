@@ -26,6 +26,7 @@ pub const COUNTER_FILE_PATH: &str = ".a_lut_tests/performance/skip_tracker/COUNT
 
 // Make sure SkipMode==COUNT
 // run with: cargo run --bin lut --release -- skip-count
+#[inline]
 pub fn track_skips() {
     // Skipping must be enabled!
     if !(SKIP_MODE == SkipMode::OFF) {
@@ -118,7 +119,7 @@ fn track(lut: LUT, json_path: &str, query_id: &str, query_text: &str, cutoff: us
     let filename = get_filename(json_path);
     if SKIP_MODE == SkipMode::COUNT {
         let csv_path = format!("{}{}.csv", COUNTER_FILE_PATH, filename);
-        let _ = skip_tracker::save_count_to_csv(json_path, &csv_path, filename, query_id, query_text);
+        _ = skip_tracker::save_count_to_csv(json_path, &csv_path, filename, query_id, query_text);
         println!("Saved={}", csv_path);
     } else if SKIP_MODE == SkipMode::TRACK {
         // Save the tracked skips to a csv

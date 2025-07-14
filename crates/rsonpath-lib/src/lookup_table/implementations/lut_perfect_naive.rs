@@ -54,6 +54,7 @@ impl LookUpTable for LutPerfectNaive {
         }
     }
 
+    #[inline]
     fn get_cutoff(&self) -> usize {
         self.cutoff
     }

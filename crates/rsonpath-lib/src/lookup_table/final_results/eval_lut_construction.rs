@@ -21,22 +21,22 @@ pub fn evaluate(data_dir_path: &str, base_path: &str) {
     fs::create_dir_all(&final_dir_path).expect("Failed to create directory");
 
     // MB_1
-    // eval_all(&data_dir_path, &final_dir_path, QUERY_BESTBUY_SHORT);
-    // eval_all(&data_dir_path, &final_dir_path, QUERY_CROSSREF0);
-    // eval_all(&data_dir_path, &final_dir_path, QUERY_GOOGLE_SHORT);
-    // eval_all(&data_dir_path, &final_dir_path, QUERY_TWITTER_SHORT);
-    // eval_all(&data_dir_path, &final_dir_path, QUERY_WALMART_SHORT);
+    eval_all(&data_dir_path, &final_dir_path, QUERY_BESTBUY_SHORT);
+    eval_all(&data_dir_path, &final_dir_path, QUERY_CROSSREF0);
+    eval_all(&data_dir_path, &final_dir_path, QUERY_GOOGLE_SHORT);
+    eval_all(&data_dir_path, &final_dir_path, QUERY_TWITTER_SHORT);
+    eval_all(&data_dir_path, &final_dir_path, QUERY_WALMART_SHORT);
 
     // GB_1
-    // eval_all(&data_dir_path, &final_dir_path, QUERY_BESTBUY);
-    // eval_all(&data_dir_path, &final_dir_path, QUERY_CROSSREF1);
-    // eval_all(&data_dir_path, &final_dir_path, QUERY_CROSSREF2);
-    // eval_all(&data_dir_path, &final_dir_path, QUERY_CROSSREF4);
-    // eval_all(&data_dir_path, &final_dir_path, QUERY_GOOGLE);
-    // eval_all(&data_dir_path, &final_dir_path, QUERY_NSPL);
-    // eval_all(&data_dir_path, &final_dir_path, QUERY_TWITTER);
-    // eval_all(&data_dir_path, &final_dir_path, QUERY_WALMART);
-    // eval_all(&data_dir_path, &final_dir_path, QUERY_WIKI);
+    eval_all(&data_dir_path, &final_dir_path, QUERY_BESTBUY);
+    eval_all(&data_dir_path, &final_dir_path, QUERY_CROSSREF1);
+    eval_all(&data_dir_path, &final_dir_path, QUERY_CROSSREF2);
+    eval_all(&data_dir_path, &final_dir_path, QUERY_CROSSREF4);
+    eval_all(&data_dir_path, &final_dir_path, QUERY_GOOGLE);
+    eval_all(&data_dir_path, &final_dir_path, QUERY_NSPL);
+    eval_all(&data_dir_path, &final_dir_path, QUERY_TWITTER);
+    eval_all(&data_dir_path, &final_dir_path, QUERY_WALMART);
+    eval_all(&data_dir_path, &final_dir_path, QUERY_WIKI);
 
     // 25 GB
     eval_all(&data_dir_path, &final_dir_path, QUERY_NESTED_COL);

@@ -2,6 +2,7 @@ use serde_json::{json, Value};
 use std::fs;
 use std::path::Path;
 
+#[inline]
 pub fn generate_bigger_version(json_path: &str) {
     // Read the original JSON file
     let file_content = fs::read_to_string(json_path).expect("Failed to read JSON file");

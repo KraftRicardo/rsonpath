@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
 use rsonpath::lookup_table::final_results::{
-    eval_final, eval_find_pair_data, eval_lut_construction, eval_rq_legacy, eval_rq_lut, eval_rq_lut_cutoffs,
-    eval_rq_lut_no_lut, eval_serde, eval_t_optimal,
+    deprecated::eval_legacy, deprecated::eval_optimal, eval_final, eval_lut_construction, eval_rq_lut,
+    eval_rq_lut_cutoffs, eval_rq_lut_no_lut, eval_serde,
 };
 use rsonpath::lookup_table::performance::lut_hot::test_hotness;
 use rsonpath::lookup_table::performance::lut_query_correctness;
@@ -83,10 +83,6 @@ enum Commands {
         data_dir_path: String,
         result_dir_path: String,
     },
-    EvalFindPairData {
-        data_dir_path: String,
-        result_dir_path: String,
-    },
     EvalFinal {
         data_dir_path: String,
         result_dir_path: String,
@@ -105,7 +101,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let cli = Cli::parse();
 
     match &cli.command {
-        Commands::Analysis { json_folder_path } => {
+        Commands::Analysis { json_folder_path: _ } => {
             // create_json_size_csv(json_folder_path);
             print_estimation();
         }
@@ -116,7 +112,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             check_if_dir_exists(json_dir);
             check_if_dir_exists(result_dir);
 
-            distance_distribution::count_distances_in_dir(json_dir, &result_dir);
+            distance_distribution::count_distances_in_dir(json_dir, result_dir);
         }
         Commands::Performance { json_dir, out_dir } => {
             check_if_dir_exists(json_dir);
@@ -163,7 +159,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             data_dir_path,
             result_dir_path,
         } => {
-            eval_rq_legacy::evaluate(data_dir_path, result_dir_path);
+            eval_legacy::evaluate(data_dir_path, result_dir_path);
         }
         Commands::EvalRqLut {
             data_dir_path,
@@ -177,12 +173,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         } => {
             eval_rq_lut_no_lut::evaluate(data_dir_path, result_dir_path);
         }
-        Commands::EvalFindPairData {
-            data_dir_path,
-            result_dir_path,
-        } => {
-            eval_find_pair_data::evaluate(data_dir_path, result_dir_path);
-        }
         Commands::EvalFinal {
             data_dir_path,
             result_dir_path,
@@ -193,7 +183,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             data_dir_path,
             result_dir_path,
         } => {
-            eval_t_optimal::evaluate(data_dir_path, result_dir_path);
+            eval_optimal::evaluate(data_dir_path, result_dir_path);
         }
         Commands::EvalLutConstruction {
             data_dir_path,

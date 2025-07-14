@@ -58,6 +58,7 @@ impl LookUpTable for LutHashMapDouble {
         }
     }
 
+    #[inline]
     fn get_cutoff(&self) -> usize {
         self.cutoff
     }

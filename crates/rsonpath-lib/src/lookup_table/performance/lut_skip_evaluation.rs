@@ -27,6 +27,7 @@ pub enum SkipMode {
 const RESULT_CSV_PATH: &str = ".a_lut_tests/performance/skip_evaluation/";
 
 // run with: cargo run --bin lut --release -- skip
+#[inline]
 pub fn skip_evaluation() {
     if SKIP_MODE != SkipMode::OFF || !TRACK_SKIPPING_ON {
         println!("Wrong paramters. Abort");
@@ -40,10 +41,12 @@ pub fn skip_evaluation() {
     // eval_test_data(QUERY_TWITTER, cutoff);
 }
 
+#[inline]
 pub fn add_skip_time(added_time: u64) {
     SKIP_TIME_ATOMIC.fetch_add(added_time, std::sync::atomic::Ordering::Relaxed);
 }
 
+#[inline]
 pub fn reset_skip_time() {
     SKIP_TIME_ATOMIC.store(0, std::sync::atomic::Ordering::Relaxed);
 }
@@ -170,7 +173,7 @@ fn plot_with_python(csv_path: &str, filename: &str) {
 
     let output = Command::new("python")
         .arg("crates/rsonpath-lib/src/lookup_table/python_statistic/lut_skip_evaluation.py")
-        .args(&[csv_path, &counter_file_path])
+        .args([csv_path, &counter_file_path])
         .output();
 
     match output {
@@ -188,6 +191,7 @@ fn plot_with_python(csv_path: &str, filename: &str) {
     }
 }
 
+#[inline]
 pub fn get_filename(path: &str) -> &str {
     Path::new(path).file_stem().and_then(|name| name.to_str()).unwrap_or("")
 }

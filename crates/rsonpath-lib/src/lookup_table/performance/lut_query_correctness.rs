@@ -15,8 +15,9 @@ use std::{
 };
 
 // Run with: cargo run --bin lut --release -- test-query
+#[inline]
 pub fn test_build_and_queries() {
-    let cutoff = 64 * 0;
+    let cutoff = 0;
 
     // ###########
     // ## BUILD ##
@@ -118,7 +119,7 @@ pub fn test_build_and_queries() {
 fn test_build_correctness(test_data: (&str, &[(&str, &str)]), cutoff: usize) {
     let (json_path, _) = test_data;
     println!("Building LUT: {}", json_path);
-    let lut = LUT::build(&json_path, cutoff).expect("Fail @ building LUT");
+    let lut = LUT::build(json_path, cutoff).expect("Fail @ building LUT");
     let lut_hash_map = lut_hash_map::LutHashMap::build(json_path, cutoff).expect("Fail @ building lut_hash_map");
 
     println!("Testing keys ...");
@@ -205,7 +206,7 @@ fn test_query_correctness_count(test_data: (&str, &[(&str, &str)]), cutoff: usiz
 fn test_query_correctness_nodes(test_data: (&str, &[(&str, &str)]), cutoff: usize) {
     let (json_path, queries) = test_data;
     println!("Building LUT: {}", json_path);
-    let mut lut = LUT::build(&json_path, cutoff).expect("Fail @ building LUT");
+    let mut lut = LUT::build(json_path, cutoff).expect("Fail @ building LUT");
 
     // Run all queries
     println!("Checking queries:");
@@ -261,14 +262,15 @@ fn test_query_correctness_nodes(test_data: (&str, &[(&str, &str)]), cutoff: usiz
 fn test_query_correctness_count_big_json(test_data: (&str, &[(&str, &str)]), cutoff: usize) {
     let (json_path, queries) = test_data;
     println!("Building LUT: {}", json_path);
-    let mut lut = LUT::build(&json_path, cutoff).expect("Fail @ building LUT");
+    let mut lut = LUT::build(json_path, cutoff).expect("Fail @ building LUT");
 
     // Run all queries
     println!("Checking queries:");
     for &(query_name, query_text) in queries {
         print!(" Query: {} = \"{}\" ... ", query_name, query_text);
-        let file = std::fs::File::open(json_path).expect("Fail to open file");
-        let input = unsafe { input::MmapInput::map_file(&file).expect("Failed to map file") };
+        let file = fs::File::open(json_path).expect("Fail to open file");
+        // TODO: add safety comment
+        let input = unsafe { MmapInput::map_file(&file).expect("Failed to map file") };
         let query = rsonpath_syntax::parse(query_text).expect("Fail @ parse query");
 
         // Query normally and skip iteratively (ITE)

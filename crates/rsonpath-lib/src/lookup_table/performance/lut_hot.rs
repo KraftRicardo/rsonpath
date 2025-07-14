@@ -10,18 +10,19 @@ use std::{
 // or for samply:
 // cargo build --bin lut --release
 // samply record ./target/release/lut hot
+#[inline]
 pub fn test_hotness() {
     let json_path = ".a_lut_tests/test_data/GB_1/google_map_large_record_(1.1GB).json";
     let query_text = "$[4000].routes[*].bounds"; // 99% skip
     let cutoff = 128;
 
-    hot_lut(&json_path, &query_text, cutoff);
-    hot_ite(&json_path, &query_text);
+    hot_lut(json_path, query_text, cutoff);
+    hot_ite(json_path, query_text);
 }
 
 fn hot_lut(json_path: &str, query_text: &str, cutoff: usize) {
     println!("Building LUT: {}", json_path);
-    let lut = LUT::build(&json_path, cutoff).expect("Fail @ building LUT");
+    let lut = LUT::build(json_path, cutoff).expect("Fail @ building LUT");
 
     println!(" Query: \"{}\" ... ", query_text);
     let input = {

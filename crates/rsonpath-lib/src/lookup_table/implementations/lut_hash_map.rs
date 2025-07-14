@@ -43,6 +43,7 @@ impl LookUpTable for LutHashMap {
         self.hash_map.get(key).copied()
     }
 
+    #[inline]
     fn get_cutoff(&self) -> usize {
         self.cutoff
     }

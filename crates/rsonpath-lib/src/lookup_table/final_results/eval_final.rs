@@ -1,4 +1,3 @@
-use crate::classification::depth::nosimd::Vector;
 use crate::lookup_table::performance::lut_query_data::{
     QUERY_BESTBUY, QUERY_CROSSREF1, QUERY_CROSSREF2, QUERY_CROSSREF4, QUERY_GOOGLE, QUERY_NSPL, QUERY_TWITTER,
     QUERY_WALMART, QUERY_WIKI,
@@ -9,7 +8,6 @@ use crate::{
     lookup_table::{LookUpTable, LUT},
 };
 use csv::Writer;
-use itertools::enumerate;
 use rsonpath_lib_ref::engine::{Compiler as CompilerLegacy, Engine as EngineLegacy};
 use serde_json::Value;
 use serde_json_path::JsonPath;
@@ -40,10 +38,10 @@ pub fn evaluate(data_dir_path: &str, base_path: &str) {
     println!("serde_json_path");
 
     // GB_1
-    // eval_all(&data_dir_path, &base_path, QUERY_BESTBUY);
-    // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF1);
-    // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF2);
-    // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF4);
+    eval_all(&data_dir_path, &base_path, QUERY_BESTBUY);
+    eval_all(&data_dir_path, &base_path, QUERY_CROSSREF1);
+    eval_all(&data_dir_path, &base_path, QUERY_CROSSREF2);
+    eval_all(&data_dir_path, &base_path, QUERY_CROSSREF4);
     eval_all(&data_dir_path, &base_path, QUERY_GOOGLE);
     eval_all(&data_dir_path, &base_path, QUERY_NSPL);
     eval_all(&data_dir_path, &base_path, QUERY_TWITTER);
@@ -220,7 +218,7 @@ fn query_rq_legacy_index(json_path: &str, queries: &[(&str, &str)]) -> Vec<f64> 
         let mut total_time = 0.0;
 
         for _ in 0..QUERY_REPETITIONS {
-            // // COUNT
+            // COUNT
             // let start = Instant::now();
             // result = legacy_engine.count(&legacy_input).expect("Query execution failed");
             // total_time += start.elapsed().as_secs_f64();

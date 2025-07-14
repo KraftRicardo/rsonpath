@@ -290,14 +290,18 @@ pub fn count_brackets(json_path: &str, cutoff: usize) -> Result<(usize, usize), 
         ) -> Result<(usize, usize), error::InputError> where
         I: Input,
         V: Simd,{
-                count::<I, V>(&input, simd, cutoff)
+                count_brackets_curly_squary::<I, V>(&input, simd, cutoff)
             })
     })
     .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
 }
 
 #[inline]
-pub(crate) fn count<I, V>(input: &I, simd: V, cutoff: usize) -> Result<(usize, usize), error::InputError>
+pub(crate) fn count_brackets_curly_squary<I, V>(
+    input: &I,
+    simd: V,
+    cutoff: usize,
+) -> Result<(usize, usize), error::InputError>
 where
     I: Input,
     V: Simd,

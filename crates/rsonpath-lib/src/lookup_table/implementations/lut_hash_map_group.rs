@@ -31,6 +31,7 @@ impl LookUpTable for LutHashMapGroup {
         self.lut_doubles[key & self.bit_mask].get(key)
     }
 
+    #[inline]
     fn get_cutoff(&self) -> usize {
         self.cutoff
     }

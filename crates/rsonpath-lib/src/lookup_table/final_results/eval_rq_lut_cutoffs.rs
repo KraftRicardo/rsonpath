@@ -2,7 +2,6 @@ use crate::lookup_table::performance::lut_query_data::{
     QUERY_BESTBUY, QUERY_CROSSREF1, QUERY_CROSSREF2, QUERY_CROSSREF4, QUERY_GOOGLE, QUERY_NSPL, QUERY_TWITTER,
     QUERY_WALMART, QUERY_WIKI,
 };
-use crate::lookup_table::performance::lut_skip_evaluation::SkipMode;
 use crate::lookup_table::performance::lut_skip_evaluation::SkipMode::OFF;
 use crate::lookup_table::{SKIP_MODE, TRACK_SKIPPING_ON};
 use crate::{
@@ -43,15 +42,15 @@ pub fn evaluate(data_dir_path: &str, base_path: &str) {
     fs::create_dir_all(&result_dir_path).expect("Failed to create directory");
 
     // GB_1
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY, &cutoffs);
     eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1, &cutoffs);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2, &cutoffs);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4, &cutoffs);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE, &cutoffs);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL, &cutoffs);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER, &cutoffs);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART, &cutoffs);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI, &cutoffs);
 
     println!("Done");
 }

@@ -98,10 +98,6 @@ pub fn measure_performance(config: &mut EvalConfig, cutoff: usize) -> Result<(),
     Ok(())
 }
 
-fn LutSicHashDouble(p0: &mut &mut EvalConfig, p1: &str, p2: usize) {
-    todo!()
-}
-
 fn eval<T: LookUpTable>(config: &mut EvalConfig, name: &str, cutoff: usize) {
     println!("  - {name}");
 
@@ -144,7 +140,7 @@ fn eval_phf<T: LookUpTableLambda>(config: &mut EvalConfig, name: &str, lambda: u
         let _ = T::build_lambda(lambda, config.json_path, 0, threaded).expect("Fail @ build lut");
         build_time += start_build.elapsed().as_secs_f64();
     }
-    build_time = build_time / (BUILD_REPETITIONS as f64);
+    build_time /= (BUILD_REPETITIONS as f64);
 
     // Size
     let start_heap = Region::new(HEAP_TRACKER);
@@ -158,7 +154,7 @@ fn eval_phf<T: LookUpTableLambda>(config: &mut EvalConfig, name: &str, lambda: u
         my_black_box(get_every_key_once(&lut, &config.keys));
         query_time += start_query.elapsed().as_secs_f64();
     }
-    query_time = query_time / (QUERY_REPETITIONS as f64);
+    query_time /= QUERY_REPETITIONS as f64;
 
     // Save measurements
     let name = format!("λ={lambda}:{name}");
@@ -224,7 +220,7 @@ fn eval_hash_map_group(config: &mut EvalConfig, name: &str, bit_mask: usize, cut
         my_black_box(get_every_key_once(&lut, &config.keys));
         query_time += start_query.elapsed().as_secs_f64();
     }
-    query_time = query_time / (QUERY_REPETITIONS as f64);
+    query_time /= QUERY_REPETITIONS as f64;
 
     // Save measurements
     let name = format!("#{buckets}:{name}");

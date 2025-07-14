@@ -1,4 +1,4 @@
-use crate::lookup_table::final_results::eval_rq_legacy::{QUERY_REPETITIONS, WARM_UP_QUERY_REPETITIONS};
+use crate::lookup_table::final_results::deprecated::eval_legacy::{QUERY_REPETITIONS, WARM_UP_QUERY_REPETITIONS};
 use crate::lookup_table::performance::lut_query_data::{
     QUERY_BESTBUY, QUERY_CROSSREF1, QUERY_CROSSREF2, QUERY_CROSSREF4, QUERY_GOOGLE, QUERY_NSPL, QUERY_TWITTER,
     QUERY_WALMART, QUERY_WIKI,

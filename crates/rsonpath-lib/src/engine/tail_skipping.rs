@@ -1,5 +1,5 @@
 #![allow(clippy::expect_used)] // Enforcing the classifier invariant is clunky without this.
-use crate::lookup_table::final_results::eval_t_optimal;
+use crate::lookup_table::final_results::deprecated::eval_optimal;
 use crate::lookup_table::{SKIP_MODE, TRACK_SKIPPING_ON};
 use crate::{
     classification::{
@@ -63,7 +63,7 @@ where
 
             let distance = result - idx;
             lut_skip_evaluation::add_skip_time(skip_time);
-            eval_t_optimal::add_skip_time(distance, skip_time);
+            eval_optimal::add_skip_time(distance, skip_time);
             Ok(result)
         } else {
             self.skip_choice(idx_open, idx, bracket_type, lut, padding)

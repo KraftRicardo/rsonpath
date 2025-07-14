@@ -20,25 +20,23 @@ pub const WARM_UP_QUERY_REPETITIONS: usize = 10;
 pub const BUILD_REPETITIONS: usize = 3;
 pub const WARM_UP_BUILD_REPETITIONS: usize = 1;
 
-// Run with: cargo run --bin lut --release -- eval-serde .a_test_data .a_final_results
+// Run with: cargo run --bin lut --release -- eval-serde .a_test_data .a_final_results/speed/serde
 // Run with: cargo run --bin lut --release -- eval-serde ricardo-jsons final-results-2
-pub fn evaluate(data_dir_path: &str, base_path: &str) {
+pub fn evaluate(data_dir_path: &str, result_dir_path: &str) {
     println!("serde_json_path");
 
-    // Create rsults dir
-    let result_dir_path = format!("{}/speed/serde", base_path);
     fs::create_dir_all(&result_dir_path).expect("Failed to create directory");
 
     // GB_1
-    eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
+    eval_all(&data_dir_path, result_dir_path, QUERY_BESTBUY);
+    eval_all(&data_dir_path, result_dir_path, QUERY_CROSSREF1);
+    eval_all(&data_dir_path, result_dir_path, QUERY_CROSSREF2);
+    eval_all(&data_dir_path, result_dir_path, QUERY_CROSSREF4);
+    eval_all(&data_dir_path, result_dir_path, QUERY_GOOGLE);
+    eval_all(&data_dir_path, result_dir_path, QUERY_NSPL);
+    eval_all(&data_dir_path, result_dir_path, QUERY_TWITTER);
+    eval_all(&data_dir_path, result_dir_path, QUERY_WALMART);
+    eval_all(&data_dir_path, result_dir_path, QUERY_WIKI);
 
     println!("Done");
 }
@@ -53,7 +51,7 @@ fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&st
     let json_path = format!("{}/{}.json", data_dir_path, filename);
 
     measure_build(&json_path, result_dir_path, filename);
-    measure_query(&json_path, &result_dir_path, filename, queries);
+    measure_query(&json_path, result_dir_path, filename, queries);
 }
 
 // Measure query time
@@ -72,7 +70,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
 
     // Write header if the file is new
     if !csv_exists {
-        wrt.write_record(&["QUERY_ID", "QUERY_TEXT", "QUERY_TIME_SECONDS"])
+        wrt.write_record(["QUERY_ID", "QUERY_TEXT", "QUERY_TIME_SECONDS"])
             .expect("Failed to write header");
     }
 
@@ -107,7 +105,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
             query_id, query_text, avg_time, result
         );
 
-        wrt.write_record(&[query_id, query_text, &format!("{:.5}", avg_time)])
+        wrt.write_record([query_id, query_text, &format!("{:.5}", avg_time)])
             .expect("Failed to write to CSV");
     }
 
@@ -130,7 +128,7 @@ fn measure_build(json_path: &str, serde_dir_path: &str, filename: &str) {
     // Write header if the file is new
     if !file_exists {
         print!("File did not exist");
-        wtr.write_record(&["JSON", "BUILD_TIME_SECONDS", "SIZE_IN_BYTES"])
+        wtr.write_record(["JSON", "BUILD_TIME_SECONDS", "SIZE_IN_BYTES"])
             .expect("Failed to write header");
         wtr.flush().expect("Failed to flush build CSV");
     }
@@ -168,7 +166,7 @@ fn measure_build(json_path: &str, serde_dir_path: &str, filename: &str) {
     println!(" build time = {:.5}s, size = {} B", avg_time, heap_bytes);
 
     // Write the results
-    wtr.write_record(&[filename, &format!("{:.5}", avg_time), &heap_bytes.to_string()])
+    wtr.write_record([filename, &format!("{:.5}", avg_time), &heap_bytes.to_string()])
         .expect("Failed to write build record");
 
     wtr.flush().expect("Failed to flush build CSV");
