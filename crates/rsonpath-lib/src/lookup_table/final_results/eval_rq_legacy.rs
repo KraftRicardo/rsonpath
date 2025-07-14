@@ -16,7 +16,9 @@ use std::{fs, io::BufReader};
 pub const QUERY_REPETITIONS: usize = 10;
 pub const WARM_UP_QUERY_REPETITIONS: usize = 10;
 
-// Measures the time taken for rq-legacy for given JSON+Queries.
+// Measures the time taken for rq-legacy for given JSON+Queries. "empty-list-opt" has no effect here.
+// If you want to compare vs. rq-legacy with the opt enabled refer to the branch named
+// rsonpath-original-measure.y
 //
 // Run with: cargo run --bin lut --release -- eval-rq-legacy .a_test_data .a_final_results
 // Run with: cargo run --bin lut --release -- eval-rq-legacy ricardo-jsons final-results-2
