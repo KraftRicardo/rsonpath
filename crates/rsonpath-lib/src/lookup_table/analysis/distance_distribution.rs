@@ -19,10 +19,10 @@ use crate::{
 
 pub const DISTANCE_EVAL_DIR: &str = "distance_distribution";
 
-/// Count the distances for each json file of the given directory
-// Run with e.g. cargo run --bin lut --release -- distances .a_lut_tests/test_data/GB_1 .a_lut_tests
+// Count the distances for each json file of the given directory
+// Run with: cargo run --bin lut --release -- distance-distribution res/json res/data/analysis/distance_distribution
 #[inline]
-pub fn count_distances_in_dir(json_dir_path: &str, result_dir: &str) {
+pub fn analyse_distance_distribution(json_dir_path: &str, result_dir_path: &str) {
     let dir = fs::read_dir(json_dir_path).expect("Failed to read directory");
 
     println!("Counting Distances:");
@@ -35,7 +35,7 @@ pub fn count_distances_in_dir(json_dir_path: &str, result_dir: &str) {
                 if extension == "json" {
                     let json_path = path.to_str().expect("Failed to convert path to string");
                     println!("  Processing: {}", json_path);
-                    count_distances_with_simd(json_path, result_dir);
+                    count_distances_with_simd(json_path, result_dir_path);
                 }
             }
         }
@@ -45,7 +45,7 @@ pub fn count_distances_in_dir(json_dir_path: &str, result_dir: &str) {
 #[inline]
 #[must_use]
 pub fn count_num_pairs(json_path: &str) -> usize {
-    let file = std::fs::File::open(json_path).expect("Fail to open file");
+    let file = File::open(json_path).expect("Fail to open file");
 
     // SAFETY: We keep the file open throughout the entire duration.
     let input = unsafe { input::MmapInput::map_file(&file).expect("Failed to map file") };
@@ -65,9 +65,10 @@ pub fn count_num_pairs(json_path: &str) -> usize {
     distance_frequencies.values().sum()
 }
 
-// Saves the result in .csv files
-fn count_distances_with_simd(json_path: &str, result_dir: &str) {
-    let file = std::fs::File::open(json_path).expect("Fail to open file");
+// Expects the path to a json as input
+// Saves the result in a csv file at "{result_dir_path}/{filename}_distances.csv"
+fn count_distances_with_simd(json_path: &str, result_dir_path: &str) {
+    let file = File::open(json_path).expect("Fail to open file");
     let filename = util_path::extract_filename(json_path);
 
     // SAFETY: We keep the file open throughout the entire duration.
@@ -86,8 +87,8 @@ fn count_distances_with_simd(json_path: &str, result_dir: &str) {
     });
 
     // Save in CSV: First column = distance, second column = frequency
-    let path = format!("{}/{}_distances.csv", result_dir, filename);
-    let mut wtr = csv::Writer::from_writer(File::create(&path).expect("Failed to create CSV file"));
+    let csv_path = format!("{}/{}_distances.csv", result_dir_path, filename);
+    let mut wtr = csv::Writer::from_writer(File::create(&csv_path).expect("Failed to create CSV file"));
     wtr.write_record(["distance", "frequency"])
         .expect("Failed to write CSV header");
     for (distance, frequency) in distance_frequencies {
@@ -95,6 +96,7 @@ fn count_distances_with_simd(json_path: &str, result_dir: &str) {
             .expect("Failed to write record");
     }
     wtr.flush().expect("Failed to flush CSV writer");
+    println!("Generated: {}", csv_path);
 }
 
 fn count_distances<I, V>(input: &I, simd: V) -> HashMap<usize, usize>

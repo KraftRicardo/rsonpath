@@ -33,7 +33,7 @@ pub fn evaluate(data_dir_path: &str, base_path: &str) {
 
     let cutoffs = vec![0, 64, 128, 512, 8192];
 
-    if (TRACK_SKIPPING_ON || SKIP_MODE != OFF) {
+    if TRACK_SKIPPING_ON || SKIP_MODE != OFF {
         println!("Disable tracking of skips before running because it slows down the algorithm.");
         return;
     }

@@ -35,7 +35,7 @@ pub const WARM_UP_QUERY_REPETITIONS: usize = 10;
 pub fn evaluate(data_dir_path: &str, base_path: &str) {
     println!("rq-legacy");
 
-    if (TRACK_SKIPPING_ON || SKIP_MODE != OFF) {
+    if TRACK_SKIPPING_ON || SKIP_MODE != OFF {
         println!("Disable tracking of skips before running because it slows down the algorithm.");
         return;
     }

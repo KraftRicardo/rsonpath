@@ -10,7 +10,7 @@ use std::sync::Mutex;
 use crate::lookup_table::performance::lut_skip_evaluation::{self, SkipMode};
 use crate::lookup_table::SKIP_MODE;
 
-const ORDER: core::sync::atomic::Ordering = Ordering::Relaxed;
+const ORDER: Ordering = Ordering::Relaxed;
 
 lazy_static! {
     static ref SKIP_TRACKER_LUT: Mutex<HashMap<usize, usize>> = Mutex::new(HashMap::new());
@@ -23,6 +23,10 @@ static LUT_DISTANCE: AtomicU64 = AtomicU64::new(0);
 static ITE_DISTANCE: AtomicU64 = AtomicU64::new(0);
 
 pub fn track_distance_lut(distance: usize) {
+    if (distance == 1) {
+        println!("Tracking lut");
+    }
+
     if SKIP_MODE == SkipMode::COUNT {
         LUT_COUNT.fetch_add(1, Ordering::Relaxed);
     } else if SKIP_MODE == SkipMode::TRACK {
@@ -34,6 +38,10 @@ pub fn track_distance_lut(distance: usize) {
 }
 
 pub fn track_distance_ite(distance: usize) {
+    if (distance == 1) {
+        println!("Tracking lut");
+    }
+
     if SKIP_MODE == SkipMode::COUNT {
         ITE_COUNT.fetch_add(1, Ordering::Relaxed);
     } else if SKIP_MODE == SkipMode::TRACK {

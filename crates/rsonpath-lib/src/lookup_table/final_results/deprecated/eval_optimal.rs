@@ -150,7 +150,7 @@ fn do_query(json_path: &str, query_id: &str, query_text: &str) {
     };
 
     let query = rsonpath_syntax::parse(query_text).expect("Failed to parse query");
-    let mut engine = RsonpathEngine::compile_query(&query).expect("Failed to compile query");
+    let engine = RsonpathEngine::compile_query(&query).expect("Failed to compile query");
 
     let mut result = 0;
     for _ in 0..QUERY_REPETITIONS {

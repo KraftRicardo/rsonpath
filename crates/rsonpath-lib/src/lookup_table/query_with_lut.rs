@@ -12,6 +12,7 @@ use crate::{
 use std::io::Read;
 
 #[inline]
+/// Apply a query on the given json
 pub fn query_with_lut(json_path: &str, json_query: &str) {
     let cutoff = 0;
 

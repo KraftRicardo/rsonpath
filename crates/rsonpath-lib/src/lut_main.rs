@@ -1,4 +1,7 @@
 use clap::{Parser, Subcommand};
+use distance_distribution::analyse_distance_distribution;
+use distance_distribution_per_query::analyse_distance_distribution_per_query;
+use rsonpath::lookup_table::analysis::distance_distribution_per_query;
 use rsonpath::lookup_table::final_results::{
     deprecated::eval_legacy, deprecated::eval_optimal, eval_final, eval_lut_construction, eval_rq_lut,
     eval_rq_lut_cutoffs, eval_rq_lut_no_lut, eval_serde,
@@ -7,7 +10,7 @@ use rsonpath::lookup_table::performance::lut_hot::test_hotness;
 use rsonpath::lookup_table::performance::lut_query_correctness;
 use rsonpath::lookup_table::{
     analysis::{distance_distribution, json_size_estimation_bits::print_estimation},
-    performance::{self, lut_skip_counter, lut_skip_evaluation, EVAL_DIR},
+    performance::{self, lut_skip_evaluation, EVAL_DIR},
     pokemon_test_data_generator,
     query_with_lut::query_with_lut,
     sichash_test_data_generator::{self, SICHASH_DATA_DIR},
@@ -16,8 +19,8 @@ use std::{error::Error, fs, path::Path};
 
 #[derive(Parser)]
 #[command(
-    name = "LUT Performance Tool",
-    about = "A tool for evaluating performance and distances."
+    name = "LUT applications",
+    about = "List of all commands related to the analysis, testing and performance evaluation of LUT related experiments."
 )]
 struct Cli {
     #[command(subcommand)]
@@ -26,18 +29,19 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Apply a query on the given JSON file
     Query {
-        /// Query to be applied
-        json_query: String,
-        /// Path to the JSON file
         json_path: String,
+        query: String,
     },
-    /// Measure distances of each parenthesis pair for each JSON in the folder and plot the distribution
-    Distances {
-        json_dir: String, // Path to the folder containing JSON files
-        result_dir: String,
+    AnalyseDistanceDistribution {
+        json_dir_path: String,
+        result_dir_path: String,
     },
+    AnalyseDistanceDistributionPerQuery {
+        json_dir_path: String,
+        result_dir_path: String,
+    },
+
     /// Run performance tests
     Performance {
         /// Path to the input JSON folder
@@ -46,8 +50,7 @@ enum Commands {
         out_dir: String,
     },
     Skip {},
-    // Run with: cargo run --bin lut --release -- skip-count
-    SkipCount {},
+
     TestQuery {},
     /// Create the test data used in this project: https://github.com/KraftRicardo/test-SicHash
     Sichash {
@@ -101,18 +104,25 @@ fn main() -> Result<(), Box<dyn Error>> {
     let cli = Cli::parse();
 
     match &cli.command {
+        Commands::Query { json_path, query } => {
+            query_with_lut(json_path, query);
+        }
+        Commands::AnalyseDistanceDistribution {
+            json_dir_path,
+            result_dir_path,
+        } => {
+            analyse_distance_distribution(json_dir_path, result_dir_path);
+        }
+        Commands::AnalyseDistanceDistributionPerQuery {
+            json_dir_path,
+            result_dir_path,
+        } => {
+            analyse_distance_distribution_per_query(json_dir_path, result_dir_path);
+        }
+
         Commands::Analysis { json_folder_path: _ } => {
             // create_json_size_csv(json_folder_path);
             print_estimation();
-        }
-        Commands::Query { json_query, json_path } => {
-            query_with_lut(json_path, json_query);
-        }
-        Commands::Distances { json_dir, result_dir } => {
-            check_if_dir_exists(json_dir);
-            check_if_dir_exists(result_dir);
-
-            distance_distribution::count_distances_in_dir(json_dir, result_dir);
         }
         Commands::Performance { json_dir, out_dir } => {
             check_if_dir_exists(json_dir);
@@ -124,9 +134,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         Commands::Skip {} => {
             lut_skip_evaluation::skip_evaluation();
         }
-        Commands::SkipCount {} => {
-            lut_skip_counter::track_skips();
-        }
+
         Commands::TestQuery {} => {
             lut_query_correctness::test_build_and_queries();
         }

@@ -1,3 +1,5 @@
+use super::lut_query_data::{QUERY_BESTBUY, QUERY_GOOGLE, QUERY_TWITTER};
+use crate::lookup_table::analysis::distance_distribution_per_query::COUNTER_FILE_PATH;
 use crate::lookup_table::{LookUpTable, LUT, REPETITIONS, SKIP_MODE, TRACK_SKIPPING_ON};
 use crate::{
     engine::{Compiler, Engine, RsonpathEngine},
@@ -11,9 +13,6 @@ use std::{
     process::Command,
     time::Instant,
 };
-
-use super::lut_query_data::{QUERY_BESTBUY, QUERY_GOOGLE, QUERY_TWITTER};
-use super::lut_skip_counter::COUNTER_FILE_PATH;
 
 static SKIP_TIME_ATOMIC: AtomicU64 = AtomicU64::new(0);
 

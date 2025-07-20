@@ -13,8 +13,8 @@ pub mod sichash_test_data_generator;
 pub mod util_path;
 
 // CONFIG
-pub const SKIP_MODE: SkipMode = SkipMode::OFF;
-pub const TRACK_SKIPPING_ON: bool = false;
+pub const SKIP_MODE: SkipMode = SkipMode::TRACK;
+pub const TRACK_SKIPPING_ON: bool = true;
 pub const REPETITIONS: u64 = 1;
 
 // Different LUT implementation approaches and experiments. LutPtrHashDouble and LutVFuncDouble
