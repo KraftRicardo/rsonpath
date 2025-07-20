@@ -92,9 +92,9 @@ pub fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[
 // Measure query time
 fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries: &[(&str, &str)]) {
     let query_csv_path = if cfg!(feature = "empty-list-opt") {
-        format!("{}/rq-legacy_time.csv", result_dir_path)
+        format!("{}/rq_legacy_time.csv", result_dir_path)
     } else {
-        format!("{}/rq-legacy_empty_list_opt_off_time.csv", result_dir_path)
+        format!("{}/rq_legacy_empty_list_opt_off_time.csv", result_dir_path)
     };
     let csv_exists = Path::new(&query_csv_path).exists();
 
