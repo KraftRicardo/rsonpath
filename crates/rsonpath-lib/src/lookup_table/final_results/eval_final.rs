@@ -2,6 +2,7 @@ use crate::lookup_table::performance::lut_query_data::{
     QUERY_BESTBUY, QUERY_CROSSREF1, QUERY_CROSSREF2, QUERY_CROSSREF4, QUERY_GOOGLE, QUERY_NSPL, QUERY_TWITTER,
     QUERY_WALMART, QUERY_WIKI,
 };
+use crate::lookup_table::{BUILD_REPETITIONS, QUERY_REPETITIONS, WARM_UP_BUILD_REPETITIONS, WARM_UP_QUERY_REPETITIONS};
 use crate::{
     engine::{Compiler, Engine, RsonpathEngine},
     input::OwnedBytes,
@@ -22,36 +23,29 @@ const RQ_LEGACY_NAME: &str = "rq-legacy";
 const RQ_LUT_CUTOFF_0_NAME: &str = "rq-lut-cutoff-0";
 const RQ_LUT_CUTOFF_512_NAME: &str = "rq-lut-cutoff-512";
 
-pub const QUERY_REPETITIONS: usize = 20;
-pub const BUILD_REPETITIONS: usize = 3;
-pub const WARM_UP_QUERY_REPETITIONS: usize = 5;
-pub const WARM_UP_BUILD_REPETITIONS: usize = 1;
-
-// pub const QUERY_REPETITIONS: usize = 1;
-// pub const BUILD_REPETITIONS: usize = 1;
-// pub const WARM_UP_QUERY_REPETITIONS: usize = 0;
-// pub const WARM_UP_BUILD_REPETITIONS: usize = 0;
-
-// Run with: cargo run --bin lut --release -- eval-final .a_test_data .a_final_results
-// Run with: cargo run --bin lut --release -- eval-final ricardo-jsons final_results-7
-pub fn evaluate(data_dir_path: &str, base_path: &str) {
-    println!("serde_json_path");
+// This compares serde, rq-legacy, rq-lut-cutoff-0 and rq-lut-cutoff-512 for several queries and
+// also measure the build time for each (if there is a build step needed).
+//
+// Run with: cargo run --bin lut --release -- eval-final res/json res/data/speed/local/final
+// Run with: cargo run --bin lut --release -- eval-final ricardo-jsons plot-results
+pub fn evaluate(data_dir_path: &str, result_dir_path: &str) {
+    println!("final");
 
     // GB_1
-    eval_all(&data_dir_path, &base_path, QUERY_BESTBUY);
-    eval_all(&data_dir_path, &base_path, QUERY_CROSSREF1);
-    eval_all(&data_dir_path, &base_path, QUERY_CROSSREF2);
-    eval_all(&data_dir_path, &base_path, QUERY_CROSSREF4);
-    eval_all(&data_dir_path, &base_path, QUERY_GOOGLE);
-    eval_all(&data_dir_path, &base_path, QUERY_NSPL);
-    eval_all(&data_dir_path, &base_path, QUERY_TWITTER);
-    eval_all(&data_dir_path, &base_path, QUERY_WALMART);
-    eval_all(&data_dir_path, &base_path, QUERY_WIKI);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
 
     println!("Done");
 }
 
-fn eval_all(data_dir_path: &str, base_path: &str, test_data: (&str, &[(&str, &str)])) {
+fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&str, &str)])) {
     // Extract input
     let (json_filename, queries) = test_data;
     let filename = json_filename.strip_suffix(".json").unwrap();
@@ -59,30 +53,28 @@ fn eval_all(data_dir_path: &str, base_path: &str, test_data: (&str, &[(&str, &st
 
     let json_path = format!("{}/{}.json", data_dir_path, filename);
 
-    let final_dir_path = format!("{}/speed/final", base_path);
-    fs::create_dir_all(&final_dir_path).expect("Failed to create directory");
+    fs::create_dir_all(&result_dir_path).expect("Failed to create directory");
 
     // Measurements
-    measure_build(&json_path, filename, base_path);
-    measure_query_index(&json_path, filename, base_path, queries);
+    measure_build(&json_path, filename, result_dir_path);
+    measure_query_index(&json_path, filename, result_dir_path, queries);
 }
 
-fn measure_query_index(json_path: &str, filename: &str, base_path: &str, queries: &[(&str, &str)]) {
-    let build_csv = format!("{}/speed/final/query.csv", base_path);
-    let file_exists = Path::new(&build_csv).exists();
+fn measure_query_index(json_path: &str, filename: &str, result_dir_path: &str, queries: &[(&str, &str)]) {
+    let query_csv_path = format!("{}/query.csv", result_dir_path);
+    let file_exists = Path::new(&query_csv_path).exists();
 
     // Open CSV in append mode
     let mut wtr = Writer::from_writer(
         OpenOptions::new()
             .create(true)
             .append(true)
-            .open(&build_csv)
+            .open(&query_csv_path)
             .expect("Failed to open build CSV"),
     );
 
     // Write header if the file is new
     if !file_exists {
-        println!("File did not exist");
         wtr.write_record(&["JSON", "ALGORITHM", "QUERY_ID", "QUERY_TEXT", "AVERAGE_TIME"])
             .expect("F");
         wtr.flush().expect("Failed to flush build CSV");
@@ -131,6 +123,7 @@ fn measure_query_index(json_path: &str, filename: &str, base_path: &str, queries
     }
 
     wtr.flush().expect("Failed to flush build CSV");
+    println!("Generated: {query_csv_path}")
 }
 
 fn query_rq_lut_index(json_path: &str, queries: &[(&str, &str)], cutoff: usize) -> Vec<f64> {
@@ -280,17 +273,17 @@ fn query_serde_index(json_path: &str, queries: &[(&str, &str)]) -> Vec<f64> {
     avg_times
 }
 
-fn measure_build(json_path: &str, filename: &str, base_path: &str) {
-    let build_csv = format!("{}/speed/final/build.csv", base_path);
-    let file_exists = Path::new(&build_csv).exists();
+fn measure_build(json_path: &str, filename: &str, result_dir_path: &str) {
+    let build_csv_path = format!("{}/build.csv", result_dir_path);
+    let file_exists = Path::new(&build_csv_path).exists();
 
     // Open CSV in append mode
     let mut wtr = Writer::from_writer(
         OpenOptions::new()
             .create(true)
             .append(true)
-            .open(&build_csv)
-            .expect(&format!("Failed to open build CSV {}", build_csv)),
+            .open(&build_csv_path)
+            .expect(&format!("Failed to open build CSV {}", build_csv_path)),
     );
 
     // Write header if the file is new
@@ -326,6 +319,7 @@ fn measure_build(json_path: &str, filename: &str, base_path: &str) {
     .expect("Fail write");
 
     wtr.flush().expect("Failed to flush build CSV");
+    println!("Generated: {build_csv_path}")
 }
 
 fn build_rq_lut(json_path: &str, cutoff: usize) -> f64 {
