@@ -18,6 +18,10 @@ enum Commands {
         data_dir_path: String,
         result_dir_path: String,
     },
+    EvalLegacyEmptyListOptOff {
+        data_dir_path: String,
+        result_dir_path: String,
+    },
     EvalOptimal {
         data_dir_path: String,
         result_dir_path: String,
@@ -32,7 +36,13 @@ fn main() -> Result<(), Box<dyn Error>> {
             data_dir_path,
             result_dir_path,
         } => {
-            eval_legacy::run(data_dir_path, result_dir_path);
+            eval_legacy::run(data_dir_path, result_dir_path, true);
+        }
+        Commands::EvalLegacyEmptyListOptOff {
+            data_dir_path,
+            result_dir_path,
+        } => {
+            eval_legacy::run(data_dir_path, result_dir_path, false);
         }
         Commands::EvalOptimal {
             data_dir_path,

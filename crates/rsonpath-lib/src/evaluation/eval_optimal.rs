@@ -85,8 +85,6 @@ fn eval_all(data_dir_path: &str, results_dir_path: &str, test_data: (&str, &[(&s
     let json_path = format!("{}/{}.json", data_dir_path, filename);
 
     for (query_id, query_text) in queries {
-
-
         do_query(&json_path, query_id, query_text);
 
         let skip_time_nano_seconds = ACCUMULATED_SKIP_TIME.load(Ordering::Relaxed) as f64 / REPETITIONS as f64;
@@ -124,5 +122,8 @@ fn do_query(json_path: &str, query_id: &str, query_text: &str) {
     for _ in 0..REPETITIONS {
         result = engine.count(&input).expect("Fail count");
     }
-    println!("  - File: {}, Q: {} = {}, Result = {}", json_path, query_id, query_text, result);
+    println!(
+        "  - File: {}, Q: {} = {}, Result = {}",
+        json_path, query_id, query_text, result
+    );
 }

@@ -18,7 +18,11 @@ use crate::evaluation::track_config::{REPETITIONS, TRACK_SKIPPING_ON, WARM_UP_RE
 
 // Measures the time taken for rq for given JSON+Queries. "empty-list-opt" has here no effect.
 //
-// Run with: cargo run --bin eval --release -- eval-legacy ../rsonpath/.a_test_data ../rsonpath/.a_final_results/speed/rq-legacy-2
+// Run with: cargo run --bin eval --release -- eval-legacy ../rsonpath/res/json ../rsonpath/res/data/speed/local
+// Run with: cargo run --bin eval --release -- eval-legacy ricardo-jsons plot-results
+// OR WITH:
+// Run with: cargo run --bin eval --release -- eval-legacy-empty-list-opt-off ../rsonpath/res/json ../rsonpath/res/data/speed/local
+// Run with: cargo run --bin eval --release -- eval-legacy-empty-list-opt-off ricardo-jsons plot-results
 //
 // "data_dir_path" path to the folder holding the input JSON files.
 // "base_path" path to the folder where the results will be saved
@@ -29,11 +33,26 @@ use crate::evaluation::track_config::{REPETITIONS, TRACK_SKIPPING_ON, WARM_UP_RE
 //  crossref1_(551MB),1,$.items[2].resource.primary.URL,0.13103
 //  crossref1_(551MB),2,$.items[*].URL,0.13692
 //  ...
-pub fn run(data_dir_path: &str, base_path: &str) {
-    println!("rq-legacy");
+pub fn run(data_dir_path: &str, base_path: &str, use_empty_list_opt: bool) {
+    let mut result_dir_path: String;
+    if use_empty_list_opt {
+        println!("rq-legacy");
+        result_dir_path = format!("{}/rq_legacy", base_path);
+    } else {
+        print!("rq-legacy-empty-list-opt-off");
+        result_dir_path = format!("{}/rq_legacy_empty_list_opt_off", base_path);
+    }
 
-    if !cfg! {feature = "empty-list-opt"} {
-        println!("empty-list-opt is currently disabled. For fair comparisons with rsonpath-lut enable it.")
+    // Abort conditions
+    if use_empty_list_opt && cfg! {feature = "empty-list-opt"} != use_empty_list_opt {
+        println!("empty-list-opt is currently disabled. For fair comparisons with rsonpath-lut enable it.");
+        return;
+    }
+    if !use_empty_list_opt && cfg! {feature = "empty-list-opt"} != use_empty_list_opt {
+        println!(
+            "For building the rq-legacy-empty-list-opt-off run the empty-list-opt must be disabled for this analysis."
+        );
+        return;
     }
     if TRACK_SKIPPING_ON {
         println!("Disable tracking of skips before running because it slows down the algorithm.");
@@ -41,17 +60,16 @@ pub fn run(data_dir_path: &str, base_path: &str) {
     }
 
     // Create results dir
-    let result_dir_path = format!("{}", base_path);
     fs::create_dir_all(&result_dir_path).expect("Failed to create directory");
 
     // GB_1
     eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
 
     // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
     // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
@@ -59,7 +77,7 @@ pub fn run(data_dir_path: &str, base_path: &str) {
     println!("Done");
 }
 
-fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&str, &str)])) {
+pub fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&str, &str)])) {
     // Extract input
     let (json_filename, queries) = test_data;
     let filename = json_filename.strip_suffix(".json").unwrap();
@@ -73,7 +91,11 @@ fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&st
 
 // Measure query time
 fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries: &[(&str, &str)]) {
-    let query_csv_path = format!("{}/rq-legacy_time.csv", result_dir_path);
+    let query_csv_path = if cfg!(feature = "empty-list-opt") {
+        format!("{}/rq-legacy_time.csv", result_dir_path)
+    } else {
+        format!("{}/rq-legacy_empty_list_opt_off_time.csv", result_dir_path)
+    };
     let csv_exists = Path::new(&query_csv_path).exists();
 
     // Open CSV in append mode
@@ -87,7 +109,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
 
     // Write header if the file is new
     if !csv_exists {
-        wrt.write_record(&["JSON", "QUERY_ID", "QUERY_TEXT", "QUERY_TIME_SECONDS"])
+        wrt.write_record(&["JSON", "QUERY_ID", "QUERY_TEXT", "QUERY_TIME_SECONDS", "REPETITIONS"])
             .expect("Failed to write header");
     }
 
@@ -124,10 +146,16 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
             filename, query_id, query_text, avg_time, result
         );
 
-        wrt.write_record(&[filename, query_id, query_text, &format!("{:.5}", avg_time)])
-            .expect("Failed to write to CSV");
+        wrt.write_record(&[
+            filename,
+            query_id,
+            query_text,
+            &format!("{:.5}", avg_time),
+            &format!("{}", REPETITIONS),
+        ])
+        .expect("Failed to write to CSV");
     }
 
     wrt.flush().expect("Failed to flush CSV");
-    println!("Data written to {}", query_csv_path);
+    println!("Generated: {}", query_csv_path);
 }
