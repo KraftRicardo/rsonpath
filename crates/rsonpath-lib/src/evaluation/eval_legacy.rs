@@ -14,7 +14,7 @@ use std::path::Path;
 use std::time::Instant;
 use std::{fs, io::BufReader};
 
-use crate::evaluation::track_config::{REPETITIONS, TRACK_SKIPPING_ON, WARM_UP_REPETITIONS};
+use crate::evaluation::track_config::{QUERY_REPETITIONS, TRACK_SKIPPING_ON, WARM_UP_QUERY_REPETITIONS};
 
 // Measures the time taken for rq for given JSON+Queries. "empty-list-opt" has here no effect.
 //
@@ -126,7 +126,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
         let engine = RsonpathEngine::compile_query(&query).expect("Fail query");
 
         // Warm up
-        for _ in 0..WARM_UP_REPETITIONS {
+        for _ in 0..WARM_UP_QUERY_REPETITIONS {
             let _ = engine.count(&input).expect("Failed count");
         }
 
@@ -134,13 +134,13 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
         let mut result = 0;
         let mut total_time = 0.0;
 
-        for _ in 0..REPETITIONS {
+        for _ in 0..QUERY_REPETITIONS {
             let start = Instant::now();
             result = engine.count(&input).expect("Fail count");
             total_time += start.elapsed().as_secs_f64();
         }
 
-        let avg_time = total_time / (REPETITIONS as f64);
+        let avg_time = total_time / (QUERY_REPETITIONS as f64);
         println!(
             "  - File: {}, Query {}: {}, Time = {:.5}s Result = {}",
             filename, query_id, query_text, avg_time, result
@@ -151,7 +151,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
             query_id,
             query_text,
             &format!("{:.5}", avg_time),
-            &format!("{}", REPETITIONS),
+            &format!("{}", QUERY_REPETITIONS),
         ])
         .expect("Failed to write to CSV");
     }
