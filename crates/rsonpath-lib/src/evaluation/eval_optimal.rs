@@ -2,7 +2,7 @@ use crate::evaluation::lut_query_data::{
     QUERY_BESTBUY, QUERY_CROSSREF1, QUERY_CROSSREF2, QUERY_CROSSREF4, QUERY_GOOGLE, QUERY_NSPL, QUERY_TWITTER,
     QUERY_WALMART, QUERY_WIKI,
 };
-use crate::evaluation::track_config::{QUERY_REPETITIONS, TRACK_SKIPPING_ON, WARM_UP_QUERY_REPETITIONS};
+use crate::evaluation::track_config::{QUERY_REPETITIONS, TRACK_SKIPPING_ON};
 use crate::{
     engine::{Compiler, Engine, RsonpathEngine},
     input::OwnedBytes,
@@ -16,7 +16,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 
 static ACCUMULATED_SKIP_TIME: AtomicU64 = AtomicU64::new(0);
 
-// Run with: cargo run --bin eval --release -- eval-optimal ../rsonpath/.a_test_data ../rsonpath/.a_final_results/speed/optimal
+// Run with: cargo run --bin eval --release -- eval-optimal ../rsonpath/res/json ../rsonpath/res/data/speed/local/optimal
 // Run with: cargo run --bin eval --release -- eval-optimal ricardo-jsons plot-results
 //
 // "data_dir_path" is the path to folder holding the input JSON files.
@@ -29,22 +29,24 @@ static ACCUMULATED_SKIP_TIME: AtomicU64 = AtomicU64::new(0);
 //  crossref1_(551MB),64,1,$.items[2].resource.primary.URL,66067022.6
 //  ...
 pub fn run(data_dir_path: &str, result_dir_path: &str) {
+    println!("eval-optimal");
+
     if !TRACK_SKIPPING_ON {
-        println!("Enable Skip Tracking first and disable the empty list optimization. Abort");
+        println!("Enable Skip Tracking. Abort");
         return;
     }
-    if !cfg! {feature = "empty-list-opt"} {
+    if ! cfg! {feature = "empty-list-opt"} {
         println!("For fair comparisons with rsonpath-lut this feature needs to be enabled. Abort!");
         return;
     }
 
     eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
 
     // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
     // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
@@ -76,8 +78,7 @@ fn eval_all(data_dir_path: &str, results_dir_path: &str, test_data: (&str, &[(&s
     );
 
     if !file_exists {
-        println!("File did not exist, writing header.");
-        wtr.write_record(&["JSON", "QUERY_ID", "QUERY_TEXT", "SKIP_TIME_NANO_SECONDS"])
+        wtr.write_record(&["JSON", "QUERY_ID", "QUERY_TEXT", "SKIP_TIME_NANO_SECONDS, REPETITIONS"])
             .expect("Failed to write header");
         wtr.flush().expect("Failed to flush CSV");
     }
@@ -94,6 +95,7 @@ fn eval_all(data_dir_path: &str, results_dir_path: &str, test_data: (&str, &[(&s
             format!("{}", query_id),
             format!("{}", query_text),
             format!("{:.}", skip_time_nano_seconds),
+            format!("{}", QUERY_REPETITIONS),
         ])
         .expect("Failed to write query result");
     }
@@ -112,7 +114,7 @@ fn do_query(json_path: &str, query_id: &str, query_text: &str) {
     let query = rsonpath_syntax::parse(query_text).expect("Failed to parse query");
     let mut engine = RsonpathEngine::compile_query(&query).expect("Failed to compile query");
 
-    for _ in 0..WARM_UP_QUERY_REPETITIONS {
+    for _ in 0..QUERY_REPETITIONS {
         _ = engine.count(&input).expect("Fail count");
     }
 

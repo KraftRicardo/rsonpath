@@ -14,7 +14,7 @@ use std::path::Path;
 use std::time::Instant;
 use std::{fs, io::BufReader};
 
-use crate::evaluation::track_config::{QUERY_REPETITIONS, TRACK_SKIPPING_ON, WARM_UP_QUERY_REPETITIONS};
+use crate::evaluation::track_config::{QUERY_REPETITIONS, TRACK_SKIPPING_ON};
 
 // Measures the time taken for rq for given JSON+Queries. "empty-list-opt" has here no effect.
 //
@@ -126,7 +126,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
         let engine = RsonpathEngine::compile_query(&query).expect("Fail query");
 
         // Warm up
-        for _ in 0..WARM_UP_QUERY_REPETITIONS {
+        for _ in 0..QUERY_REPETITIONS {
             let _ = engine.count(&input).expect("Failed count");
         }
 
