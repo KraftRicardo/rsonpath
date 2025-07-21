@@ -56,13 +56,13 @@ pub const QUERY_JOHN_BIG: (&str, &[(&str, &str)]) = (
     "john_big.json",
     &[
         ("0", "$.person.address"),
-        // ("1", "$.person.firstName"),
-        // ("2", "$.person.lastName"),
-        // ("3", "$.person.phoneNumber[1].type"),
-        // ("4", "$.person.spouse.person.phoneNumber.*"),
-        // ("5", "$.person.spouse.person.phoneNumber[0]"),
-        // ("6", "$.person.spouse.person.phoneNumber[1]"),
-        // ("7", "$[1]"),
+        ("1", "$.person.firstName"),
+        ("2", "$.person.lastName"),
+        ("3", "$.person.phoneNumber[1].type"),
+        ("4", "$.person.spouse.person.phoneNumber.*"),
+        ("5", "$.person.spouse.person.phoneNumber[0]"),
+        ("6", "$.person.spouse.person.phoneNumber[1]"),
+        ("7", "$[1]"),
     ],
 );
 

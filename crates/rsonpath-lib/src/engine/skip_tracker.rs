@@ -69,6 +69,10 @@ pub fn save_track_to_csv(file_path: &str) -> std::io::Result<()> {
         writeln!(writer, "{},{},ite", key, value)?;
     }
 
+    drop(lut_map);
+    drop(ite_map);
+    reset();
+
     Ok(())
 }
 
@@ -154,10 +158,13 @@ pub fn save_count_to_csv(json_path: &str, csv_path: &str, filename: &str, query_
     reset();
 }
 
-fn reset() {
+pub fn reset() {
     LUT_COUNT.store(0, ORDER);
     ITE_COUNT.store(0, ORDER);
 
     LUT_DISTANCE.store(0, ORDER);
     ITE_DISTANCE.store(0, ORDER);
+
+    SKIP_TRACKER_LUT.lock().unwrap().clear();
+    SKIP_TRACKER_ITE.lock().unwrap().clear();
 }

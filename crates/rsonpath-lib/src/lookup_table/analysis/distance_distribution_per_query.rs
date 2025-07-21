@@ -54,7 +54,7 @@ pub fn run(json_dir_path: &str, base_path: &str) {
     // track_skip_count(json_dir_path, &result_dir_path, QUERY_BUGS, cutoff);
     // track_skip_count(json_dir_path, &result_dir_path, QUERY_BUGS_2, cutoff);
     // track_skip_count(json_dir_path, &result_dir_path, QUERY_JOHN, cutoff);
-    track_skip_count(json_dir_path, &result_dir_path, QUERY_JOHN_BIG, cutoff);
+    // track_skip_count(json_dir_path, &result_dir_path, QUERY_JOHN_BIG, cutoff);
     // track_skip_count(json_dir_path, &result_dir_path, QUERY_NUMBERS, cutoff);
 
     // // MB_1
@@ -80,15 +80,15 @@ pub fn run(json_dir_path: &str, base_path: &str) {
     // track_skip_count(json_dir_path, &result_dir_path, QUERY_WALMART_SHORT, cutoff);
 
     // GB_1
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_BESTBUY, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_CROSSREF1, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_CROSSREF2, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_CROSSREF4, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_GOOGLE, cutoff);
+    track_skip_count(json_dir_path, &result_dir_path, QUERY_BESTBUY, cutoff);
+    track_skip_count(json_dir_path, &result_dir_path, QUERY_CROSSREF1, cutoff);
+    track_skip_count(json_dir_path, &result_dir_path, QUERY_CROSSREF2, cutoff);
+    track_skip_count(json_dir_path, &result_dir_path, QUERY_CROSSREF4, cutoff);
+    track_skip_count(json_dir_path, &result_dir_path, QUERY_GOOGLE, cutoff);
     // track_skip_count(json_dir_path, &result_dir_path, QUERY_NSPL, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_TWITTER, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_WALMART, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_WIKI, cutoff);
+    track_skip_count(json_dir_path, &result_dir_path, QUERY_TWITTER, cutoff);
+    track_skip_count(json_dir_path, &result_dir_path, QUERY_WALMART, cutoff);
+    track_skip_count(json_dir_path, &result_dir_path, QUERY_WIKI, cutoff);
 
     // GB_25
     // track_skip_count(json_dir_path, &result_dir_path, QUERY_NESTED_COL, cutoff);
@@ -131,10 +131,12 @@ fn track(lut: LUT, json_path: &str, result_dir_path: &str, query_id: &str, query
     if SKIP_MODE == SkipMode::COUNT {
         let csv_path = format!("{result_dir_path}/COUNTER_{filename}.csv");
         _ = skip_tracker::save_count_to_csv(json_path, &csv_path, filename, query_id, query_text);
+        skip_tracker::reset();
         println!("Write to: {}", csv_path);
     } else if SKIP_MODE == SkipMode::TRACK {
         let csv_path = format!("{result_dir_path}/{filename}_query={query_id}.csv");
         _ = skip_tracker::save_track_to_csv(&csv_path);
+        skip_tracker::reset();
         println!("Write to: {}", csv_path);
     }
 

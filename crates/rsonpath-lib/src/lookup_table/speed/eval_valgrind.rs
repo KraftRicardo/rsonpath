@@ -9,9 +9,21 @@ use std::io::{BufReader, Read};
 use std::time::Instant;
 
 // Run with: cargo run --bin lut --release -- eval-valgrind
+
+// eval-valgrind
+// - File: twitter_large_record_(843MB).json, Cutoff: 0, Query: $[*].user.profile_sidebar_border_color, Time = 0.18026s, Result = 150135
+// - File: twitter_large_record_(843MB).json, Cutoff: 0, Query: $[*].retweeted_status.filter_level, Time = 0.24248s, Result = 102389
 pub fn run() {
     println!("eval-valgrind");
 
+    // INPUT
+    let data_dir_path = "res/json";
+    let cutoff = 0;
+    let json_twitter = "twitter_large_record_(843MB).json";
+    let query_twitter_17 = "$[*].user.profile_sidebar_border_color";
+    let query_twitter_19 = "$[*].retweeted_status.filter_level";
+
+    // Abort conditions
     if TRACK_SKIPPING_ON || SKIP_MODE != OFF {
         println!("Disable tracking of skips before running because it slows down the algorithm.");
         return;
@@ -21,14 +33,8 @@ pub fn run() {
         return;
     }
 
-    let data_dir_path = "res/json";
-
-    let cutoff = 0;
-    let json_twitter = "twitter_large_record_(843MB).json";
-    let query_twitter_17 = "$[*].user.profile_sidebar_border_color";
-    let query_twitter_19 = "$[*].retweeted_status.filter_level";
-
     eval(json_twitter, query_twitter_17, data_dir_path, cutoff);
+    eval(json_twitter, query_twitter_19, data_dir_path, cutoff);
 
     println!("Done");
 }
@@ -53,20 +59,22 @@ fn eval(json_name: &str, query_text: &str, data_dir_path: &str, cutoff: usize) {
     engine.add_lut(lut);
 
     let mut result = 0;
+
+    // Warm-up
     for _ in 0..QUERY_REPETITIONS {
         result = engine.count(&input).expect("Query execution failed");
     }
 
-    // let mut total_time = 0.0;
-    // for _ in 0..QUERY_REPETITIONS {
-    //     let start = Instant::now();
-    //     result = engine.count(&input).expect("Query execution failed");
-    //     total_time += start.elapsed().as_secs_f64();
-    // }
-    // let avg_time = total_time / (QUERY_REPETITIONS as f64);
-    //
-    // println!(
-    //     "  - File: {}, Cutoff: {}, Query: {}, Time = {:.5}s, Result = {}",
-    //     json_name, cutoff, query_text, avg_time, result
-    // );
+    let mut total_time = 0.0;
+    for _ in 0..QUERY_REPETITIONS {
+        let start = Instant::now();
+        result = engine.count(&input).expect("Query execution failed");
+        total_time += start.elapsed().as_secs_f64();
+    }
+    let avg_time = total_time / (QUERY_REPETITIONS as f64);
+
+    println!(
+        "  - File: {}, Cutoff: {}, Query: {}, Time = {:.5}s, Result = {}",
+        json_name, cutoff, query_text, avg_time, result
+    );
 }

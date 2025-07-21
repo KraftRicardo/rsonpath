@@ -11,7 +11,7 @@ pub mod speed;
 pub const SKIP_MODE: SkipMode = SkipMode::TRACK;
 pub const TRACK_SKIPPING_ON: bool = true;
 // pub const QUERY_REPETITIONS: usize = 20;
-pub const QUERY_REPETITIONS: usize = 100;
+pub const QUERY_REPETITIONS: usize = 10;
 // pub const BUILD_REPETITIONS: usize = 3;
 pub const BUILD_REPETITIONS: usize = 1;
 
