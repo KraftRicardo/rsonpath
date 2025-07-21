@@ -1,5 +1,6 @@
 use crate::lookup_table::speed::lut_query_data::*;
-use crate::lookup_table::{BUILD_REPETITIONS, QUERY_REPETITIONS};
+use crate::lookup_table::speed::lut_skip_evaluation::SkipMode::OFF;
+use crate::lookup_table::{BUILD_REPETITIONS, QUERY_REPETITIONS, SKIP_MODE, TRACK_SKIPPING_ON};
 use crate::{
     engine::{Compiler, Engine, RsonpathEngine},
     input::OwnedBytes,
@@ -27,6 +28,15 @@ const RQ_LUT_CUTOFF_512_NAME: &str = "rq-lut-cutoff-512";
 // Run with: cargo run --bin lut --release -- eval-final ricardo-jsons plot-results
 pub fn run(data_dir_path: &str, result_dir_path: &str) {
     println!("eval-final");
+
+    if TRACK_SKIPPING_ON || SKIP_MODE != OFF {
+        println!("Disable tracking of skips before running because it slows down the algorithm.");
+        return;
+    }
+    if !cfg! {feature = "empty-list-opt"} {
+        println!("Turn the empty-list-opt feature for better performance!");
+        return;
+    }
 
     // GB_1
     eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);

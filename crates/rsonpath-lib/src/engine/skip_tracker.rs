@@ -23,7 +23,7 @@ static LUT_DISTANCE: AtomicU64 = AtomicU64::new(0);
 static ITE_DISTANCE: AtomicU64 = AtomicU64::new(0);
 
 pub fn track_distance_lut(distance: usize) {
-    println!("Track: {distance}");
+    // println!("Track: {distance}");
 
     if SKIP_MODE == SkipMode::COUNT {
         LUT_COUNT.fetch_add(1, Ordering::Relaxed);
@@ -36,7 +36,7 @@ pub fn track_distance_lut(distance: usize) {
 }
 
 pub fn track_distance_ite(distance: usize) {
-    println!("Track: {distance}");
+    // println!("Track: {distance}");
 
     if SKIP_MODE == SkipMode::COUNT {
         ITE_COUNT.fetch_add(1, Ordering::Relaxed);
