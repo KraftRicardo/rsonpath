@@ -1,5 +1,7 @@
 #![allow(clippy::expect_used)] // Enforcing the classifier invariant is clunky without this.
-use crate::lookup_table::final_results::deprecated::eval_optimal;
+use crate::lookup_table::analysis::skip_counter;
+use crate::lookup_table::speed::lut_skip_evaluation;
+use crate::lookup_table::speed::lut_skip_evaluation::SkipMode;
 use crate::lookup_table::{SKIP_MODE, TRACK_SKIPPING_ON};
 use crate::{
     classification::{
@@ -15,10 +17,7 @@ use crate::{
         skip_tracker::{track_distance_ite, track_distance_lut},
     },
     input::InputBlockIterator,
-    lookup_table::{
-        performance::lut_skip_evaluation::{self, SkipMode},
-        LookUpTable, LUT,
-    },
+    lookup_table::{LookUpTable, LUT},
     FallibleIterator, MaskType, BLOCK_SIZE,
 };
 use std::{marker::PhantomData, time::Instant};
@@ -63,7 +62,7 @@ where
 
             let distance = result - idx;
             lut_skip_evaluation::add_skip_time(skip_time);
-            eval_optimal::add_skip_time(distance, skip_time);
+            skip_counter::add_skip_time(distance, skip_time);
             Ok(result)
         } else {
             self.skip_choice(idx_open, idx, bracket_type, lut, padding)
@@ -87,7 +86,7 @@ where
         } else {
             let idx_close = self.skip_ite(bracket_type)?;
 
-            track_skip("ITE", idx_close - idx);
+            track_skip("ITE", idx_close - idx - 1);
             debug_msg("ITE", idx, idx_open, idx_close, padding);
             Ok(idx_close)
         }
@@ -106,7 +105,7 @@ where
         if let Some(idx_lut) = lut.get(&(idx_open - padding)) {
             let idx_close = idx_lut + 1 + padding; // Note: shift index by 1 or its off aligned
 
-            track_skip("LUT", idx_close - idx);
+            track_skip("LUT", idx_close - idx - 1);
             debug_msg("LUT", idx, idx_open, idx_close, padding);
 
             self.classifier
@@ -119,7 +118,7 @@ where
             // LUT had no hit, skip ITE style
             let idx_close = self.skip_ite(bracket_type)?;
 
-            track_skip("ITE", idx_close - idx);
+            track_skip("ITE", idx_close - idx - 1);
             debug_msg("ITE", idx, idx_open, idx_close, padding);
 
             Ok(idx_close)
@@ -229,7 +228,7 @@ where
                     .expect("tail skip must always hold a classifier")
                     .jump_to_idx(idx_close, false)?;
 
-                track_skip("LUT", idx_close - idx);
+                track_skip("LUT", idx_close - idx - 1);
                 debug_msg("LUT", idx, idx_open, idx_close, padding);
                 return Ok(idx_close);
             }
@@ -237,7 +236,7 @@ where
             if let Some(err) = err {
                 Err(err.into())
             } else {
-                track_skip("ITE", idx_close - idx);
+                track_skip("ITE", idx_close - idx - 1);
                 debug_msg("ITE", idx, idx_open, idx_close, padding);
                 Ok(idx_close)
             }
