@@ -1,11 +1,6 @@
-use crate::lookup_table::util_path;
+use crate::lookup_table::extra::util_path;
+use crate::lookup_table::speed::lut_evaluation;
 use std::{fs, path::Path};
-
-pub mod lut_evaluation;
-pub mod lut_hot;
-pub mod lut_query_correctness;
-pub mod lut_query_data;
-pub mod lut_skip_evaluation;
 
 pub const EVAL_DIR: &str = "evaluation";
 

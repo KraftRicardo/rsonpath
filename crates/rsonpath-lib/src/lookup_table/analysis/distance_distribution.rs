@@ -1,10 +1,10 @@
 use std::{
     collections::{HashMap, VecDeque},
     fs::{self, File},
-    io::{self, Write},
-    process::Command,
+    io::Write,
 };
 
+use crate::lookup_table::extra::util_path;
 use crate::{
     classification::{
         self,
@@ -12,7 +12,6 @@ use crate::{
         structural::{BracketType, Structural, StructuralIterator},
     },
     input::{self, Input},
-    lookup_table::util_path,
     result::empty::EmptyRecorder,
     FallibleIterator,
 };
@@ -22,7 +21,7 @@ pub const DISTANCE_EVAL_DIR: &str = "distance_distribution";
 // Count the distances for each json file of the given directory
 // Run with: cargo run --bin lut --release -- distance-distribution res/json res/data/analysis/distance_distribution
 #[inline]
-pub fn analyse_distance_distribution(json_dir_path: &str, result_dir_path: &str) {
+pub fn run(json_dir_path: &str, result_dir_path: &str) {
     let dir = fs::read_dir(json_dir_path).expect("Failed to read directory");
 
     println!("Counting Distances:");

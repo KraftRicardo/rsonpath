@@ -1,4 +1,4 @@
-use crate::lookup_table::pair_data;
+use crate::lookup_table::extra::pair_data;
 use std::ffi::OsStr;
 use std::fs::{self, File};
 use std::io::{BufWriter, Write};

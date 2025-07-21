@@ -6,22 +6,14 @@ use std::{
 use log::debug;
 use rsonpath::engine::main::MainEngine;
 use rsonpath::input::{BorrowedBytes, Input};
-use rsonpath::lookup_table::implementations::lut_hash_map;
-use rsonpath::lookup_table::implementations::lut_hash_map::LutHashMap;
-use rsonpath::lookup_table::implementations::lut_phf_double::LutPHFDouble;
-use rsonpath::lookup_table::implementations::lut_phf_group::LutPHFGroup;
-use rsonpath::lookup_table::performance::lut_query_data::{
-    QUERY_BESTBUY, QUERY_CANADA, QUERY_NESTED_COL, QUERY_OPENFOOD, QUERY_PEOPLE, QUERY_POKEMON_MINI,
-    QUERY_PRETTY_PEOPLE, QUERY_TWITTER, QUERY_TWITTER_MINI,
-};
+use rsonpath::lookup_table::luts::lut_hash_map;
+use rsonpath::lookup_table::luts::lut_hash_map::LutHashMap;
+use rsonpath::lookup_table::luts::lut_phf_double::LutPHFDouble;
+use rsonpath::lookup_table::luts::lut_phf_group::LutPHFGroup;
 use rsonpath::{
     engine::{Compiler, Engine, RsonpathEngine},
     input::OwnedBytes,
-    lookup_table::{
-        pair_data,
-        performance::lut_query_data::{QUERY_BUGS, QUERY_GOOGLE, QUERY_JOHN_BIG},
-        LookUpTable, LUT,
-    },
+    lookup_table::{LookUpTable, LUT},
 };
 use serde_json::json;
 
@@ -42,7 +34,7 @@ fn test_build_and_queries() {
     debug!("Start with cutoff={}", cutoff);
 
     // MB_1
-    // test_build_correctness(QUERY_CANADA, cutoff);
+    test_build_correctness(QUERY_CANADA, cutoff);
     // test_build_correctness(QUERY_OPENFOOD, cutoff);
     // test_build_correctness(QUERY_PEOPLE, cutoff);
     // test_build_correctness(QUERY_PRETTY_PEOPLE, cutoff);
@@ -232,6 +224,8 @@ fn debug_lut_phf_double() {
 }
 
 use rayon::current_num_threads;
+use rsonpath::lookup_table::extra::pair_data;
+use rsonpath::lookup_table::speed::lut_query_data::QUERY_CANADA;
 #[allow(unused_imports)]
 use std::str;
 

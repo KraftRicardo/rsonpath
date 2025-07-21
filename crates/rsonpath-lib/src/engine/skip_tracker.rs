@@ -7,7 +7,7 @@ use std::path::Path;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Mutex;
 
-use crate::lookup_table::performance::lut_skip_evaluation::{self, SkipMode};
+use crate::lookup_table::speed::lut_skip_evaluation::SkipMode;
 use crate::lookup_table::SKIP_MODE;
 
 const ORDER: Ordering = Ordering::Relaxed;
@@ -23,9 +23,7 @@ static LUT_DISTANCE: AtomicU64 = AtomicU64::new(0);
 static ITE_DISTANCE: AtomicU64 = AtomicU64::new(0);
 
 pub fn track_distance_lut(distance: usize) {
-    if (distance == 1) {
-        println!("Tracking lut");
-    }
+    println!("Track: {distance}");
 
     if SKIP_MODE == SkipMode::COUNT {
         LUT_COUNT.fetch_add(1, Ordering::Relaxed);
@@ -38,9 +36,7 @@ pub fn track_distance_lut(distance: usize) {
 }
 
 pub fn track_distance_ite(distance: usize) {
-    if (distance == 1) {
-        println!("Tracking lut");
-    }
+    println!("Track: {distance}");
 
     if SKIP_MODE == SkipMode::COUNT {
         ITE_COUNT.fetch_add(1, Ordering::Relaxed);
@@ -114,9 +110,10 @@ pub fn save_count_to_csv(json_path: &str, csv_path: &str, filename: &str, query_
     if !file_existed {
         writeln!(
             writer,
-            "{},{},{},{},{},{},{},{},{},{},{},{}",
+            "{},{},{},{},{},{},{},{},{},{},{},{},{}",
             "FILENAME",
             "QUERY_NAME",
+            "QUERY_TEXT",
             "LUT_PERCENT_SKIP",
             "ITE_PERCENT_SKIP",
             "TOTAL_PERCENT_SKIP",
@@ -134,9 +131,10 @@ pub fn save_count_to_csv(json_path: &str, csv_path: &str, filename: &str, query_
     // Write data to CSV
     writeln!(
         writer,
-        "{},{},{:.6},{:.6},{:.6},{},{},{},{},{},{},{}",
+        "{},{},{},{:.6},{:.6},{:.6},{},{},{},{},{},{},{}",
         filename,
         query_name,
+        query_text,
         percentage_lut_skip,
         percentage_ite_skip,
         percentage_total_skip,
