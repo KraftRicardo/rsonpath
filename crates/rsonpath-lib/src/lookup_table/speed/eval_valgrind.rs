@@ -14,10 +14,6 @@ use std::time::Instant;
 // Analyse with: sudo perf stat target/release/lut eval-valgrind
 // Analyse with: valgrind --tool=cachegrind target/release/lut eval-valgrind
 
-// eval-valgrind
-// - File: google_map_short_(107MB).json, Cutoff: 0, Query: $[*].routes[*].bounds.northeast.lat, Time = 0.00093s, Result = 434
-// - File: google_map_short_(107MB).json, Cutoff: 0, Query: $[*].routes[*].bounds.northeast.lng, Time = 0.00088s, Result = 434
-
 pub fn run() {
     println!("eval-valgrind");
     println!("REPETITIONS: {QUERY_REPETITIONS}");
@@ -29,9 +25,9 @@ pub fn run() {
     // let query_twitter_17 = "$[*].user.profile_sidebar_border_color";
     // let query_twitter_19 = "$[*].retweeted_status.filter_level";
 
-    let json_google = "google_map_short_(107MB).json";
-    let query_google_14 = "$[*].routes[*].bounds.northeast.lat";
-    let query_google_15 = "$[*].routes[*].bounds.northeast.lng";
+    let json_google = "google_map_large_record_(1.1GB).json";
+    let query_google_14 = "$[*].routes[*].legs[*].steps[*].polyline.points";
+    let query_google_15 = "$[*].routes[*].legs[*]..lat";
 
     // Abort conditions
     if TRACK_SKIPPING_ON || SKIP_MODE != OFF {
@@ -43,8 +39,8 @@ pub fn run() {
         return;
     }
 
-    // eval(json_google, query_google_14, data_dir_path, cutoff);
-    eval(json_google, query_google_15, data_dir_path, cutoff);
+    eval(json_google, query_google_14, data_dir_path, cutoff);
+    // eval(json_google, query_google_15, data_dir_path, cutoff);
 
     println!("Done");
 }

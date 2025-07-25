@@ -1,4 +1,5 @@
 #![allow(clippy::expect_used)] // Enforcing the classifier invariant is clunky without this.
+use crate::engine::skip_tracker;
 use crate::lookup_table::analysis::skip_counter;
 use crate::lookup_table::speed::lut_skip_evaluation;
 use crate::lookup_table::speed::lut_skip_evaluation::SkipMode;
@@ -57,13 +58,17 @@ where
     ) -> Result<usize, EngineError> {
         if TRACK_SKIPPING_ON {
             let start_skip = Instant::now();
-            let result = self.skip_choice(idx_open, idx, bracket_type, lut, padding)?;
-            let skip_time = start_skip.elapsed().as_nanos() as u64;
+            let idx_close = self.skip_choice(idx_open, idx, bracket_type, lut, padding)?;
+            let skip_time_nanos = start_skip.elapsed().as_nanos() as u64;
 
-            let distance = result - idx;
-            lut_skip_evaluation::add_skip_time(skip_time);
-            skip_counter::add_skip_time(distance, skip_time);
-            Ok(result)
+            let distance = idx_close - idx - 1;
+            if SKIP_MODE == SkipMode::TRACK_TIMED {
+                skip_tracker::track_timed_distance(distance, skip_time_nanos);
+            }
+
+            lut_skip_evaluation::add_skip_time(skip_time_nanos);
+            // skip_counter::add_skip_time(distance, skip_time_nanos);
+            Ok(idx_close)
         } else {
             self.skip_choice(idx_open, idx, bracket_type, lut, padding)
         }
@@ -84,10 +89,11 @@ where
                 self.skip_lut_abort(idx_open, idx, bracket_type, lut, padding)
             }
         } else {
-            let idx_close = self.skip_ite(bracket_type)?;
+            let mut idx_close: usize;
+            idx_close = self.skip_ite(bracket_type)?;
 
             track_skip("ITE", idx_close - idx - 1);
-            debug_msg("ITE", idx, idx_open, idx_close, padding);
+            // debug_msg("ITE", idx, idx_open, idx_close, padding);
             Ok(idx_close)
         }
     }
@@ -322,6 +328,21 @@ where
     }
 }
 
+// Only used for tracking jumps and not needed in normal runs
+fn track_skip(prefix: &str, distance: usize) {
+    if SKIP_MODE == SkipMode::COUNT || SKIP_MODE == SkipMode::TRACK {
+        debug!("{prefix}: Track distance = {distance}");
+
+        if prefix == "ITE" {
+            track_distance_ite(distance);
+        } else if prefix == "LUT" {
+            track_distance_lut(distance)
+        } else {
+            panic!("Wrong debug input!")
+        }
+    }
+}
+
 fn debug_msg(prefix: &str, idx: usize, idx_open: usize, idx_close: usize, padding: usize) {
     let distance = idx_close - idx_open;
     if idx >= padding && idx_open >= padding && idx_close >= padding {
@@ -342,21 +363,6 @@ fn debug_msg(prefix: &str, idx: usize, idx_open: usize, idx_close: usize, paddin
             "{}[dst={}]: idx={}: (idx_open={} -> idx_close={}) No-PAD: not possible because padding = {} is too high.",
             prefix, distance, idx, idx_open, idx_close, padding
         );
-    }
-}
-
-// Only for tracking jumps and not needed in normal runs
-fn track_skip(prefix: &str, distance: usize) {
-    if !(SKIP_MODE == SkipMode::OFF) {
-        debug!("{prefix}: Track distance = {distance}");
-
-        if prefix == "ITE" {
-            track_distance_ite(distance);
-        } else if prefix == "LUT" {
-            track_distance_lut(distance)
-        } else {
-            panic!("Wrong debug input!")
-        }
     }
 }
 

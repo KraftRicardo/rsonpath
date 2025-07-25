@@ -6,14 +6,17 @@ use crate::{
 };
 
 use crate::lookup_table::speed::lut_query_data::*;
+use crate::lookup_table::speed::lut_skip_evaluation::SkipMode::{COUNT, TRACK};
 use crate::lookup_table::speed::lut_skip_evaluation::{get_filename, SkipMode};
-use crate::lookup_table::{SKIP_MODE, TRACK_SKIPPING_ON};
+use crate::lookup_table::{QUERY_REPETITIONS, SKIP_MODE, TRACK_SKIPPING_ON};
+use crate::result::MatchCount;
 use crate::{
     engine::{Compiler, RsonpathEngine},
     input::OwnedBytes,
     lookup_table::LookUpTable,
 };
 use std::fs;
+use SkipMode::TRACK_TIMED;
 
 pub const COUNTER_FILE_PATH: &str = ".a_lut_tests/performance/skip_tracker/COUNTER_";
 
@@ -37,12 +40,15 @@ pub fn run(json_dir_path: &str, base_path: &str) {
     // Create result directory
     let result_dir_path: String;
 
-    if SKIP_MODE == SkipMode::COUNT {
+    if SKIP_MODE == COUNT {
         println!("Skip mode = COUNT");
         result_dir_path = format!("{base_path}/count");
-    } else if SKIP_MODE == SkipMode::TRACK {
+    } else if SKIP_MODE == TRACK {
         println!("Skip mode = TRACK");
         result_dir_path = format!("{base_path}/track/cutoff={cutoff}");
+    } else if SKIP_MODE == TRACK_TIMED {
+        println!("Skip mode = TRACK_TIMED");
+        result_dir_path = format!("{base_path}/track_timed/cutoff={cutoff}");
     } else {
         println!("No tracking set. Abort.");
         return;
@@ -80,21 +86,21 @@ pub fn run(json_dir_path: &str, base_path: &str) {
     // track_skip_count(json_dir_path, &result_dir_path, QUERY_WALMART_SHORT, cutoff);
 
     // GB_1
-    track_skip_count(json_dir_path, &result_dir_path, QUERY_BESTBUY, cutoff);
-    track_skip_count(json_dir_path, &result_dir_path, QUERY_CROSSREF1, cutoff);
-    track_skip_count(json_dir_path, &result_dir_path, QUERY_CROSSREF2, cutoff);
-    track_skip_count(json_dir_path, &result_dir_path, QUERY_CROSSREF4, cutoff);
-    track_skip_count(json_dir_path, &result_dir_path, QUERY_GOOGLE, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_NSPL, cutoff);
-    track_skip_count(json_dir_path, &result_dir_path, QUERY_TWITTER, cutoff);
-    track_skip_count(json_dir_path, &result_dir_path, QUERY_WALMART, cutoff);
-    track_skip_count(json_dir_path, &result_dir_path, QUERY_WIKI, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_BESTBUY, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_CROSSREF1, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_CROSSREF2, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_CROSSREF4, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_GOOGLE, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_NSPL, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_TWITTER, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_WALMART, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_WIKI, cutoff);
 
     // GB_25
     // track_skip_count(json_dir_path, &result_dir_path, QUERY_NESTED_COL, cutoff);
 }
 
-fn track_skip_count(json_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&str, &str)]), cutoff: usize) {
+fn track(json_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&str, &str)]), cutoff: usize) {
     let (json_name, queries) = test_data;
     let json_path = format!("{}/{}", json_dir_path, json_name);
     println!("json_path: {}", json_path);
@@ -103,15 +109,19 @@ fn track_skip_count(json_dir_path: &str, result_dir_path: &str, test_data: (&str
     let mut lut = LUT::build(&json_path, cutoff).expect("Fail @ building LUT");
 
     for &(query_id, query_text) in queries {
-        let new_lut = track(lut, &json_path, result_dir_path, query_id, query_text);
-        lut = new_lut;
+        if SKIP_MODE == COUNT || SKIP_MODE == TRACK {
+            let new_lut = track_count(lut, &json_path, result_dir_path, query_id, query_text);
+            lut = new_lut;
+        } else if SKIP_MODE == TRACK_TIMED {
+            track_timed(&json_path, result_dir_path, query_id, query_text);
+        }
     }
 }
 
-fn track(lut: LUT, json_path: &str, result_dir_path: &str, query_id: &str, query_text: &str) -> LUT {
+fn track_count(lut: LUT, json_path: &str, result_dir_path: &str, query_id: &str, query_text: &str) -> LUT {
     print!("\tQuery {} = {}", query_id, query_text);
 
-    // Build query
+    // Build query and engine with LUT
     let query = rsonpath_syntax::parse(query_text).expect("Fail @ parse query");
     let mut engine = RsonpathEngine::compile_query(&query).expect("Fail @ compile query");
     engine.add_lut(lut);
@@ -123,17 +133,18 @@ fn track(lut: LUT, json_path: &str, result_dir_path: &str, query_id: &str, query
         file.read_to_end(&mut buf).expect("Fail @ file read");
         OwnedBytes::new(buf)
     };
+
     let result = engine.count(&input).expect("Failed to run query normally");
     print!("Result={} ", result);
 
     // Save to csv
     let filename = get_filename(json_path);
-    if SKIP_MODE == SkipMode::COUNT {
+    if SKIP_MODE == COUNT {
         let csv_path = format!("{result_dir_path}/COUNTER_{filename}.csv");
         _ = skip_tracker::save_count_to_csv(json_path, &csv_path, filename, query_id, query_text);
         skip_tracker::reset();
         println!("Write to: {}", csv_path);
-    } else if SKIP_MODE == SkipMode::TRACK {
+    } else if SKIP_MODE == TRACK {
         let csv_path = format!("{result_dir_path}/{filename}_query={query_id}.csv");
         _ = skip_tracker::save_track_to_csv(&csv_path);
         skip_tracker::reset();
@@ -141,4 +152,33 @@ fn track(lut: LUT, json_path: &str, result_dir_path: &str, query_id: &str, query
     }
 
     engine.take_lut().expect("Failed to retrieve LUT from engine")
+}
+
+fn track_timed(json_path: &str, result_dir_path: &str, query_id: &str, query_text: &str) {
+    print!("\tQuery {} = {}", query_id, query_text);
+
+    // Build query
+    let query = rsonpath_syntax::parse(query_text).expect("Fail @ parse query");
+    let mut engine = RsonpathEngine::compile_query(&query).expect("Fail @ compile query");
+
+    // Get result while tracking skips
+    let input = {
+        let mut file = BufReader::new(fs::File::open(json_path).expect("Fail @ open File"));
+        let mut buf = vec![];
+        file.read_to_end(&mut buf).expect("Fail @ file read");
+        OwnedBytes::new(buf)
+    };
+
+    let mut result = 0;
+    for _ in 0..QUERY_REPETITIONS {
+        result = engine.count(&input).expect("Failed to run query normally");
+    }
+    print!("Result={} ", result);
+
+    // Save to csv
+    let filename = get_filename(json_path);
+    let csv_path = format!("{result_dir_path}/{filename}_query={query_id}.csv");
+    _ = skip_tracker::save_track_timed_to_csv(&csv_path);
+    skip_tracker::reset();
+    println!("Write to: {}", csv_path);
 }

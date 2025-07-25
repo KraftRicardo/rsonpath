@@ -649,6 +649,7 @@ where
             if self.automaton.is_unitary(self.state) {
                 let bracket_type = self.current_node_bracket_type();
                 debug!("Skipping unique state from {bracket_type:?}. Skip#1");
+                // TODO add empty-list-opt here jump from }/] -> }/]
                 let close_idx = classifier.skip(
                     self.idx_open,
                     idx,

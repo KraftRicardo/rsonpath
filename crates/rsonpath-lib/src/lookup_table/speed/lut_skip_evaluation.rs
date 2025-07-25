@@ -18,9 +18,10 @@ static SKIP_TIME_ATOMIC: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Debug, PartialEq)]
 pub enum SkipMode {
-    COUNT, // Track how many jumps are happening
-    TRACK, // Track each jump value individually in a data structure (slow)
-    OFF,   // Turned off, tracking nothing
+    COUNT,       // Track how many jumps are happening
+    TRACK,       // Track each jump value individually in a data structure (slow)
+    TRACK_TIMED, // Track each jump value individually in a data structure and measure the time of each (slower)
+    OFF,         // Turned off, tracking nothing
 }
 
 const RESULT_CSV_PATH: &str = ".a_lut_tests/performance/skip_evaluation/";
