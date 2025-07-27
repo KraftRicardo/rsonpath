@@ -1,5 +1,9 @@
 // All listed queries here have a result with count > 0.
 
+use csv::ReaderBuilder;
+use std::fs::File;
+use std::io::BufReader;
+
 // ##########
 // kB_1
 // ##########
@@ -478,27 +482,31 @@ pub const QUERY_WALMART_SHORT: (&str, &[(&str, &str)]) = (
 // ##########
 // GB_1
 // ##########
-pub const QUERY_BESTBUY: (&str, &[(&str, &str)]) = (
-    "bestbuy_large_record_(1GB).json",
-    &[
-        ("1", "$.products[4].categoryPath[2]"),            // 0.999999 <- Skip Percentage
-        ("2", "$.products[*].categoryPath[2]"),            // 0.827555
-        ("3", "$.products[*].quantityLimit"),              // 0.803025
-        ("4", "$.products[*].frequentlyPurchasedWith[*]"), // 0.775238
-        ("5", "$.products[*].includedItemList[*]"),        // 0.765115
-        ("6", "$.products[*].homeDelivery"),               // 0.598374
-        ("7", "$.products[*].freeShipping"),               // 0.510142
-        ("8", "$.products[*].shipping[*]"),                // 0.492032
-        ("9", "$.products[*].shippingLevelsOfService[*].serviceLevelName"), // 0.306224
-        ("10", "$.products[*].shippingLevelsOfService[*]"), // 0.295264
-        ("11", "$.products[*].dollarSavings"),             // 0.162506
-        ("12", "$.products[*].lengthInMinutes"),           // 0.127193
-        ("13", "$.products[*].screenFormat"),              // 0.101771
-        ("14", "$.products[*].additionalFeatures[*]"),     // 0.097107
-        ("15", "$.products[*].videoChapters"),             // 0.088070
-        ("16", "$..freeShipping"),                         // 0.000000
-    ],
-);
+
+// Structure:
+//      QUERY_ID,QUERY_TEXT,COUNT_RESULT,SKIP_PERCENTAGE
+//      1,$..freeShipping,230089,0.000
+//      2,$..additionalFeatures[*].feature,61098,0.000
+//      ...
+const QUERY_DATA_FOLDER: &str = "res/query";
+pub const QUERY_BESTBUY: &str = "bestbuy_large_record_(1GB)";
+
+pub fn read_queries(file_name: &str) -> (String, Vec<(String, String)>) {
+    let csv_path = format!("{QUERY_DATA_FOLDER}/{file_name}.csv");
+    let file = File::open(&csv_path).expect("Cannot open CSV file");
+    let mut rdr = ReaderBuilder::new().has_headers(true).from_reader(BufReader::new(file));
+
+    let mut queries = Vec::new();
+
+    for result in rdr.records() {
+        let record = result.expect("Failed to parse CSV record");
+        let id = record.get(0).expect("Missing ID").to_string();
+        let path = record.get(1).expect("Missing path").to_string();
+        queries.push((id, path));
+    }
+
+    (format!("{file_name}.json"), queries)
+}
 
 pub const QUERY_CROSSREF1: (&str, &[(&str, &str)]) = (
     "crossref1_(551MB).json",

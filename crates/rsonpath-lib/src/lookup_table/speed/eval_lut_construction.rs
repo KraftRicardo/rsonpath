@@ -21,7 +21,7 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
     eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART_SHORT);
 
     // GB_1
-    eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);
     eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
     eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
     eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);

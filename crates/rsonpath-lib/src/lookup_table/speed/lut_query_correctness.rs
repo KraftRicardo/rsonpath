@@ -102,7 +102,7 @@ pub fn test_build_and_queries() {
     // test_query_correctness_count(QUERY_WALMART_SHORT, cutoff);
 
     // GB_1
-    test_query_correctness_count(QUERY_BESTBUY, cutoff);
+    // test_query_correctness_count(QUERY_BESTBUY, cutoff);
     test_query_correctness_count(QUERY_CROSSREF1, cutoff);
     test_query_correctness_count(QUERY_CROSSREF2, cutoff);
     test_query_correctness_count(QUERY_CROSSREF4, cutoff);
