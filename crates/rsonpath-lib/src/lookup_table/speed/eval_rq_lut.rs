@@ -32,8 +32,8 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
 
     // 2^40 = 1,099,511,627,776, we basically use a cutoff so high we do not trigger the skipping
     // with the lut. We want to see how slow the overall application is.
-    // let cutoffs = vec![0, 64, 128, 512, 8192, 1099511627776];
-    let cutoffs = vec![0, 64];
+    let cutoffs = vec![0, 64, 128, 512, 1024, 2048, 4096, 8192, 1099511627776];
+    // let cutoffs = vec![0, 64];
 
     if TRACK_SKIPPING_ON || SKIP_MODE != OFF {
         println!("Disable tracking of skips before running because it slows down the algorithm.");
@@ -48,24 +48,25 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
     fs::create_dir_all(&result_dir_path).expect("Failed to create directory");
 
     // GB_1
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY, &cutoffs);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1, &cutoffs);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE, &cutoffs);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL, &cutoffs);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER, &cutoffs);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART, &cutoffs);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI, &cutoffs);
-
-    // Practically the same as crossref1
-    // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF2, &cutoffs);
-    // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF4, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER_SCALED, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART_SCALED, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI_SCALED, &cutoffs);
 
     println!("Done");
 }
 
-fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&str, &str)]), cutoffs: &Vec<usize>) {
+fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data: &str, cutoffs: &Vec<usize>) {
     // Extract input
-    let (json_filename, queries) = test_data;
+    let (json_filename, queries) = read_queries(query_data);
     let filename = json_filename.strip_suffix(".json").unwrap();
     println!("JSON: {}", filename);
 
@@ -74,12 +75,12 @@ fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&st
 
     // Measurements
     for cutoff in cutoffs {
-        measure_query(&json_path, &result_dir_path, filename, queries, *cutoff);
+        measure_query(&json_path, &result_dir_path, filename, &queries, *cutoff);
     }
 }
 
 // Measure query time
-fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries: &[(&str, &str)], cutoff: usize) {
+fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries: &[(String, String)], cutoff: usize) {
     let query_csv_path = format!("{}/rq_lut_time.csv", result_dir_path);
     let csv_exists = Path::new(&query_csv_path).exists();
 
@@ -108,8 +109,8 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
         OwnedBytes::new(buf)
     };
 
-    for &(query_id, query_text) in queries {
-        let query = rsonpath_syntax::parse(query_text).expect("Failed to parse query");
+    for (query_id, query_text) in queries {
+        let query = rsonpath_syntax::parse(&query_text).expect("Failed to parse query");
         let mut engine = RsonpathEngine::compile_query(&query).expect("Failed to compile query");
         engine.add_lut(lut);
 
@@ -139,8 +140,8 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
         wrt.write_record(&[
             filename,
             cutoff.to_string().as_str(),
-            query_id,
-            query_text,
+            query_id.as_str(),
+            query_text.as_str(),
             &format!("{:.5}", avg_time),
         ])
         .expect("Failed to write to CSV");
