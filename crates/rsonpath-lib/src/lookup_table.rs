@@ -10,10 +10,10 @@ pub mod speed;
 // CONFIG
 pub const SKIP_MODE: SkipMode = SkipMode::OFF;
 pub const TRACK_SKIPPING_ON: bool = false;
-// pub const QUERY_REPETITIONS: usize = 20;
-pub const QUERY_REPETITIONS: usize = 1;
-// pub const BUILD_REPETITIONS: usize = 3;
-pub const BUILD_REPETITIONS: usize = 1;
+pub const QUERY_REPETITIONS: usize = 20;
+// pub const QUERY_REPETITIONS: usize = 1;
+pub const BUILD_REPETITIONS: usize = 3;
+// pub const BUILD_REPETITIONS: usize = 1;
 
 // Different LUT implementation approaches and experiments. LutPtrHashDouble and LutVFuncDouble
 // perform the best by far memory, build time and query speed wise.
