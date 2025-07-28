@@ -1,7 +1,4 @@
-use crate::evaluation::lut_query_data::{
-    QUERY_BESTBUY, QUERY_CROSSREF1, QUERY_CROSSREF2, QUERY_CROSSREF4, QUERY_GOOGLE, QUERY_NSPL, QUERY_TWITTER,
-    QUERY_WALMART, QUERY_WIKI,
-};
+use crate::evaluation::lut_query_data::*;
 use crate::{
     engine::{Compiler, Engine, RsonpathEngine},
     input::OwnedBytes,
@@ -36,10 +33,10 @@ use crate::evaluation::track_config::{QUERY_REPETITIONS, TRACK_SKIPPING_ON};
 pub fn run(data_dir_path: &str, base_path: &str, use_empty_list_opt: bool) {
     let mut result_dir_path: String;
     if use_empty_list_opt {
-        println!("rq-legacy");
+        println!("rq-legacy QUERY_REPETITIONS {QUERY_REPETITIONS}");
         result_dir_path = format!("{}/rq_legacy", base_path);
     } else {
-        print!("rq-legacy-empty-list-opt-off");
+        print!("rq-legacy-empty-list-opt-off QUERY_REPETITIONS {QUERY_REPETITIONS}");
         result_dir_path = format!("{}/rq_legacy_empty_list_opt_off", base_path);
     }
 
@@ -64,33 +61,35 @@ pub fn run(data_dir_path: &str, base_path: &str, use_empty_list_opt: bool) {
 
     // GB_1
     eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
-
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
     // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
     // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER_SCALED);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART_SCALED);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI_SCALED);
 
     println!("Done");
 }
 
-pub fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&str, &str)])) {
+pub fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data: &str) {
     // Extract input
-    let (json_filename, queries) = test_data;
+    let (json_filename, queries) = read_queries(query_data);
     let filename = json_filename.strip_suffix(".json").unwrap();
     println!("JSON: {}", filename);
 
     // All necessary paths to CSV and PNG
     let json_path = format!("{}/{}.json", data_dir_path, filename);
 
-    measure_query(&json_path, &result_dir_path, filename, queries);
+    measure_query(&json_path, &result_dir_path, filename, &queries);
 }
 
 // Measure query time
-fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries: &[(&str, &str)]) {
+fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries: &[(String, String)]) {
     let query_csv_path = if cfg!(feature = "empty-list-opt") {
         format!("{}/rq_legacy_time.csv", result_dir_path)
     } else {
@@ -121,8 +120,8 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
         OwnedBytes::new(buf)
     };
 
-    for &(query_id, query_text) in queries {
-        let query = parse(query_text).expect("Fail @ parse query");
+    for (query_id, query_text) in queries {
+        let query = parse(&query_text).expect("Fail @ parse query");
         let engine = RsonpathEngine::compile_query(&query).expect("Fail query");
 
         // Warm up
@@ -148,8 +147,8 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
 
         wrt.write_record(&[
             filename,
-            query_id,
-            query_text,
+            &query_id,
+            &query_text,
             &format!("{:.5}", avg_time),
             &format!("{}", QUERY_REPETITIONS),
         ])

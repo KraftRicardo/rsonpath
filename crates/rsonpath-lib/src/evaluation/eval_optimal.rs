@@ -1,6 +1,6 @@
 use crate::evaluation::lut_query_data::{
-    QUERY_BESTBUY, QUERY_CROSSREF1, QUERY_CROSSREF2, QUERY_CROSSREF4, QUERY_GOOGLE, QUERY_NSPL, QUERY_TWITTER,
-    QUERY_WALMART, QUERY_WIKI,
+    read_queries, QUERY_BESTBUY, QUERY_CROSSREF1, QUERY_CROSSREF2, QUERY_CROSSREF4, QUERY_GOOGLE, QUERY_NSPL,
+    QUERY_TWITTER, QUERY_TWITTER_SCALED, QUERY_WALMART, QUERY_WALMART_SCALED, QUERY_WIKI, QUERY_WIKI_SCALED,
 };
 use crate::evaluation::track_config::{QUERY_REPETITIONS, TRACK_SKIPPING_ON};
 use crate::{
@@ -29,27 +29,29 @@ static ACCUMULATED_SKIP_TIME: AtomicU64 = AtomicU64::new(0);
 //  crossref1_(551MB),64,1,$.items[2].resource.primary.URL,66067022.6
 //  ...
 pub fn run(data_dir_path: &str, result_dir_path: &str) {
-    println!("eval-optimal");
+    println!("eval-optimal QUERY_REPETITIONS {QUERY_REPETITIONS}");
 
     if !TRACK_SKIPPING_ON {
         println!("Enable Skip Tracking. Abort");
         return;
     }
-    if ! cfg! {feature = "empty-list-opt"} {
+    if !cfg! {feature = "empty-list-opt"} {
         println!("For fair comparisons with rsonpath-lut this feature needs to be enabled. Abort!");
         return;
     }
 
     eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);
     // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
     // eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
     // eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
     // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER_SCALED);
     // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART_SCALED);
     // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
-
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI_SCALED);
 
     println!("Done")
 }
@@ -59,8 +61,8 @@ pub fn add_skip_time(added_time: u64) {
     ACCUMULATED_SKIP_TIME.fetch_add(added_time, Ordering::Relaxed);
 }
 
-fn eval_all(data_dir_path: &str, results_dir_path: &str, test_data: (&str, &[(&str, &str)])) {
-    let (json_filename, queries) = test_data;
+fn eval_all(data_dir_path: &str, results_dir_path: &str, query_data: &str) {
+    let (json_filename, queries) = read_queries(query_data);
     let filename = json_filename.strip_suffix(".json").unwrap();
     println!("JSON: {}", filename);
 
@@ -86,7 +88,7 @@ fn eval_all(data_dir_path: &str, results_dir_path: &str, test_data: (&str, &[(&s
     let json_path = format!("{}/{}.json", data_dir_path, filename);
 
     for (query_id, query_text) in queries {
-        do_query(&json_path, query_id, query_text);
+        do_query(&json_path, &query_id, &query_text);
 
         let skip_time_nano_seconds = ACCUMULATED_SKIP_TIME.load(Ordering::Relaxed) as f64 / QUERY_REPETITIONS as f64;
 
