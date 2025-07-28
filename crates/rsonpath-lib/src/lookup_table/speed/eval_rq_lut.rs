@@ -49,12 +49,12 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
 
     // GB_1
     // eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI, &cutoffs);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1, &cutoffs);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE, &cutoffs);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL, &cutoffs);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER, &cutoffs);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART, &cutoffs);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI, &cutoffs);
 
     // Practically the same as crossref1
     // eval_all(&data_dir_path, &base_path, QUERY_CROSSREF2, &cutoffs);

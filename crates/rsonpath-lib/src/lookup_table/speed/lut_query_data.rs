@@ -479,17 +479,31 @@ pub const QUERY_WALMART_SHORT: (&str, &[(&str, &str)]) = (
     ],
 );
 
-// ##########
-// GB_1
-// ##########
-
-// Structure:
-//      QUERY_ID,QUERY_TEXT,COUNT_RESULT,SKIP_PERCENTAGE
-//      1,$..freeShipping,230089,0.000
-//      2,$..additionalFeatures[*].feature,61098,0.000
+// Expected csv structure:
+//      ID,Path,Result,SkipPercentage
+//      1,$..freeShipping,230089,0.00000000000000000
+//      2,$..additionalFeatures[*].feature,61098,0.00000000000000000
+//      3,$..includedItemList[*],9096,0.00000000000000000
+//      4,$.products[*].videoChapters,769,0.09227438889806847
 //      ...
+
+// Note: Query data with the "_scaled" suffix use just one single query that targets different
+// of the JSON
 const QUERY_DATA_FOLDER: &str = "res/query";
+
 pub const QUERY_BESTBUY: &str = "bestbuy_large_record_(1GB)";
+pub const QUERY_CROSSREF1: &str = "crossref1_(551MB)";
+pub const QUERY_CROSSREF2: &str = "crossref2_(1.1GB)"; // Same queries as crossref1
+pub const QUERY_CROSSREF4: &str = "crossref4_(2.1GB)"; // Same queries as crossref1
+pub const QUERY_GOOGLE: &str = "google_map_large_record_(1.1GB)";
+pub const QUERY_NSPL: &str = "nspl_large_record_(1.2GB)";
+pub const QUERY_TWITTER: &str = "twitter_large_record_(843MB)";
+pub const QUERY_TWITTER_SCALED: &str = "twitter_large_record_(843MB)_scaled";
+pub const QUERY_WALMART: &str = "walmart_large_record_(995MB)";
+pub const QUERY_WALMART_SCALED: &str = "walmart_large_record_(995MB)_scaled";
+pub const QUERY_WIKI: &str = "wiki_large_record_(1.1GB)";
+pub const QUERY_WIKI_SCALED: &str = "wiki_large_record_(1.1GB)_scaled";
+pub const QUERY_NESTED_COL: &str = "nested_col_(27.7GB)";
 
 pub fn read_queries(file_name: &str) -> (String, Vec<(String, String)>) {
     let csv_path = format!("{QUERY_DATA_FOLDER}/{file_name}.csv");
@@ -505,254 +519,14 @@ pub fn read_queries(file_name: &str) -> (String, Vec<(String, String)>) {
         queries.push((id, path));
     }
 
-    (format!("{file_name}.json"), queries)
+    let json_name = format!("{}.json", remove_suffix(file_name, "_scaled"));
+    (json_name, queries)
 }
 
-pub const QUERY_CROSSREF1: (&str, &[(&str, &str)]) = (
-    "crossref1_(551MB).json",
-    &[
-        ("1", "$.items[2].resource.primary.URL"), // 1.000000 <- Skip Percentage
-        ("2", "$.items[*].URL"),                  // 0.963846
-        ("3", "$.items[*].member"),               // 0.950990
-        ("4", "$.items[*].score"),                // 0.948115
-        ("5", "$.items[*].resource.primary.URL"), // 0.937938
-        ("6", "$.items[*].issued"),               // 0.922995
-        ("7", "$.items[*].author[*].given"),      // 0.881082
-        ("8", "$.items[*].author[*].family"),     // 0.865040
-        ("9", "$.items[*].author[*].sequence"),   // 0.852936
-        ("10", "$.items[*].author[*]"),           // 0.849213
-        ("11", "$.items[*].institution[*].name"), // 0.808941
-        ("12", "$.items[*].link[*]..URL"),        // 0.804825
-        ("13", "$.items[*].assertion[*]..name"),  // 0.796434
-        ("14", "$.items[*].reference[*].key"),    // 0.732995
-        ("15", "$.items[*].reference[*].author"), // 0.545019
-        ("16", "$.items[*].reference[*].DOI"),    // 0.490577
-        ("17", "$.items[*].reference[*].year"),   // 0.374631
-        ("18", "$.items[*].reference[*].issue"),  // 0.338667
-        ("19", "$.items[*].reference[*].volume"), // 0.313539
-        ("20", "$.items[*].reference[*]"),        // 0.256538
-        ("21", "$..URL"),                         // 0.000000
-    ],
-);
-
-pub const QUERY_CROSSREF2: (&str, &[(&str, &str)]) = (
-    "crossref2_(1.1GB).json",
-    &[
-        ("1", "$.items[2].resource.primary.URL"), // 1.000000 <- Skip Percentage
-        ("2", "$.items[*].URL"),                  // 0.963846
-        ("3", "$.items[*].member"),               // 0.950990
-        ("4", "$.items[*].score"),                // 0.948115
-        ("5", "$.items[*].resource.primary.URL"), // 0.937938
-        ("6", "$.items[*].issued"),               // 0.922995
-        ("7", "$.items[*].author[*].given"),      // 0.881082
-        ("8", "$.items[*].author[*].family"),     // 0.865040
-        ("9", "$.items[*].author[*].sequence"),   // 0.852936
-        ("10", "$.items[*].author[*]"),           // 0.849213
-        ("11", "$.items[*].institution[*].name"), // 0.808941
-        ("12", "$.items[*].link[*]..URL"),        // 0.804825
-        ("13", "$.items[*].assertion[*]..name"),  // 0.796434
-        ("14", "$.items[*].reference[*].key"),    // 0.732995
-        ("15", "$.items[*].reference[*].author"), // 0.545019
-        ("16", "$.items[*].reference[*].DOI"),    // 0.490577
-        ("17", "$.items[*].reference[*].year"),   // 0.374631
-        ("18", "$.items[*].reference[*].issue"),  // 0.338667
-        ("19", "$.items[*].reference[*].volume"), // 0.313539
-        ("20", "$.items[*].reference[*]"),        // 0.256538
-        ("21", "$..URL"),                         // 0.000000
-    ],
-);
-
-pub const QUERY_CROSSREF4: (&str, &[(&str, &str)]) = (
-    "crossref4_(2.1GB).json",
-    &[
-        ("1", "$.items[2].resource.primary.URL"), // 1.000000 <- Skip Percentage
-        ("2", "$.items[*].URL"),                  // 0.963846
-        ("3", "$.items[*].member"),               // 0.950990
-        ("4", "$.items[*].score"),                // 0.948115
-        ("5", "$.items[*].resource.primary.URL"), // 0.937938
-        ("6", "$.items[*].issued"),               // 0.922995
-        ("7", "$.items[*].author[*].given"),      // 0.881082
-        ("8", "$.items[*].author[*].family"),     // 0.865040
-        ("9", "$.items[*].author[*].sequence"),   // 0.852936
-        ("10", "$.items[*].author[*]"),           // 0.849213
-        ("11", "$.items[*].institution[*].name"), // 0.808941
-        ("12", "$.items[*].link[*]..URL"),        // 0.804825
-        ("13", "$.items[*].assertion[*]..name"),  // 0.796434
-        ("14", "$.items[*].reference[*].key"),    // 0.732995
-        ("15", "$.items[*].reference[*].author"), // 0.545019
-        ("16", "$.items[*].reference[*].DOI"),    // 0.490577
-        ("17", "$.items[*].reference[*].year"),   // 0.374631
-        ("18", "$.items[*].reference[*].issue"),  // 0.338667
-        ("19", "$.items[*].reference[*].volume"), // 0.313539
-        ("20", "$.items[*].reference[*]"),        // 0.256538
-        ("21", "$..URL"),                         // 0.000000
-    ],
-);
-
-pub const QUERY_GOOGLE: (&str, &[(&str, &str)]) = (
-    "google_map_large_record_(1.1GB).json",
-    &[
-        ("0", "$[4000].routes[*].bounds"), // 0.999989 <- Skip Percentage
-        ("1", "$[*].routes[*].legs[*].steps[*].html_instructions"), // 0.965067
-        ("2", "$[*].routes[*].legs[*].steps[*].distance.text"), // 0.821380
-        ("3", "$[*].routes[*].legs[*].steps[*].distance"), // 0.819461
-        ("4", "$[*].routes[*].legs[*].steps[*].maneuver"), // 0.745787
-        ("5", "$[*].routes[*].legs[*].steps[*].start_location"), // 0.673776
-        ("6", "$[*].routes[*].legs[*].steps[*].start_location.lat"), // 0.665473
-        ("7", "$[1:2000].routes[*].legs[*].steps[*].polyline.points"), // 0.654228
-        ("8", "$[*].routes[*].legs[*].steps[*].duration"), // 0.594071
-        ("9", "$[*].routes[*].legs[*].steps[*].end_location"), // 0.532257
-        ("10", "$[1:3000].routes[*].legs[*].steps[*].polyline.points"), // 0.467309
-        ("11", "$[*].routes[*].legs[*].steps[*]"), // 0.432387
-        ("12", "$[1:4000].routes[*].legs[*].steps[*].polyline.points"), // 0.269475
-        ("13", "$[*].routes[*].legs[*].steps[*].polyline"), // 0.225161
-        ("14", "$[*].routes[*].legs[*].steps[*].polyline.points"), // 0.173328
-        ("15", "$[*].routes[*].legs[*]..lat"), // 0.006689
-        ("16", "$[*]..bounds"),            // 0.000000
-    ],
-);
-
-pub const QUERY_NSPL: (&str, &[(&str, &str)]) = (
-    "nspl_large_record_(1.2GB).json",
-    &[
-        ("0", "$.meta.view.id"),        // 1.000000 <- Skip Percentage
-        ("1", "$.data[0:100000][*]"),   // 0.938919
-        ("2", "$.data[0:200000][*]"),   // 0.882185
-        ("3", "$.data[0:300000][*]"),   // 0.825455
-        ("4", "$.data[0:400000][*]"),   // 0.768723
-        ("5", "$.data[0:500000][*]"),   // 0.711985
-        ("6", "$.data[0:600000][*]"),   // 0.655252
-        ("7", "$.data[0:700000][*]"),   // 0.598512
-        ("8", "$.data[0:800000][*]"),   // 0.541783
-        ("9", "$.data[0:900000][*]"),   // 0.485039
-        ("10", "$.data[0:1000000][*]"), // 0.428310
-        ("11", "$.data[0:1100000][*]"), // 0.371576
-        ("12", "$.data[0:1200000][*]"), // 0.314850
-        ("13", "$.data[0:1300000][*]"), // 0.258127
-        ("14", "$.data[0:1400000][*]"), // 0.201401
-        ("15", "$.data[0:1500000][*]"), // 0.144680
-        ("16", "$.data[0:1600000][*]"), // 0.087951
-        ("17", "$.data[*]"),            // 0.093469
-        ("18", "$..id"),                // 0.000000
-    ],
-);
-
-pub const QUERY_TWITTER: (&str, &[(&str, &str)]) = (
-    "twitter_large_record_(843MB).json",
-    &[
-        // Picked
-        ("1", "$[*].user..url.*"),                        // 0.000000 <- Skip Percentage
-        ("2", "$[1:150000]..user"),                       // 0.035640
-        ("3", "$[1:140000]..user"),                       // 0.101083
-        ("4", "$[1:130000]..user"),                       // 0.165078
-        ("5", "$[1:120000]..user"),                       // 0.228623
-        ("6", "$[1:110000]..user"),                       // 0.292380
-        ("7", "$[1:100000]..user"),                       // 0.356660
-        ("8", "$[1:90000]..user"),                        // 0.417997
-        ("9", "$[1:80000]..user"),                        // 0.481244
-        ("10", "$[1:70000]..user"),                       // 0.545231
-        ("11", "$[1:60000]..user"),                       // 0.572430
-        ("12", "$[1:50000]..user"),                       // 0.609424
-        ("13", "$[1:40000]..user"),                       // 0.661039
-        ("14", "$[1:30000]..user"),                       // 0.675647
-        ("15", "$[1:20000]..user"),                       // 0.708100
-        ("16", "$[1:10000]..user"),                       // 0.741561
-        ("17", "$[*].user.profile_sidebar_border_color"), // 0.751322
-        ("18", "$[*].user.profile_image_url_https"),      // 0.780070
-        ("19", "$[*].retweeted_status.filter_level"),     // 0.805593
-        ("20", "$[*].retweeted_status.user.name"),        // 0.807400
-        ("21", "$[*].user.created_at"),                   // 0.834220
-        ("22", "$[*].retweeted_status.id"),               // 0.870497
-        ("23", "$[*].user.screen_name"),                  // 0.872362
-        ("24", "$[*].source"),                            // 0.889281
-        ("25", "$[*].id"),                                // 0.901908
-        ("26", "$[*].geo"),                               // 0.936339
-        ("27", "$[*].retweeted_status[*]"),               // 0.954362
-        ("28", "$[*]..id"),                               // 0.989802
-        // Queries where LUT is faster than ITE
-        ("200", "$[*].entities..symbols[*]"),
-        ("201", "$[*].entities..url"),
-        ("202", "$[*].entities.symbols[*]"),
-        ("203", "$[*].entities.symbols[1]"),
-        ("204", "$[*].entities.urls[*].display_url"),
-        ("205", "$[*].timestamp_ms"),
-    ],
-);
-
-pub const QUERY_WALMART: (&str, &[(&str, &str)]) = (
-    "walmart_large_record_(995MB).json",
-    &[
-        ("0", "$.category"),                     // 1.000000 <- Skip Percentage
-        ("1", "$.items[*].itemId"),              // 0.996712
-        ("2", "$.items[*].name"),                // 0.985764
-        ("3", "$.items[*].upc"),                 // 0.955816
-        ("4", "$.items[*].categoryPath"),        // 0.949076
-        ("5", "$.items[*].salePrice"),           // 0.938876
-        ("6", "$.items[*].longDescription"),     // 0.878879
-        ("7", "$.items[*].msrp"),                // 0.680515
-        ("8", "$.items[*].thumbnailImage"),      // 0.564013
-        ("9", "$.items[*].mediumImage"),         // 0.520963
-        ("10", "$.items[*].largeImage"),         // 0.478252
-        ("11", "$.items[*].productTrackingUrl"), // 0.433276
-        ("12", "$.items[*].productUrl"),         // 0.301231
-        ("13", "$.items[*].addToCartUrl"),       // 0.187381
-        ("14", "$.items[*].isbn"),               // 0.019278
-        ("15", "$..category"),                   // 0.000000
-    ],
-);
-
-pub const QUERY_WIKI: (&str, &[(&str, &str)]) = (
-    "wiki_large_record_(1.1GB).json",
-    &[
-        ("1", "$[0].id"),                // 1.000000 <- Skip Percentage
-        ("2", "$[1:1000]..fr"),          // 0.981716
-        ("3", "$[*].labels.*.language"), // 0.911067
-        ("4", "$[*].labels.*.value"),    // 0.861710
-        ("5", "$[1:10000]..fr"),         // 0.882321
-        ("6", "$[*].*.fr.*"),            // 0.813313
-        ("7", "$[1:20000]..fr"),         // 0.781792
-        ("8", "$[1:30000]..fr"),         // 0.702920
-        ("9", "$[1:40000]..fr"),         // 0.624433
-        ("10", "$[1:50000]..fr"),        // 0.541105
-        ("11", "$[1:60000]..fr"),        // 0.472672
-        ("12", "$[1:70000]..fr"),        // 0.408434
-        ("13", "$[1:80000]..fr"),        // 0.338641
-        ("14", "$[1:90000]..fr"),        // 0.279816
-        ("15", "$[1:100000]..fr"),       // 0.226452
-        ("16", "$[1:110000]..fr"),       // 0.161277
-        ("17", "$[1:120000]..fr"),       // 0.097605
-        ("18", "$[1:130000]..fr"),       // 0.039856
-        ("19", "$[1:140000]..fr"),       // 0.000021
-        ("20", "$..language"),           // 0.000000
-    ],
-);
-
-// ##########
-// GB_25
-// ##########
-pub const QUERY_NESTED_COL: (&str, &[(&str, &str)]) = (
-    "nested_col_(27.7GB).json",
-    &[
-        ("1", "$[*].c_custkey"),
-        ("2", "$[*].c_name"),
-        ("9", "$[*].c_orders[*].o_orderkey"),
-        ("10", "$[*].c_orders[*].o_orderstatus"),
-        ("11", "$[*].c_orders[*].o_totalprice"),
-        ("12", "$[*].c_orders[*].o_orderdate"),
-        ("13", "$[*].c_orders[*].o_orderpriority"),
-        ("14", "$[*].c_orders[*].o_clerk"),
-        ("15", "$[*].c_orders[*].o_shippriority"),
-        ("16", "$[*].c_orders[*].o_comment"),
-        ("17", "$[*].c_orders[*].o_lineitems[*].l_partkey"),
-        ("18", "$[*].c_orders[*].o_lineitems[*].l_suppkey"),
-        ("19", "$[*].c_orders[*].o_lineitems[*].l_linenumber"),
-        ("101", "$[0].c_custkey"),
-        ("102", "$[0].c_name"),
-        ("103", "$[0].c_address"),
-        ("104", "$[0].c_nationkey"),
-        ("200", "$..l_receiptdate"),
-        ("201", "$..l_shipinstruct"),
-        ("202", "$..l_shipmode"),
-        ("203", "$..l_comment"),
-    ],
-);
+fn remove_suffix(s: &str, suffix: &str) -> String {
+    if s.ends_with(suffix) {
+        (&s[..s.len() - suffix.len()]).parse().unwrap()
+    } else {
+        s.parse().unwrap()
+    }
+}
