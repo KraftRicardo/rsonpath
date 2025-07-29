@@ -1,11 +1,9 @@
 use log::debug;
+use rsonpath::lookup_table::speed::lut_query_data::*;
 use rsonpath::{
     engine::{Compiler, Engine, RsonpathEngine},
     input::OwnedBytes,
-    lookup_table::{
-        performance::lut_query_data::{QUERY_BESTBUY, QUERY_GOOGLE, QUERY_POKEMON_SHORT, QUERY_TWITTER},
-        LookUpTable, LUT,
-    },
+    lookup_table::{LookUpTable, LUT},
 };
 use std::{
     error::Error,
@@ -14,26 +12,73 @@ use std::{
 };
 
 #[test]
-fn query_pokemon_short() -> Result<(), Box<dyn Error>> {
-    test_all_queries(QUERY_POKEMON_SHORT)
+fn query_bestbuy() -> Result<(), Box<dyn Error>> {
+    compare_rq_lut_vs_rq_legacy(QUERY_BESTBUY)
+}
+
+#[test]
+fn query_crossref1() -> Result<(), Box<dyn Error>> {
+    compare_rq_lut_vs_rq_legacy(QUERY_CROSSREF1)
+}
+
+#[test]
+fn query_crossref2() -> Result<(), Box<dyn Error>> {
+    compare_rq_lut_vs_rq_legacy(QUERY_CROSSREF2)
+}
+
+#[test]
+fn query_crossref4() -> Result<(), Box<dyn Error>> {
+    compare_rq_lut_vs_rq_legacy(QUERY_CROSSREF4)
 }
 
 #[test]
 fn query_google() -> Result<(), Box<dyn Error>> {
-    test_all_queries(QUERY_GOOGLE)
+    compare_rq_lut_vs_rq_legacy(QUERY_GOOGLE)
 }
 
 #[test]
-fn query_bestbuy() -> Result<(), Box<dyn Error>> {
-    test_all_queries(QUERY_BESTBUY)
+fn query_nspl() -> Result<(), Box<dyn Error>> {
+    compare_rq_lut_vs_rq_legacy(QUERY_NSPL)
 }
 
 #[test]
 fn query_twitter() -> Result<(), Box<dyn Error>> {
-    test_all_queries(QUERY_TWITTER)
+    compare_rq_lut_vs_rq_legacy(QUERY_TWITTER)
 }
 
-fn test_all_queries(test_data: (&str, &[(&str, &str)])) -> Result<(), Box<dyn Error>> {
+#[test]
+fn query_twitter_scaled() -> Result<(), Box<dyn Error>> {
+    compare_rq_lut_vs_rq_legacy(QUERY_TWITTER_SCALED)
+}
+
+#[test]
+fn query_walmart() -> Result<(), Box<dyn Error>> {
+    compare_rq_lut_vs_rq_legacy(QUERY_WALMART)
+}
+
+#[test]
+fn query_walmart_scaled() -> Result<(), Box<dyn Error>> {
+    compare_rq_lut_vs_rq_legacy(QUERY_WALMART_SCALED)
+}
+
+#[test]
+fn query_wiki() -> Result<(), Box<dyn Error>> {
+    compare_rq_lut_vs_rq_legacy(QUERY_WIKI)
+}
+
+#[test]
+fn query_wiki_scaled() -> Result<(), Box<dyn Error>> {
+    compare_rq_lut_vs_rq_legacy(QUERY_WIKI_SCALED)
+}
+
+/// Run all with:
+///     cargo test --test lut_query_tests
+/// Or run single ones with:
+///     cargo test --test lut_query_tests -- query_bestbuy --nocapture | rg "(tail_skipping|lut_query_tests)"
+///     cargo test --test lut_query_tests -- query_bestbuy --nocapture | rg "(lut_query_tests)"
+fn compare_rq_lut_vs_rq_legacy(query_data: &str) -> Result<(), Box<dyn Error>> {
+    let cutoff = 0;
+
     // Enables to see log messages when running tests
     simple_logger::SimpleLogger::new()
         .with_level(log::LevelFilter::Debug)
@@ -41,13 +86,13 @@ fn test_all_queries(test_data: (&str, &[(&str, &str)])) -> Result<(), Box<dyn Er
         .unwrap();
 
     // Build LUT once at the beginning
-    let (json_file_path, queries) = test_data;
-    let json_path = format!("../../{}", json_file_path);
-    debug!("Building LUT: {}", json_path);
-    let mut lut = LUT::build(&json_path, 0).expect("Fail @ building LUT");
+    let (json_file_path, queries) = read_queries_test(query_data);
+    let json_path = format!("../../res/json/{}", json_file_path);
+    debug!("Building LUT: {json_path}, cutoff: {cutoff}");
+    let mut lut = LUT::build(&json_path, cutoff).expect("Fail @ building LUT");
 
     // Run all queries
-    for &(query_name, query_text) in queries {
+    for (query_name, query_text) in queries {
         debug!("Query: {}", query_name);
 
         let input = {
@@ -56,7 +101,7 @@ fn test_all_queries(test_data: (&str, &[(&str, &str)])) -> Result<(), Box<dyn Er
             file.read_to_end(&mut buf).expect("Fail @ file read");
             OwnedBytes::new(buf)
         };
-        let query = rsonpath_syntax::parse(query_text).expect("Fail @ parse query");
+        let query = rsonpath_syntax::parse(&query_text).expect("Fail @ parse query");
 
         // Query normally and skip iteratively (ITE)
         let mut engine = RsonpathEngine::compile_query(&query).expect("Fail @ compile query");

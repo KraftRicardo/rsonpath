@@ -1,11 +1,12 @@
 use clap::{Parser, Subcommand};
 use rsonpath::lookup_table::analysis::distance_distribution_per_query;
+use rsonpath::lookup_table::correctness::{lut_build_correctness, lut_query_correctness};
 use rsonpath::lookup_table::extra::query_with_lut::query_with_lut;
 use rsonpath::lookup_table::extra::sichash_test_data_generator;
 use rsonpath::lookup_table::speed::lut_hot::test_hotness;
 use rsonpath::lookup_table::speed::{
     eval_final, eval_lut_construction, eval_rq_lut, eval_rq_lut_cutoffs, eval_rq_lut_no_lut, eval_serde, eval_valgrind,
-    lut_query_correctness, lut_skip_evaluation,
+    lut_skip_evaluation,
 };
 use rsonpath::lookup_table::{
     analysis::{distance_distribution, json_size_estimation_bits::print_estimation},
@@ -58,7 +59,12 @@ enum Commands {
         result_dir_path: String,
     },
     EvalValgrind {},
-
+    TestQueryCorrectness {
+        data_dir_path: String,
+    },
+    TestBuildCorrectness {
+        data_dir_path: String,
+    },
     /// Run performance tests
     Performance {
         /// Path to the input JSON folder
@@ -67,7 +73,6 @@ enum Commands {
         out_dir: String,
     },
     Skip {},
-    TestQuery {},
     /// Create the test data used in this project: https://github.com/KraftRicardo/test-SicHash
     Sichash {
         json_dir: String,
@@ -135,6 +140,12 @@ fn main() -> Result<(), Box<dyn Error>> {
         Commands::EvalValgrind {} => {
             eval_valgrind::run();
         }
+        Commands::TestQueryCorrectness { data_dir_path } => {
+            lut_query_correctness::run(data_dir_path);
+        }
+        Commands::TestBuildCorrectness { data_dir_path } => {
+            lut_build_correctness::run(data_dir_path);
+        }
 
         Commands::Analysis { json_folder_path: _ } => {
             // create_json_size_csv(json_folder_path);
@@ -151,9 +162,6 @@ fn main() -> Result<(), Box<dyn Error>> {
             lut_skip_evaluation::skip_evaluation();
         }
 
-        Commands::TestQuery {} => {
-            lut_query_correctness::test_build_and_queries();
-        }
         Commands::Sichash { json_dir, out_dir } => {
             check_if_dir_exists(json_dir);
             create_folder_setup(out_dir)?;

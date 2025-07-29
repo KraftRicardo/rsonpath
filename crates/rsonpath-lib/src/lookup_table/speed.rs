@@ -7,6 +7,5 @@ pub mod eval_serde;
 pub mod eval_valgrind;
 pub mod lut_evaluation;
 pub mod lut_hot;
-pub mod lut_query_correctness;
 pub mod lut_query_data;
 pub mod lut_skip_evaluation;

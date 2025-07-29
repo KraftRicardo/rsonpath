@@ -43,7 +43,9 @@ impl LookUpTable for LutPtrHashDouble {
                     // println!("    - Search time:     {search_time}");
                     // Ok(LutPtrHashDouble::build_double(pair_data, cutoff))
 
+                    debug!("Finding Pairs ...");
                     let pair_data = pair_data::find_pairs(&input, simd, cutoff)?;
+                    debug!("Building ...");
                     Ok(LutPtrHashDouble::build_double(pair_data, cutoff))
                 })
         });

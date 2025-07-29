@@ -1,9 +1,7 @@
 QUERY_ID,QUERY_TEXT,RESULT,SKIP_PERCENTAGE
 1,$[*]..id,933840,0
 2,$[*].retweeted_status..[*],12220351,0.4495813048386163
-3,$[*].retweeted_status[*].entities.urls[*].symbols,0,0.5701691021962161
 4,$[*].retweeted_status[*],2664203,0.5730844799451081
-5,$[*].user..url.*,0,0.6612911708223635
 6,$[*].user.profile_image_url_https,150135,0.7080174168008309
 7,$[*].user.profile_sidebar_border_color,150135,0.7512392517401193
 8,$[*].retweeted_status.filter_level,102389,0.7824214463126068

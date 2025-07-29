@@ -2,18 +2,19 @@ use crate::lookup_table::luts::lut_ptr_hash_double::LutPtrHashDouble;
 use crate::lookup_table::speed::lut_skip_evaluation::SkipMode;
 
 pub mod analysis;
+pub mod correctness;
 pub mod extra;
 pub mod luts;
 pub mod performance;
 pub mod speed;
 
 // CONFIG
-pub const SKIP_MODE: SkipMode = SkipMode::OFF;
-pub const TRACK_SKIPPING_ON: bool = false;
-pub const QUERY_REPETITIONS: usize = 20;
-// pub const QUERY_REPETITIONS: usize = 1;
-pub const BUILD_REPETITIONS: usize = 3;
-// pub const BUILD_REPETITIONS: usize = 1;
+pub const SKIP_MODE: SkipMode = SkipMode::COUNT;
+pub const TRACK_SKIPPING_ON: bool = true;
+// pub const QUERY_REPETITIONS: usize = 20;
+pub const QUERY_REPETITIONS: usize = 1;
+// pub const BUILD_REPETITIONS: usize = 3;
+pub const BUILD_REPETITIONS: usize = 1;
 
 // Different LUT implementation approaches and experiments. LutPtrHashDouble and LutVFuncDouble
 // perform the best by far memory, build time and query speed wise.

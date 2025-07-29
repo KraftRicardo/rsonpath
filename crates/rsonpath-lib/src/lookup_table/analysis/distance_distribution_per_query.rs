@@ -86,19 +86,22 @@ pub fn run(json_dir_path: &str, base_path: &str) {
     // track_skip_count(json_dir_path, &result_dir_path, QUERY_TWITTER_SHORT, cutoff);
     // track_skip_count(json_dir_path, &result_dir_path, QUERY_WALMART_SHORT, cutoff);
 
+    // DEBUG
+    track(json_dir_path, &result_dir_path, QUERY_NSPL_MINI, cutoff);
+
     // GB_1
-    track(json_dir_path, &result_dir_path, QUERY_BESTBUY, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_CROSSREF1, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_CROSSREF2, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_CROSSREF4, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_GOOGLE, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_NSPL, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_TWITTER, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_TWITTER_SCALED, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_WALMART, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_WALMART_SCALED, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_WIKI, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_WIKI_SCALED, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_BESTBUY, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_CROSSREF1, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_CROSSREF2, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_CROSSREF4, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_GOOGLE, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_NSPL, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_TWITTER, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_TWITTER_SCALED, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_WALMART, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_WALMART_SCALED, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_WIKI, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_WIKI_SCALED, cutoff);
 
     // GB_25
     // track(json_dir_path, &result_dir_path, QUERY_NESTED_COL, cutoff);
@@ -147,12 +150,12 @@ fn track_count(lut: LUT, json_path: &str, result_dir_path: &str, query_id: &str,
         let csv_path = format!("{result_dir_path}/COUNTER_{filename}.csv");
         _ = skip_tracker::save_count_to_csv(json_path, &csv_path, filename, query_id, query_text);
         skip_tracker::reset();
-        println!("Write to: {}", csv_path);
+        // println!("Write to: {}", csv_path);
     } else if SKIP_MODE == TRACK {
         let csv_path = format!("{result_dir_path}/{filename}_query={query_id}.csv");
         _ = skip_tracker::save_track_to_csv(&csv_path);
         skip_tracker::reset();
-        println!("Write to: {}", csv_path);
+        // println!("Write to: {}", csv_path);
     }
 
     engine.take_lut().expect("Failed to retrieve LUT from engine")
