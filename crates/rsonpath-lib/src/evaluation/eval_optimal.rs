@@ -1,7 +1,4 @@
-use crate::evaluation::lut_query_data::{
-    read_queries, QUERY_BESTBUY, QUERY_CROSSREF1, QUERY_CROSSREF2, QUERY_CROSSREF4, QUERY_GOOGLE, QUERY_NSPL,
-    QUERY_TWITTER, QUERY_TWITTER_SCALED, QUERY_WALMART, QUERY_WALMART_SCALED, QUERY_WIKI, QUERY_WIKI_SCALED,
-};
+use crate::evaluation::lut_query_data::*;
 use crate::evaluation::track_config::{QUERY_REPETITIONS, TRACK_SKIPPING_ON};
 use crate::{
     engine::{Compiler, Engine, RsonpathEngine},
@@ -41,17 +38,17 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
     }
 
     eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER_SCALED);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART_SCALED);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI_SCALED);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER_SCALED);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART_SCALED);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI_SCALED);
 
     println!("Done")
 }
@@ -61,10 +58,14 @@ pub fn add_skip_time(added_time: u64) {
     ACCUMULATED_SKIP_TIME.fetch_add(added_time, Ordering::Relaxed);
 }
 
-fn eval_all(data_dir_path: &str, results_dir_path: &str, query_data: &str) {
-    let (json_filename, queries) = read_queries(query_data);
-    let filename = json_filename.strip_suffix(".json").unwrap();
-    println!("JSON: {}", filename);
+fn eval_all(data_dir_path: &str, results_dir_path: &str, query_data_csv: &str) {
+    // Extract input
+    let queries = read_queries(query_data_csv);
+    let json_name = format!("{}.json", remove_common_suffix(query_data_csv));
+
+    // All necessary paths to CSV and PNG
+    let json_path = format!("{data_dir_path}/{json_name}");
+    println!("JSON: {json_path}");
 
     fs::create_dir_all(&results_dir_path).expect("Failed to create directory");
 
@@ -80,12 +81,16 @@ fn eval_all(data_dir_path: &str, results_dir_path: &str, query_data: &str) {
     );
 
     if !file_exists {
-        wtr.write_record(&["JSON", "QUERY_ID", "QUERY_TEXT", "SKIP_TIME_NANO_SECONDS, REPETITIONS"])
-            .expect("Failed to write header");
+        wtr.write_record(&[
+            "JSON",
+            "QUERY_ID",
+            "QUERY_TEXT",
+            "SKIP_TIME_NANO_SECONDS",
+            "REPETITIONS",
+        ])
+        .expect("Failed to write header");
         wtr.flush().expect("Failed to flush CSV");
     }
-
-    let json_path = format!("{}/{}.json", data_dir_path, filename);
 
     for (query_id, query_text) in queries {
         do_query(&json_path, &query_id, &query_text);
@@ -93,7 +98,7 @@ fn eval_all(data_dir_path: &str, results_dir_path: &str, query_data: &str) {
         let skip_time_nano_seconds = ACCUMULATED_SKIP_TIME.load(Ordering::Relaxed) as f64 / QUERY_REPETITIONS as f64;
 
         wtr.write_record(&[
-            format!("{}", filename),
+            format!("{}", query_data_csv),
             format!("{}", query_id),
             format!("{}", query_text),
             format!("{:.}", skip_time_nano_seconds),

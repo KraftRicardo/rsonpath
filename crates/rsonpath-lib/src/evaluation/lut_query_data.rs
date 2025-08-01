@@ -30,7 +30,7 @@ pub const QUERY_NESTED_COL: &str = "nested_col_(27.7GB)";
 
 /// Reads the query data from a csv. It extracts the QUERY_ID and QUERY_TEXT field which are
 /// expected to be the first 2 columns.
-pub fn read_queries(file_name: &str) -> (String, Vec<(String, String)>) {
+pub fn read_queries(file_name: &str) -> Vec<(String, String)> {
     let csv_path = format!("{QUERY_DATA_FOLDER}/{file_name}.csv");
     let file = File::open(&csv_path).expect("Cannot open CSV file");
     let mut rdr = ReaderBuilder::new().has_headers(true).from_reader(BufReader::new(file));
@@ -44,8 +44,11 @@ pub fn read_queries(file_name: &str) -> (String, Vec<(String, String)>) {
         queries.push((id, path));
     }
 
-    let json_name = format!("{}.json", remove_suffix(file_name, "_scaled"));
-    (json_name, queries)
+    queries
+}
+
+pub(crate) fn remove_common_suffix(csv_path: &str) -> String {
+    remove_suffix(csv_path, "_scaled")
 }
 
 fn remove_suffix(s: &str, suffix: &str) -> String {

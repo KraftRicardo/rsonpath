@@ -61,35 +61,35 @@ pub fn run(data_dir_path: &str, base_path: &str, use_empty_list_opt: bool) {
 
     // GB_1
     eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER_SCALED);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART_SCALED);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI_SCALED);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER_SCALED);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART_SCALED);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI_SCALED);
 
     println!("Done");
 }
 
-pub fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data: &str) {
+pub fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str) {
     // Extract input
-    let (json_filename, queries) = read_queries(query_data);
-    let filename = json_filename.strip_suffix(".json").unwrap();
-    println!("JSON: {}", filename);
+    let queries = read_queries(query_data_csv);
+    let json_name = format!("{}.json", remove_common_suffix(query_data_csv));
 
     // All necessary paths to CSV and PNG
-    let json_path = format!("{}/{}.json", data_dir_path, filename);
+    let json_path = format!("{data_dir_path}/{json_name}");
+    println!("JSON: {json_path}");
 
-    measure_query(&json_path, &result_dir_path, filename, &queries);
+    measure_query(&json_path, &result_dir_path, query_data_csv, &queries);
 }
 
 // Measure query time
-fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries: &[(String, String)]) {
+fn measure_query(json_path: &str, result_dir_path: &str, query_data_csv: &str, queries: &[(String, String)]) {
     let query_csv_path = if cfg!(feature = "empty-list-opt") {
         format!("{}/rq_legacy_time.csv", result_dir_path)
     } else {
@@ -142,11 +142,11 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
         let avg_time = total_time / (QUERY_REPETITIONS as f64);
         println!(
             "  - File: {}, Query {}: {}, Time = {:.5}s Result = {}",
-            filename, query_id, query_text, avg_time, result
+            query_data_csv, query_id, query_text, avg_time, result
         );
 
         wrt.write_record(&[
-            filename,
+            query_data_csv,
             &query_id,
             &query_text,
             &format!("{:.5}", avg_time),
