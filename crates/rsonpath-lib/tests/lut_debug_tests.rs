@@ -232,11 +232,13 @@ use std::str;
 fn test_bug() {
     let json_path = "../../crates/rsonpath-test/documents/json/compressed/lists.json";
     let query = "$[2][1]";
-    let cutoff = 0;
-    for requested_padding in 1..=127 {
+    let cutoff = 16;
+    for requested_padding in 1..=128 {
+        debug!("padding: {requested_padding}");
         let jsonpath_query = rsonpath_syntax::parse(query).expect("Fail at parse");
         let raw_json = fs::read_to_string(&json_path).expect("Fail at reading json");
 
+        /// [' ' x256] [JSON]
         let json_with_leading_whitespace = {
             let mut json = String::new();
             for _ in 0..256 {
@@ -246,14 +248,18 @@ fn test_bug() {
             json
         };
         let misalignment = json_with_leading_whitespace.as_ptr().align_offset(128);
+        /// [' ' x256-m] [JSON]
         let aligned_json = &json_with_leading_whitespace.as_bytes()[misalignment..];
+        /// [' ' x256-m-pad] [JSON]
         let forced_padding_json = &aligned_json[requested_padding..];
 
-        std::fs::write("/tmp/luttest.json", forced_padding_json).expect("Fail");
+        // [' ' x256-m-pad] [JSON] -> add 'pad' padding [' ' xpad][' ' x256-m-pad][JSON]
+        let p = format!("/tmp/luttest.json{requested_padding}");
+        std::fs::write(&p, forced_padding_json).expect("Fail");
 
         let input = BorrowedBytes::new(forced_padding_json);
         assert_eq!(input.leading_padding_len(), requested_padding);
-        let lut = LUT::build("/tmp/luttest.json", cutoff).expect("Fail lut");
+        let lut = LUT::build(&p, cutoff).expect("Fail lut");
         let mut engine = MainEngine::compile_query(&jsonpath_query).expect("Fail compile query");
 
         // ITE

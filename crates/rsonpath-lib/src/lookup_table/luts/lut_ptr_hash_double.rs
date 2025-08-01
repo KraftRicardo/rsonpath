@@ -24,6 +24,10 @@ impl LookUpTable for LutPtrHashDouble {
     where
         Self: Sized,
     {
+        assert!(
+            cutoff % crate::BLOCK_SIZE == 0,
+            "cutoff must be a multiple of block size"
+        );
         let file = fs::File::open(json_path).expect("Failed to open file");
         // SAFETY: We keep the file open throughout the entire duration.
         let input = unsafe { input::MmapInput::map_file(&file)? };
@@ -51,6 +55,12 @@ impl LookUpTable for LutPtrHashDouble {
 impl LutPtrHashDouble {
     pub fn build_from_input<I: Input>(input: &I, cutoff: usize) -> Result<Self, Box<dyn std::error::Error>> {
         let simd_c = classification::simd::configure();
+
+        assert_eq!(
+            input.leading_padding_len(),
+            0,
+            "LUT currently assumes there is no padding"
+        );
 
         let lut_phf_double = classification::simd::config_simd!(simd_c => |simd| {
             classification::simd::dispatch_simd!(simd; input, simd, cutoff => fn<I, V>(
