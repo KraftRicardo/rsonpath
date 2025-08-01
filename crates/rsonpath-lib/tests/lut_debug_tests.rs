@@ -230,8 +230,8 @@ use rsonpath::lookup_table::speed::lut_query_data::QUERY_CANADA;
 use std::str;
 
 fn test_bug() {
-    let json_path = "../../crates/rsonpath-test/documents/json/atomic_descendant.json";
-    let query = "$[1]";
+    let json_path = "../../crates/rsonpath-test/documents/json/lists.json";
+    let query = "$[2][1]";
     let cutoff = 0;
     let requested_padding = 112;
 
@@ -261,6 +261,7 @@ fn test_bug() {
     engine.matches(&input, &mut result).expect("Fail matching");
     let utf8: Result<Vec<&str>, _> = result.iter().map(|x| str::from_utf8(x.bytes())).collect();
     let utf8 = utf8.expect("valid utf8");
+    debug!("result ITE: {:?}", utf8);
 
     // LUT
     debug!("---- LUT STYLE ----");
@@ -269,6 +270,7 @@ fn test_bug() {
     engine.matches(&input, &mut result_lut).expect("Fail matching");
     let utf8_lut: Result<Vec<&str>, _> = result_lut.iter().map(|x| str::from_utf8(x.bytes())).collect();
     let utf8_lut = utf8_lut.expect("valid utf8");
+    debug!("result LUT: {:?}", utf8_lut);
 
     let expected_str = r#""https:\/\/t.co\/blQy8JxViF""#;
     let expected: Vec<&str> = vec![expected_str];
