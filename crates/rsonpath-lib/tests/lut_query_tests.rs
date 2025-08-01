@@ -84,6 +84,7 @@ fn compare_rq_lut_vs_rq_legacy(query_data: &str) -> Result<(), Box<dyn Error>> {
         .with_level(log::LevelFilter::Debug)
         .init()
         .unwrap();
+    debug!("Using cutoff {}", cutoff);
 
     // Build LUT once at the beginning
     let (json_file_path, queries) = read_queries_test(query_data);

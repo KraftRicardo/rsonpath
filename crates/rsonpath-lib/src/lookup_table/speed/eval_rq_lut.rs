@@ -19,9 +19,9 @@ use std::{fs, io::BufReader};
 // Run with: cargo run --bin lut --release -- eval-rq-lut ricardo-jsons plot-results
 //
 // "data_dir_path" path to the folder holding the input JSON files.
-// "base_path" path to the folder where the results will be saved
+// "result_dir_path" path to the folder where the results will be saved
 //
-// Data will be saved in "{base_path}/rq_lut_time.csv"
+// Data will be saved in "{result_dir_path}/rq_lut_time.csv"
 // Example structure of the csv:
 //  JSON,CUTOFF,QUERY_ID,QUERY_TEXT,QUERY_TIME_SECONDS
 //  google_map_large_record_(1.1GB),0,0,$[4000].routes[*].bounds,0.00652

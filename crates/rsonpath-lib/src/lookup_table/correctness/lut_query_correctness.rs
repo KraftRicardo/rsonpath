@@ -4,9 +4,6 @@ use crate::{
     lookup_table::{LookUpTable, LUT},
 };
 
-use crate::input::MmapInput;
-use crate::lookup_table::extra::pair_data;
-use crate::lookup_table::luts::lut_hash_map;
 use crate::lookup_table::speed::lut_query_data::*;
 use rsonpath_lib_ref::engine::{Compiler as CompilerLegacy, Engine as EngineLegacy};
 use std::{
@@ -24,18 +21,18 @@ pub fn run(data_dir_path: &str) {
     let cutoff = 0;
 
     // GB_1 - COUNT
-    // test_query_correctness_count(data_dir_path, QUERY_BESTBUY, cutoff);
-    // test_query_correctness_count(data_dir_path, QUERY_CROSSREF1, cutoff);
-    // test_query_correctness_count(data_dir_path, QUERY_CROSSREF2, cutoff);
-    // test_query_correctness_count(data_dir_path, QUERY_CROSSREF4, cutoff);
-    // test_query_correctness_count(data_dir_path, QUERY_GOOGLE, cutoff);
-    // test_query_correctness_count(data_dir_path, QUERY_NSPL, cutoff);
-    // test_query_correctness_count(data_dir_path, QUERY_TWITTER, cutoff);
-    // test_query_correctness_count(data_dir_path, QUERY_TWITTER_SCALED, cutoff);
-    // test_query_correctness_count(data_dir_path, QUERY_WALMART, cutoff);
-    // test_query_correctness_count(data_dir_path, QUERY_WALMART_SCALED, cutoff);
-    // test_query_correctness_count(data_dir_path, QUERY_WIKI, cutoff);
-    // test_query_correctness_count(data_dir_path, QUERY_WIKI_SCALED, cutoff);
+    test_query_correctness_count(data_dir_path, QUERY_BESTBUY, cutoff);
+    test_query_correctness_count(data_dir_path, QUERY_CROSSREF1, cutoff);
+    test_query_correctness_count(data_dir_path, QUERY_CROSSREF2, cutoff);
+    test_query_correctness_count(data_dir_path, QUERY_CROSSREF4, cutoff);
+    test_query_correctness_count(data_dir_path, QUERY_GOOGLE, cutoff);
+    test_query_correctness_count(data_dir_path, QUERY_NSPL, cutoff);
+    test_query_correctness_count(data_dir_path, QUERY_TWITTER, cutoff);
+    test_query_correctness_count(data_dir_path, QUERY_TWITTER_SCALED, cutoff);
+    test_query_correctness_count(data_dir_path, QUERY_WALMART, cutoff);
+    test_query_correctness_count(data_dir_path, QUERY_WALMART_SCALED, cutoff);
+    test_query_correctness_count(data_dir_path, QUERY_WIKI, cutoff);
+    test_query_correctness_count(data_dir_path, QUERY_WIKI_SCALED, cutoff);
 
     // GB_1 - NODES
     test_query_correctness_nodes(data_dir_path, QUERY_BESTBUY, cutoff);

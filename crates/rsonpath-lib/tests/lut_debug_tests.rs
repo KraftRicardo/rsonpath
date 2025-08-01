@@ -34,7 +34,7 @@ fn test_build_and_queries() {
     debug!("Start with cutoff={}", cutoff);
 
     // MB_1
-    test_build_correctness(QUERY_CANADA, cutoff);
+    // test_build_correctness(QUERY_CANADA, cutoff);
     // test_build_correctness(QUERY_OPENFOOD, cutoff);
     // test_build_correctness(QUERY_PEOPLE, cutoff);
     // test_build_correctness(QUERY_PRETTY_PEOPLE, cutoff);
@@ -49,9 +49,9 @@ fn test_build_and_queries() {
 
     // test_query_correctness(QUERY_GOOGLE, cutoff);
 
-    // test_bug();
+    test_bug();
 
-    debug_skips();
+    // debug_skips();
 }
 
 fn test_build_correctness(test_data: (&str, &[(&str, &str)]), cutoff: usize) {
@@ -230,15 +230,11 @@ use rsonpath::lookup_table::speed::lut_query_data::QUERY_CANADA;
 use std::str;
 
 fn test_bug() {
-    let json_path = format!(
-        "../../{}",
-        "./crates/rsonpath-test/documents/json/compressed/twitter_urls.json"
-    );
-    let query = "$[0].url";
-    let cutoff = 128;
+    let json_path = "../../crates/rsonpath-test/documents/json/atomic_descendant.json";
+    let query = "$[1]";
+    let cutoff = 0;
     let requested_padding = 112;
 
-    //println ! ("on document atomic_after_list running the query $.a..b (select the 'a' object and then the atomic integer by descendant) with Input impl BorrowedBytes and result mode NodesResult using engine MainEngine(with LUT)");
     let jsonpath_query = rsonpath_syntax::parse(query).expect("Fail at parse");
     let raw_json = fs::read_to_string(&json_path).expect("Fail at reading json");
 
