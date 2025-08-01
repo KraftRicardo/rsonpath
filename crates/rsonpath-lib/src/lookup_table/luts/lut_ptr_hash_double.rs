@@ -27,29 +27,8 @@ impl LookUpTable for LutPtrHashDouble {
         let file = fs::File::open(json_path).expect("Failed to open file");
         // SAFETY: We keep the file open throughout the entire duration.
         let input = unsafe { input::MmapInput::map_file(&file)? };
-        let simd_c = classification::simd::configure();
 
-        let lut_phf_double = classification::simd::config_simd!(simd_c => |simd| {
-            classification::simd::dispatch_simd!(simd; input, simd, cutoff => fn<I, V>(
-                input: I,
-                simd: V,
-                cutoff: usize,
-            ) -> Result<LutPtrHashDouble, error::InputError> where
-            I: Input,
-            V: Simd, {
-                    // let start_search = std::time::Instant::now();
-                    // let pair_data = pair_data::find_pairs(&input, simd, cutoff)?;
-                    // let search_time = start_search.elapsed().as_secs_f64();
-                    // println!("    - Search time:     {search_time}");
-                    // Ok(LutPtrHashDouble::build_double(pair_data, cutoff))
-
-                    debug!("Finding Pairs ...");
-                    let pair_data = pair_data::find_pairs(&input, simd, cutoff)?;
-                    debug!("Building ...");
-                    Ok(LutPtrHashDouble::build_double(pair_data, cutoff))
-                })
-        });
-        lut_phf_double.map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
+        Self::build_from_input(&input, cutoff)
     }
 
     fn get(&self, key: &usize) -> Option<usize> {
@@ -70,6 +49,32 @@ impl LookUpTable for LutPtrHashDouble {
 }
 
 impl LutPtrHashDouble {
+    pub fn build_from_input<I: Input>(input: &I, cutoff: usize) -> Result<Self, Box<dyn std::error::Error>> {
+        let simd_c = classification::simd::configure();
+
+        let lut_phf_double = classification::simd::config_simd!(simd_c => |simd| {
+            classification::simd::dispatch_simd!(simd; input, simd, cutoff => fn<I, V>(
+                input: &I,
+                simd: V,
+                cutoff: usize,
+            ) -> Result<LutPtrHashDouble, error::InputError> where
+            I: Input,
+            V: Simd, {
+                    // let start_search = std::time::Instant::now();
+                    // let pair_data = pair_data::find_pairs(&input, simd, cutoff)?;
+                    // let search_time = start_search.elapsed().as_secs_f64();
+                    // println!("    - Search time:     {search_time}");
+                    // Ok(LutPtrHashDouble::build_double(pair_data, cutoff))
+
+                    debug!("Finding Pairs ...");
+                    let pair_data = pair_data::find_pairs(input, simd, cutoff)?;
+                    debug!("Building ...");
+                    Ok(LutPtrHashDouble::build_double(pair_data, cutoff))
+                })
+        });
+        lut_phf_double.map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
+    }
+
     fn build_double(pair_data: PairData, cutoff: usize) -> Self {
         let keys = pair_data.keys;
         let input_values = pair_data.values;
