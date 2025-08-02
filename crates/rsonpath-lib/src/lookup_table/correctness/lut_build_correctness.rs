@@ -33,10 +33,10 @@ pub fn run(data_dir_path: &str) {
     test_build_correctness(data_dir_path, QUERY_WIKI, cutoff);
 }
 
-fn test_build_correctness(data_dir_path: &str, query_data: &str, cutoff: usize) {
-    let (filename, _) = read_queries(query_data);
-    let json_path = format!("{}/{}", data_dir_path, filename);
-    println!("Building LUT: {}", json_path);
+fn test_build_correctness(data_dir_path: &str, query_data_csv: &str, cutoff: usize) {
+    let (json_path, _, _) = extract_input(data_dir_path, query_data_csv);
+
+    println!("Building LUT...");
     let lut = LUT::build(&json_path, cutoff).expect("Fail @ building LUT");
     let lut_hash_map = lut_hash_map::LutHashMap::build(&json_path, cutoff).expect("Fail @ building lut_hash_map");
 

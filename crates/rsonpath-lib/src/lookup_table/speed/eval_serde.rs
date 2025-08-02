@@ -1,4 +1,4 @@
-use crate::lookup_table::speed::eval_rq_lut_cutoffs::heap_value;
+use crate::lookup_table::speed::eval_distance_cutoff::heap_value;
 use crate::lookup_table::speed::lut_evaluation::HEAP_TRACKER;
 use crate::lookup_table::speed::lut_query_data::*;
 use crate::lookup_table::{BUILD_REPETITIONS, QUERY_REPETITIONS};
@@ -20,35 +20,29 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
     fs::create_dir_all(&result_dir_path).expect("Failed to create directory");
 
     // GB_1
-    // eval_all(&data_dir_path, result_dir_path, QUERY_BESTBUY);
-    // eval_all(&data_dir_path, result_dir_path, QUERY_CROSSREF1);
-    // eval_all(&data_dir_path, result_dir_path, QUERY_CROSSREF2);
-    // eval_all(&data_dir_path, result_dir_path, QUERY_CROSSREF4);
-    // eval_all(&data_dir_path, result_dir_path, QUERY_GOOGLE);
-    // eval_all(&data_dir_path, result_dir_path, QUERY_NSPL);
-    // eval_all(&data_dir_path, result_dir_path, QUERY_TWITTER);
-    // eval_all(&data_dir_path, result_dir_path, QUERY_WALMART);
-    // eval_all(&data_dir_path, result_dir_path, QUERY_WIKI);
+    eval_all(&data_dir_path, result_dir_path, QUERY_BESTBUY);
+    eval_all(&data_dir_path, result_dir_path, QUERY_CROSSREF1);
+    eval_all(&data_dir_path, result_dir_path, QUERY_CROSSREF2);
+    eval_all(&data_dir_path, result_dir_path, QUERY_CROSSREF4);
+    eval_all(&data_dir_path, result_dir_path, QUERY_GOOGLE);
+    eval_all(&data_dir_path, result_dir_path, QUERY_NSPL);
+    eval_all(&data_dir_path, result_dir_path, QUERY_TWITTER);
+    eval_all(&data_dir_path, result_dir_path, QUERY_WALMART);
+    eval_all(&data_dir_path, result_dir_path, QUERY_WIKI);
 
     println!("Done");
 }
 
-fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&str, &str)])) {
-    // Extract input
-    let (json_filename, queries) = test_data;
-    let filename = json_filename.strip_suffix(".json").unwrap();
-    println!("JSON: {}", filename);
+fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str) {
+    let (json_path, _, queries) = extract_input(data_dir_path, query_data_csv);
 
-    // All necessary paths to CSV and PNG
-    let json_path = format!("{}/{}.json", data_dir_path, filename);
-
-    measure_build(&json_path, result_dir_path, filename);
-    measure_query(&json_path, result_dir_path, filename, queries);
+    measure_build(&json_path, result_dir_path, query_data_csv);
+    measure_query(&json_path, result_dir_path, query_data_csv, queries);
 }
 
 // Measure query time
-fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries: &[(&str, &str)]) {
-    let query_csv_path = format!("{}/{}.csv", result_dir_path, filename);
+fn measure_query(json_path: &str, result_dir_path: &str, query_data_csv: &str, queries: Vec<(String, String)>) {
+    let query_csv_path = format!("{}/{}.csv", result_dir_path, query_data_csv);
     let csv_exists = Path::new(&query_csv_path).exists();
 
     // Open CSV in append mode
@@ -71,9 +65,9 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
     let reader = BufReader::new(file);
     let json_value: Value = serde_json::from_reader(reader).expect("Failed to parse JSON");
 
-    for &(query_id, query_text) in queries {
+    for (query_id, query_text) in queries {
         // Parse the JSONPath query
-        let path = JsonPath::parse(query_text).expect("Could not parse query JSON");
+        let path = JsonPath::parse(&query_text).expect("Could not parse query JSON");
 
         // Warm up
         for _ in 0..QUERY_REPETITIONS {
@@ -97,7 +91,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
             query_id, query_text, avg_time, result
         );
 
-        wrt.write_record([query_id, query_text, &format!("{:.5}", avg_time)])
+        wrt.write_record([query_id, query_text, format!("{:.5}", avg_time)])
             .expect("Failed to write to CSV");
     }
 
@@ -105,7 +99,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
     println!("Generated: {query_csv_path}");
 }
 
-fn measure_build(json_path: &str, serde_dir_path: &str, filename: &str) {
+fn measure_build(json_path: &str, serde_dir_path: &str, query_data_csv: &str) {
     let build_csv_path = format!("{}/build.csv", serde_dir_path);
     let file_exists = Path::new(&build_csv_path).exists();
 
@@ -159,7 +153,7 @@ fn measure_build(json_path: &str, serde_dir_path: &str, filename: &str) {
     println!(" build time = {:.5}s, size = {} B", avg_time, heap_bytes);
 
     // Write the results
-    wtr.write_record([filename, &format!("{:.5}", avg_time), &heap_bytes.to_string()])
+    wtr.write_record([query_data_csv, &format!("{:.5}", avg_time), &heap_bytes.to_string()])
         .expect("Failed to write build record");
 
     wtr.flush().expect("Failed to flush build CSV");

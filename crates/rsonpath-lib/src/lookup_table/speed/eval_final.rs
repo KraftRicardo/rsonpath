@@ -21,11 +21,26 @@ const RQ_LEGACY_NAME: &str = "rq-legacy";
 const RQ_LUT_CUTOFF_0_NAME: &str = "rq-lut-cutoff-0";
 const RQ_LUT_CUTOFF_512_NAME: &str = "rq-lut-cutoff-512";
 
-// This compares serde, rq-legacy, rq-lut-cutoff-0 and rq-lut-cutoff-512 for several queries and
-// also measure the build time for each (if there is a build step needed).
-//
-// Run with: cargo run --bin lut --release -- eval-final res/json res/data/speed/local/final
-// Run with: cargo run --bin lut --release -- eval-final ricardo-jsons plot-results
+/// This compares serde, rq-legacy, rq-lut-cutoff-0 and rq-lut-cutoff-512 for several queries and
+/// also measure the build time for each (if there is a build step needed). The output will be
+/// saved in the build.csv and query.csv which can then be used for plotting later.
+/// build.csv e.g.:
+///     JSON,ALGORITHM,BUILD_TIME_SECONDS
+///     bestbuy_large_record_(1GB),SERDE,13.91782
+///     bestbuy_large_record_(1GB),rq-legacy,0
+///     bestbuy_large_record_(1GB),rq-lut-cutoff-0,0.52239
+///     bestbuy_large_record_(1GB),rq-lut-cutoff-512,0.29037
+///     ...
+/// query.csv e.g.:
+///     JSON,ALGORITHM,QUERY_ID,QUERY_TEXT,AVERAGE_TIME
+///     bestbuy_large_record_(1GB),SERDE,1,$.products[4].categoryPath[2],0.00000
+///     bestbuy_large_record_(1GB),rq-legacy,1,$.products[4].categoryPath[2],0.13047
+///     bestbuy_large_record_(1GB),rq-lut-cutoff-0,1,$.products[4].categoryPath[2],0.03581
+///     bestbuy_large_record_(1GB),rq-lut-cutoff-512,1,$.products[4].categoryPath[2],0.03484
+///     ...
+///
+/// Run with: cargo run --bin lut --release -- eval-final res/json res/data/speed/local/final
+/// Run with: cargo run --bin lut --release -- eval-final ricardo-jsons plot-results
 pub fn run(data_dir_path: &str, result_dir_path: &str) {
     println!("eval-final");
 
@@ -39,35 +54,30 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
     }
 
     // GB_1
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
 
     println!("Done");
 }
 
-fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&str, &str)])) {
-    // Extract input
-    let (json_filename, queries) = test_data;
-    let filename = json_filename.strip_suffix(".json").unwrap();
-    println!("JSON: {}", filename);
-
-    let json_path = format!("{}/{}.json", data_dir_path, filename);
+fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str) {
+    let (json_path, json_name, queries) = extract_input(data_dir_path, query_data_csv);
 
     fs::create_dir_all(&result_dir_path).expect("Failed to create directory");
 
     // Measurements
-    measure_build(&json_path, filename, result_dir_path);
-    measure_query_index(&json_path, filename, result_dir_path, queries);
+    measure_build(&json_path, &json_name, result_dir_path);
+    measure_query_index(&json_path, &json_name, result_dir_path, &queries);
 }
 
-fn measure_query_index(json_path: &str, filename: &str, result_dir_path: &str, queries: &[(&str, &str)]) {
+fn measure_query_index(json_path: &str, filename: &str, result_dir_path: &str, queries: &[(String, String)]) {
     let query_csv_path = format!("{}/query.csv", result_dir_path);
     let file_exists = Path::new(&query_csv_path).exists();
 
@@ -133,7 +143,7 @@ fn measure_query_index(json_path: &str, filename: &str, result_dir_path: &str, q
     println!("Generated: {query_csv_path}")
 }
 
-fn query_rq_lut_index(json_path: &str, queries: &[(&str, &str)], cutoff: usize) -> Vec<f64> {
+fn query_rq_lut_index(json_path: &str, queries: &[(String, String)], cutoff: usize) -> Vec<f64> {
     let mut lut = LUT::build(json_path, cutoff).expect("Failed to build LUT");
 
     let input = {
@@ -144,8 +154,8 @@ fn query_rq_lut_index(json_path: &str, queries: &[(&str, &str)], cutoff: usize) 
     };
 
     let mut avg_times = vec![];
-    for &(query_id, query_text) in queries {
-        let query = rsonpath_syntax::parse(query_text).expect("Failed to parse query");
+    for (query_id, query_text) in queries {
+        let query = rsonpath_syntax::parse(&query_text).expect("Failed to parse query");
         let mut engine = RsonpathEngine::compile_query(&query).expect("Failed to compile query");
         engine.add_lut(lut);
 
@@ -189,7 +199,7 @@ fn query_rq_lut_index(json_path: &str, queries: &[(&str, &str)], cutoff: usize) 
     avg_times
 }
 
-fn query_rq_legacy_index(json_path: &str, queries: &[(&str, &str)]) -> Vec<f64> {
+fn query_rq_legacy_index(json_path: &str, queries: &[(String, String)]) -> Vec<f64> {
     let legacy_input = {
         let mut file = BufReader::new(fs::File::open(json_path).expect("Failed to open file"));
         let mut buf = vec![];
@@ -198,8 +208,8 @@ fn query_rq_legacy_index(json_path: &str, queries: &[(&str, &str)]) -> Vec<f64> 
     };
 
     let mut avg_times = vec![];
-    for &(query_id, query_text) in queries {
-        let legacy_query = syntax_ref::parse(query_text).expect("Failed to parse query");
+    for (query_id, query_text) in queries {
+        let legacy_query = syntax_ref::parse(&query_text).expect("Failed to parse query");
         let legacy_engine =
             rsonpath_lib_ref::engine::RsonpathEngine::compile_query(&legacy_query).expect("Failed to compile query");
 
@@ -245,13 +255,13 @@ fn query_rq_legacy_index(json_path: &str, queries: &[(&str, &str)]) -> Vec<f64> 
     avg_times
 }
 
-fn query_serde_index(json_path: &str, queries: &[(&str, &str)]) -> Vec<f64> {
+fn query_serde_index(json_path: &str, queries: &[(String, String)]) -> Vec<f64> {
     let file = fs::File::open(json_path).expect("Failed to open file");
     let reader = BufReader::new(file);
     let json_value: Value = serde_json::from_reader(reader).expect("Failed to parse JSON");
 
     let mut avg_times = vec![];
-    for &(query_id, query_text) in queries {
+    for (query_id, query_text) in queries {
         let path = JsonPath::parse(query_text).expect("Failed to parse JSONPath");
 
         for _ in 0..QUERY_REPETITIONS {

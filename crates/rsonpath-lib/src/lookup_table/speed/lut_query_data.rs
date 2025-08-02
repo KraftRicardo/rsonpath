@@ -2,27 +2,24 @@ use csv::ReaderBuilder;
 use std::fs::File;
 use std::io::BufReader;
 
-/// Expected csv structure:
-///      ID,Path,Result,SkipPercentage
-///      1,$..freeShipping,230089,0.00000000000000000
-///      2,$..additionalFeatures[*].feature,61098,0.00000000000000000
-///      3,$..includedItemList[*],9096,0.00000000000000000
-///      4,$.products[*].videoChapters,769,0.09227438889806847
-///      ...
-/// Note: Query data with the "_scaled" suffix uses just one single query that targets different
-/// scopes of the JSON
-
 const QUERY_DATA_FOLDER: &str = "res/query";
 const QUERY_DATA_FOLDER_TEST: &str = "../../res/query";
 
 // DEBUG
 pub const QUERY_NSPL_MINI: &str = "nspl_mini"; // cargo run --bin rq -- -v $.data[*][10] res/json/nspl_mini.json > run.log
 
+// 100 MB
+pub const QUERY_BESTBUY_SHORT: &str = "bestbuy_short_(103MB)";
+pub const QUERY_CROSSREF0: &str = "crossref0_(320MB)";
+pub const QUERY_GOOGLE_SHORT: &str = "google_map_short_(107MB)";
+pub const QUERY_TWITTER_SHORT: &str = "twitter_short_(80MB)";
+pub const QUERY_WALMART_SHORT: &str = "walmart_short_(95MB)";
+
 // 1 GB
 pub const QUERY_BESTBUY: &str = "bestbuy_large_record_(1GB)";
 pub const QUERY_CROSSREF1: &str = "crossref1_(551MB)";
-pub const QUERY_CROSSREF2: &str = "crossref2_(1.1GB)"; // Same queries as crossref1
-pub const QUERY_CROSSREF4: &str = "crossref4_(2.1GB)"; // Same queries as crossref1
+pub const QUERY_CROSSREF2: &str = "crossref2_(1.1GB)";
+pub const QUERY_CROSSREF4: &str = "crossref4_(2.1GB)";
 pub const QUERY_GOOGLE: &str = "google_map_large_record_(1.1GB)";
 pub const QUERY_NSPL: &str = "nspl_large_record_(1.2GB)";
 pub const QUERY_TWITTER: &str = "twitter_large_record_(843MB)";
@@ -35,20 +32,28 @@ pub const QUERY_WIKI_SCALED: &str = "wiki_large_record_(1.1GB)_scaled";
 // 25 GB
 pub const QUERY_NESTED_COL: &str = "nested_col_(27.7GB)";
 
-pub fn read_queries(file_name: &str) -> (String, Vec<(String, String)>) {
+pub fn read_queries(file_name: &str) -> Vec<(String, String)> {
     let csv_path = format!("{QUERY_DATA_FOLDER}/{file_name}.csv");
-    read_csv(file_name, &csv_path)
+    read_queries_from_csv(&csv_path)
 }
 
-pub fn read_queries_test(file_name: &str) -> (String, Vec<(String, String)>) {
+pub fn read_queries_test(file_name: &str) -> Vec<(String, String)> {
     let csv_path = format!("{QUERY_DATA_FOLDER_TEST}/{file_name}.csv");
-    read_csv(file_name, &csv_path)
+    read_queries_from_csv(&csv_path)
 }
 
 /// Reads the query data from a csv. It extracts the QUERY_ID and QUERY_TEXT field which are
 /// expected to be the first 2 columns.
-pub fn read_csv(file_name: &str, csv_path: &str) -> (String, Vec<(String, String)>) {
-    let file = File::open(&csv_path).expect(format!("Cannot open CSV file {csv_path}").as_str());
+///
+/// Expected csv structure:
+///      ID,Path,Result,SkipPercentage
+///      1,$..freeShipping,230089,0.00000000000000000
+///      2,$..additionalFeatures[*].feature,61098,0.00000000000000000
+///      3,$..includedItemList[*],9096,0.00000000000000000
+///      4,$.products[*].videoChapters,769,0.09227438889806847
+///      ...
+fn read_queries_from_csv(csv_path: &str) -> Vec<(String, String)> {
+    let file = File::open(&csv_path).expect("Cannot open CSV file");
     let mut rdr = ReaderBuilder::new().has_headers(true).from_reader(BufReader::new(file));
 
     let mut queries = Vec::new();
@@ -60,10 +65,39 @@ pub fn read_csv(file_name: &str, csv_path: &str) -> (String, Vec<(String, String
         queries.push((id, path));
     }
 
-    let json_name = format!("{}.json", remove_suffix(file_name, "_scaled"));
-    (json_name, queries)
+    queries
 }
 
+/// Based on the input this functions read the queries from the csv and also gives the associated
+/// json_path and json_name. We need the json_name so we can differentiate e.g. between QUERY_TWITTER
+/// and QUERY_TWITTER_SCALED which both want to query on the same json but have different queries.
+pub fn extract_input(data_dir_path: &str, query_data_csv: &str) -> (String, String, Vec<(String, String)>) {
+    let queries = read_queries(query_data_csv);
+    let json_name = format!("{}.json", remove_common_suffix(query_data_csv));
+    let json_path = format!("{data_dir_path}/{json_name}");
+    println!("JSON: {json_path}");
+
+    (json_path, json_name, queries)
+}
+
+/// Extract only the json_path of the given query set, because some experiments only need the json
+/// and no queries.
+pub fn extract_path(data_dir_path: &str, query_data_csv: &str) -> String {
+    let json_name = format!("{}.json", remove_common_suffix(query_data_csv));
+    let json_path = format!("{data_dir_path}/{json_name}");
+    println!("JSON: {json_path}");
+
+    json_path
+}
+
+/// Common suffixes will be removed if possible
+/// List of common suffixes:
+///     "_scaled": Used to mark query sets that only cover a single query with different ranges
+fn remove_common_suffix(csv_path: &str) -> String {
+    remove_suffix(csv_path, "_scaled")
+}
+
+/// Remove the suffix from the string if possible and return it.
 fn remove_suffix(s: &str, suffix: &str) -> String {
     if s.ends_with(suffix) {
         (&s[..s.len() - suffix.len()]).parse().unwrap()
@@ -357,124 +391,6 @@ pub const QUERY_APP: (&str, &[(&str, &str)]) = (
     ],
 );
 
-pub const QUERY_BESTBUY_SHORT: (&str, &[(&str, &str)]) = (
-    "bestbuy_short_(103MB).json",
-    &[
-        ("101", "$.products[*].videoChapters"),
-        ("102", "$.products[*].videoChapters[1].chapter"),
-        ("103", "$.products[*].shipping[*]"),
-        ("104", "$.products[*].shipping[*].ground"),
-        ("105", "$.products[*].shipping[*].nextDay"),
-        ("106", "$.products[*].shipping[*].secondDay"),
-        ("107", "$.products[*].shipping[*].vendorDelivery"),
-        ("108", "$.products[*].shippingLevelsOfService[*]"),
-        ("109", "$.products[*].shippingLevelsOfService[*].serviceLevelId"),
-        ("110", "$.products[*].shippingLevelsOfService[*].serviceLevelName"),
-        ("111", "$.products[*].shippingLevelsOfService[*].unitShippingPrice"),
-        ("112", "$.products[*].categoryPath[2]"),
-        ("113", "$.products[*].categoryPath[*].id"),
-        ("114", "$.products[*].categoryPath[*].name"),
-        ("115", "$.products[*].quantityLimit"),
-        ("117", "$.products[*].frequentlyPurchasedWith[*]"),
-        ("118", "$.products[*].includedItemList[*]"),
-        ("121", "$.products[*].homeDelivery"),
-        ("123", "$.products[*].freeShipping"),
-        ("124", "$.products[*].additionalFeatures[*]"),
-        ("125", "$.products[*].additionalFeatures[*].feature"),
-        ("126", "$.products[*].dollarSavings"),
-        ("127", "$.products[*].lengthInMinutes"),
-        ("128", "$.products[*].screenFormat"),
-        ("200", "$..freeShipping"),
-        ("201", "$..additionalFeatures[*]"),
-        ("202", "$..additionalFeatures[*].feature"),
-        ("203", "$..dollarSavings"),
-        ("204", "$..lengthInMinutes"),
-        ("205", "$..screenFormat"),
-        ("300", "$.products[4].categoryPath[2]"),
-        ("301", "$.products[4].categoryPath[*].id"),
-        ("302", "$.products[4].categoryPath[*].name"),
-        ("303", "$.products[4].quantityLimit"),
-    ],
-);
-
-pub const QUERY_CROSSREF0: (&str, &[(&str, &str)]) = (
-    "crossref0_(320MB).json",
-    &[
-        ("1", "$.items[*].URL"),
-        ("2", "$.items[*].resource.primary.URL"),
-        ("3", "$.items[*].member"),
-        ("4", "$.items[*].author[*].given"),
-        ("5", "$.items[*].author[*].family"),
-        ("6", "$.items[*].author[*].sequence"),
-        ("7", "$.items[*].score"),
-        ("8", "$.items[0].prefix"),
-        ("9", "$.items[0].DOI"),
-        ("10", "$.items[1].URL"),
-        ("11", "$.items[1].author[*].given"),
-        ("12", "$.items[2].URL"),
-        ("13", "$.items[2].resource.primary.URL"),
-        ("14", "$..URL"),
-        ("15", "$..author[*].given"),
-        ("16", "$..author[*].family"),
-        ("17", "$..author[*].affiliation[0].name"),
-        ("18", "$..title[*]"),
-    ],
-);
-
-pub const QUERY_GOOGLE_SHORT: (&str, &[(&str, &str)]) = (
-    "google_map_short_(107MB).json",
-    &[
-        ("0", "$[*]..bounds"),
-        ("1", "$[*]..bounds.northeast"),
-        ("2", "$[*]..bounds.northeast.lat"),
-        ("3", "$[*]..bounds.northeast.lng"),
-        ("4", "$[*]..copyrights"),
-        ("5", "$[*]..summary"),
-        ("6", "$[*]..warnings"),
-        ("7", "$[*]..waypoint_order"),
-        ("8", "$[*].routes[*]"),
-        ("9", "$[*].routes[*]..legs"),
-        ("10", "$[*].routes[*]..points"),
-        ("11", "$[*].routes[*]..steps[*]"),
-        ("12", "$[*].routes[*].bounds"),
-        ("13", "$[*].routes[*].bounds.northeast"),
-        ("14", "$[*].routes[*].bounds.northeast.lat"),
-        ("15", "$[*].routes[*].bounds.northeast.lng"),
-        ("16", "$[*].routes[*].legs[*].start_location.lat"),
-        ("17", "$[*].routes[*].legs[*].steps[1]"),
-        ("18", "$[*].routes[*].legs[*].steps[1].distance.text"),
-        ("19", "$[*].routes[*].legs[*].traffic_speed_entry"),
-        ("20", "$[*].routes[*].overview_polyline"),
-        ("21", "$[*].routes[*].overview_polyline.points"),
-        ("22", "$[*].routes[*].summary"),
-        ("23", "$[*].routes[*].warnings"),
-        ("24", "$[*].routes[*].waypoint_order"),
-        ("25", "$[1]"),
-        ("26", "$[10].routes[*].bounds"),
-        ("27", "$[100].routes[*].bounds"),
-        ("100", "$[*].routes[*].legs[*]"),
-        ("101", "$[*].routes[*].legs[*].steps[*]"),
-        ("102", "$[*].routes[*].legs[*].steps[*].distance"),
-        ("103", "$[*].routes[*].legs[*].steps[*].distance.text"),
-        ("104", "$[*].routes[*].legs[*].steps[*].distance.value"),
-        ("108", "$[*].routes[*].legs[*].steps[*].duration"),
-        ("109", "$[*].routes[*].legs[*].steps[*].polyline"),
-        ("110", "$[*].routes[*].legs[*].steps[*].polyline.points"),
-        ("111", "$[*].routes[*].legs[*].steps[*].end_location"),
-        ("112", "$[*].routes[*].legs[*].steps[*].html_instructions"),
-        ("113", "$[*].routes[*].legs[*].steps[*].travel_mode"),
-        ("114", "$[*].routes[*].legs[*].steps[*].start_location"),
-        ("115", "$[*].routes[*].legs[*].steps[*].start_location.lat"),
-        ("116", "$[*].routes[*].legs[*].steps[*].start_location.lng"),
-        ("117", "$[*].routes[*].legs[*].steps[*].maneuver"),
-        ("118", "$[*].routes[*].legs[*]..lat"),
-        ("119", "$[*].routes[*].legs[*]..lng"),
-        ("200", "$[*].available_travel_modes"),
-        ("202", "$[*].routes[*]"),
-        ("203", "$[*].routes[*].legs[*]"),
-    ],
-);
-
 pub const QUERY_POKEMON: (&str, &[(&str, &str)]) = (
     "pokemon_(173MB).json",
     &[
@@ -487,62 +403,5 @@ pub const QUERY_POKEMON: (&str, &[(&str, &str)]) = (
         ("13", "$..Name"),
         ("17", "$.cfg6[*].Abilities[*]"),
         ("18", "$.cfg7[*].Moves[*].moveName"),
-    ],
-);
-
-pub const QUERY_TWITTER_SHORT: (&str, &[(&str, &str)]) = (
-    "twitter_short_(80MB).json",
-    &[
-        ("1", "$[*].geo"),
-        ("2", "$[*].id"),
-        ("3", "$[*].source"),
-        ("4", "$[*].timestamp_ms"),
-        ("5", "$[*].user.created_at"),
-        ("6", "$[*].retweeted_status.id"),
-        ("7", "$[*].retweeted_status.filter_level"),
-        ("8", "$[1].retweeted_status.user.following"),
-        ("9", "$[0].retweeted_status.user.name"),
-        ("10", "$[1].retweeted_status[*]"),
-        ("14", "$[1].retweeted_status[*]..id"),
-        ("16", "$[1].retweeted_status[*].user.lang"),
-        ("17", "$..entities.hashtags[*]"),
-        ("18", "$..entities.symbols[*]"),
-        ("19", "$..entities.symbols[1]"),
-        ("20", "$..urls[*].display_url"),
-        ("21", "$[*].entities..symbols[*]"),
-        ("22", "$[*].entities..url"),
-        ("23", "$[*]..id"),
-        ("24", "$[*].entities..symbols[*]"),
-        ("25", "$[*].entities..url"),
-        ("26", "$[*].entities.symbols[*]"),
-        ("27", "$[*].entities.symbols[1]"),
-        ("28", "$[*].entities.urls[*].display_url"),
-        ("29", "$[*].timestamp_ms"),
-    ],
-);
-
-pub const QUERY_WALMART_SHORT: (&str, &[(&str, &str)]) = (
-    "walmart_short_(95MB).json",
-    &[
-        ("1", "$.items[*].itemId"),
-        ("2", "$.items[*].name"),
-        ("3", "$.items[*].msrp"),
-        ("4", "$.items[*].salePrice"),
-        ("5", "$.items[*].upc"),
-        ("6", "$.items[*].categoryPath"),
-        ("7", "$.items[*].shortDescription"),
-        ("8", "$.items[*].longDescription"),
-        ("9", "$.items[0].thumbnailImage"),
-        ("10", "$.items[0].productTrackingUrl"),
-        ("11", "$.items[0].freeShipToStore"),
-        ("12", "$.items[0].stock"),
-        ("13", "$..addToCartUrl"),
-        ("14", "$..isbn"),
-        ("15", "$..availableOnline"),
-        ("16", "$..freeShippingOver50Dollars"),
-        ("17", "$..categoryNode"),
-        ("18", "$..marketplace"),
-        ("19", "$.category"),
-        ("20", "$.format"),
     ],
 );

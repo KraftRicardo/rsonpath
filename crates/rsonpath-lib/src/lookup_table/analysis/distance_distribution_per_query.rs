@@ -57,60 +57,29 @@ pub fn run(json_dir_path: &str, base_path: &str) {
 
     fs::create_dir_all(&result_dir_path).expect("Fail at creating result folder.");
 
-    // kB_1
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_BUGS, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_BUGS_2, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_JOHN, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_JOHN_BIG, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_NUMBERS, cutoff);
-
-    // // MB_1
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_CANADA, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_OPENFOOD, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_PEOPLE, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_PRETTY_PEOPLE, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_TWITTER_MINI, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_POKEMON_MINI, cutoff);
-    //
-    // // MB_15
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_AST, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_DUMMY_10, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_DUMMY_20, cutoff);
-    //
-    // // MB_100
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_APP, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_BESTBUY_SHORT, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_CROSSREF0, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_GOOGLE_SHORT, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_POKEMON, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_TWITTER_SHORT, cutoff);
-    // track_skip_count(json_dir_path, &result_dir_path, QUERY_WALMART_SHORT, cutoff);
-
     // DEBUG
     track(json_dir_path, &result_dir_path, QUERY_NSPL_MINI, cutoff);
 
     // GB_1
-    // track(json_dir_path, &result_dir_path, QUERY_BESTBUY, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_CROSSREF1, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_CROSSREF2, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_CROSSREF4, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_GOOGLE, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_NSPL, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_TWITTER, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_TWITTER_SCALED, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_WALMART, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_WALMART_SCALED, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_WIKI, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_WIKI_SCALED, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_BESTBUY, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_CROSSREF1, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_CROSSREF2, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_CROSSREF4, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_GOOGLE, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_NSPL, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_TWITTER, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_TWITTER_SCALED, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_WALMART, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_WALMART_SCALED, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_WIKI, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_WIKI_SCALED, cutoff);
 
     // GB_25
-    // track(json_dir_path, &result_dir_path, QUERY_NESTED_COL, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_NESTED_COL, cutoff);
 }
 
-fn track(json_dir_path: &str, result_dir_path: &str, query_data: &str, cutoff: usize) {
-    let (json_name, queries) = read_queries(query_data);
-    let json_path = format!("{}/{}", json_dir_path, json_name);
-    println!("json_path: {}", json_path);
+fn track(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str, cutoff: usize) {
+    let (json_path, json_name, queries) = extract_input(data_dir_path, query_data_csv);
 
     // Build LUT with set cutoff
     let mut lut = LUT::build(&json_path, cutoff).expect("Fail @ building LUT");

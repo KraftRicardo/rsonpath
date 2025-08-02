@@ -16,13 +16,29 @@ use std::{
     io::{BufReader, Read, Write},
 };
 
-// run with: cargo run --bin lut --release -- cutoff res/json res/data/speed/local/lut_ptr_hash_double_empty_list_opt
-// run with: cargo run --bin lut --release -- cutoff ricardo-jsons final-results-4
-pub fn evaluate(data_dir_path: &str, result_dir_path: &str) {
+/// Measure build time, build size and query speed on real queries of the JSON. It does that for
+/// each cutoff so that it can be compared which cutoff performs the best. The output will create
+/// a folder per cutoff e.g. cutoff=0 has folder named "0". Then in each fodler there will be
+/// the results for given set cutoff.
+/// This includes the single build.csv e.g. :
+///     JSON,BUILD_TIME_SECONDS,SIZE_IN_BYTES
+///     bestbuy_large_record_(1GB),0.51288,16103794
+///     crossref1_(551MB),0.39692,13321166
+///     ...
+/// and then one csv per json named after the json e.g. :
+///     QUERY_ID,QUERY_TEXT,QUERY_TIME_SECONDS
+///     1,$.products[4].categoryPath[2],0.00954
+///     2,$.products[*].categoryPath[2],0.26674
+///     ...
+///
+/// Run with: cargo run --bin lut --release -- cutoff res/json res/data/speed/local/distance_cutoff
+/// Run with: cargo run --bin lut --release -- cutoff ricardo-jsons final-results-4
+pub fn run(data_dir_path: &str, result_dir_path: &str) {
     println!("lut_ptrhash_double_empty_list_opt");
 
     // let cutoffs: Vec<usize> = vec![0, 64, 128, 192, 256, 320, 384, 448, 512, 1024, 2048, 4096, 8192];
-    let cutoffs = vec![0, 64, 128, 512, 8192];
+    // let cutoffs = vec![0, 64, 128, 512, 8192];
+    let cutoffs = vec![0];
 
     if TRACK_SKIPPING_ON || SKIP_MODE != OFF {
         println!("Disable tracking of skips before running because it slows down the algorithm.");
@@ -31,25 +47,25 @@ pub fn evaluate(data_dir_path: &str, result_dir_path: &str) {
 
     fs::create_dir_all(&result_dir_path).expect("Failed to create directory");
 
+    // MB_100
+    eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY_SHORT, &cutoffs);
+
     // GB_1
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY, &cutoffs);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1, &cutoffs);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2, &cutoffs);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4, &cutoffs);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE, &cutoffs);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL, &cutoffs);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER, &cutoffs);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART, &cutoffs);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART, &cutoffs);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI, &cutoffs);
 
     println!("Done");
 }
 
-fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&str, &str)]), cutoffs: &Vec<usize>) {
-    // Extract input
-    let (json_filename, queries) = test_data;
-    let filename = json_filename.strip_suffix(".json").unwrap();
-    println!("JSON: {}", filename);
+fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str, cutoffs: &Vec<usize>) {
+    let (json_path, _, queries) = extract_input(data_dir_path, query_data_csv);
 
     // Measurements
     for cutoff in cutoffs {
@@ -59,10 +75,8 @@ fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&st
         let cutoff_dir_path = format!("{}/{}", result_dir_path, cutoff);
         fs::create_dir_all(&cutoff_dir_path).expect("Failed to create directory");
 
-        let json_path = format!("{}/{}.json", data_dir_path, filename);
-
-        measure_build(&json_path, &cutoff_dir_path, filename, *cutoff);
-        measure_query_count(&json_path, &result_dir_path, filename, *cutoff, queries);
+        measure_build(&json_path, &cutoff_dir_path, query_data_csv, *cutoff);
+        measure_query_count(&json_path, &result_dir_path, query_data_csv, *cutoff, &queries);
     }
 }
 
@@ -70,14 +84,14 @@ fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&st
 fn measure_query_count(
     json_path: &str,
     result_dir_path: &str,
-    filename: &str,
+    query_data_csv: &str,
     cutoff: usize,
-    queries: &[(&str, &str)],
+    queries: &Vec<(String, String)>,
 ) {
     // Ensure the result directory exists
     fs::create_dir_all(result_dir_path).expect("Failed to create results directory");
 
-    let query_csv_path = format!("{}/{}/{}.csv", result_dir_path, cutoff, filename);
+    let query_csv_path = format!("{}/{}/{}.csv", result_dir_path, cutoff, query_data_csv);
     let csv_exists = Path::new(&query_csv_path).exists();
 
     // Open CSV in append mode
@@ -105,7 +119,7 @@ fn measure_query_count(
         OwnedBytes::new(buf)
     };
 
-    for &(query_id, query_text) in queries {
+    for (query_id, query_text) in queries {
         let query = rsonpath_syntax::parse(query_text).expect("Failed to parse query");
         let mut engine = RsonpathEngine::compile_query(&query).expect("Failed to compile query");
         engine.add_lut(lut);
@@ -130,7 +144,7 @@ fn measure_query_count(
 
         println!(
             "  - File {}, Query {}: {}, time = {:.5}s, result = {}",
-            filename, query_id, query_text, avg_time, result
+            query_data_csv, query_id, query_text, avg_time, result
         );
 
         wrt.write_record(&[query_id, query_text, &format!("{:.5}", avg_time)])
@@ -141,7 +155,7 @@ fn measure_query_count(
     println!("Generated: {}", query_csv_path);
 }
 
-fn measure_build(json_path: &str, cutoff_dir_path: &str, filename: &str, cutoff: usize) {
+fn measure_build(json_path: &str, cutoff_dir_path: &str, query_data_csv: &str, cutoff: usize) {
     let build_csv = format!("{}/build.csv", cutoff_dir_path);
     let file_exists = Path::new(&build_csv).exists();
 
@@ -187,7 +201,7 @@ fn measure_build(json_path: &str, cutoff_dir_path: &str, filename: &str, cutoff:
     println!(" build time = {:.5}s, size = {} B", avg_time, heap_bytes);
 
     // Write the results
-    wtr.write_record(&[filename, &format!("{:.5}", avg_time), &heap_bytes.to_string()])
+    wtr.write_record(&[query_data_csv, &format!("{:.5}", avg_time), &heap_bytes.to_string()])
         .expect("Failed to write build record");
 
     wtr.flush().expect("Failed to flush build CSV");

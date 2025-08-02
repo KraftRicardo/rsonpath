@@ -1,4 +1,6 @@
 use crate::lookup_table::speed::lut_query_data::*;
+use crate::lookup_table::speed::lut_skip_evaluation::SkipMode::OFF;
+use crate::lookup_table::{QUERY_REPETITIONS, SKIP_MODE, TRACK_SKIPPING_ON};
 use crate::{
     engine::{Compiler, Engine, RsonpathEngine},
     input::OwnedBytes,
@@ -12,52 +14,53 @@ use std::{
     io::{BufReader, Read, Write},
 };
 
-pub const QUERY_REPETITIONS: usize = 10;
-pub const WARM_UP_QUERY_REPETITIONS: usize = 10;
-
-// Run with: cargo run --bin lut --release -- eval-rq-lut-no-lut .a_test_data .a_final_results
-// Run with:
-pub fn run(data_dir_path: &str, base_path: &str) {
+/// Run rq-lut without using a LUT but just using the non-lut version of rq. This is to see whether
+/// there is a measurable speed change in the changes of the base code.
+/// Output is one csv per json file. Structure e.g. :
+///     QUERY_ID,QUERY_TEXT,QUERY_TIME_SECONDS
+///     1,$..freeShipping,0.08720
+///     2,$.products[*].videoChapters,0.79716
+///     ...
+///
+/// Run with: cargo run --bin lut --release -- eval-rq-lut-no-lut res/json res/data/speed/local/rq_lut_no_lut
+pub fn run(data_dir_path: &str, result_dir_path: &str) {
     println!("rq-lut-no-lut");
 
+    if TRACK_SKIPPING_ON || SKIP_MODE != OFF {
+        println!("Disable tracking of skips before running because it slows down the algorithm.");
+        return;
+    }
     if !(cfg! {feature = "empty-list-opt"}) {
         println!("empty-list-opt not set, aborting");
         return;
     }
 
     // Create results dir
-    let result_dir_path = format!("{}/speed/rq-lut-no-lut", base_path);
     fs::create_dir_all(&result_dir_path).expect("Failed to create directory");
 
     // GB_1
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
 
     println!("Done");
 }
 
-fn eval_all(data_dir_path: &str, result_dir_path: &str, test_data: (&str, &[(&str, &str)])) {
-    // Extract input
-    let (json_filename, queries) = test_data;
-    let filename = json_filename.strip_suffix(".json").unwrap();
-    println!("JSON: {}", filename);
+fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str) {
+    let (json_path, _, queries) = extract_input(data_dir_path, query_data_csv);
 
-    // All necessary paths to CSV and PNG
-    let json_path = format!("{}/{}.json", data_dir_path, filename);
-
-    measure_query(&json_path, &result_dir_path, filename, queries);
+    measure_query(&json_path, &result_dir_path, query_data_csv, queries);
 }
 
 // Measure query time
-fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries: &[(&str, &str)]) {
-    let query_csv_path = format!("{}/{}.csv", result_dir_path, filename);
+fn measure_query(json_path: &str, result_dir_path: &str, query_data_csv: &str, queries: Vec<(String, String)>) {
+    let query_csv_path = format!("{}/rq_lut_no_lut_time.csv", result_dir_path);
     let csv_exists = Path::new(&query_csv_path).exists();
 
     // Open CSV in append mode
@@ -71,7 +74,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
 
     // Write header if the file is new
     if !csv_exists {
-        wrt.write_record(&["QUERY_ID", "QUERY_TEXT", "QUERY_TIME_SECONDS"])
+        wrt.write_record(&["JSON", "QUERY_ID", "QUERY_TEXT", "QUERY_TIME_SECONDS", "REPETITIONS"])
             .expect("Failed to write header");
     }
 
@@ -83,12 +86,12 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
         OwnedBytes::new(buf)
     };
 
-    for &(query_id, query_text) in queries {
-        let query = rsonpath_syntax::parse(query_text).expect("Failed to parse query");
+    for (query_id, query_text) in queries {
+        let query = rsonpath_syntax::parse(&query_text).expect("Failed to parse query");
         let engine = RsonpathEngine::compile_query(&query).expect("Failed to compile query");
 
         // Warm up
-        for _ in 0..WARM_UP_QUERY_REPETITIONS {
+        for _ in 0..QUERY_REPETITIONS {
             let _ = engine.count(&input).expect("Failed count");
         }
 
@@ -103,10 +106,19 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
         }
 
         let avg_time = total_time / (QUERY_REPETITIONS as f64);
-        println!("  - Time = {:.5}s Result = {}", avg_time, result);
+        println!(
+            "  - File: {}, Query {}: {}, Time = {:.5}s, Result = {}",
+            query_data_csv, query_id, query_text, avg_time, result
+        );
 
-        wrt.write_record(&[query_id, query_text, &format!("{:.5}", avg_time)])
-            .expect("Failed to write to CSV");
+        wrt.write_record(&[
+            query_data_csv.to_string(),
+            query_id,
+            query_text,
+            format!("{:.5}", avg_time),
+            QUERY_REPETITIONS.to_string(),
+        ])
+        .expect("Failed to write to CSV");
     }
 
     wrt.flush().expect("Failed to flush CSV");

@@ -5,8 +5,8 @@ use rsonpath::lookup_table::extra::query_with_lut::query_with_lut;
 use rsonpath::lookup_table::extra::sichash_test_data_generator;
 use rsonpath::lookup_table::speed::lut_hot::test_hotness;
 use rsonpath::lookup_table::speed::{
-    eval_final, eval_lut_construction, eval_rq_lut, eval_rq_lut_cutoffs, eval_rq_lut_no_lut, eval_serde, eval_valgrind,
-    lut_skip_evaluation,
+    eval_distance_cutoff, eval_final, eval_lut_construction, eval_rq_lut, eval_rq_lut_no_lut, eval_serde,
+    eval_valgrind, lut_skip_evaluation,
 };
 use rsonpath::lookup_table::{
     analysis::{distance_distribution, json_size_estimation_bits::print_estimation},
@@ -78,7 +78,7 @@ enum Commands {
         json_dir: String,
         out_dir: String,
     },
-    Cutoff {
+    EvalDistanceCutoff {
         data_dir_path: String,
         base_dir_path: String,
     },
@@ -107,11 +107,23 @@ fn main() -> Result<(), Box<dyn Error>> {
         } => {
             distance_distribution_per_query::run(json_dir_path, result_dir_path);
         }
-        Commands::EvalSerde {
+        Commands::EvalDistanceCutoff {
+            data_dir_path,
+            base_dir_path: result_dir_path,
+        } => {
+            eval_distance_cutoff::run(data_dir_path, result_dir_path);
+        }
+        Commands::EvalFinal {
             data_dir_path,
             result_dir_path,
         } => {
-            eval_serde::run(data_dir_path, result_dir_path);
+            eval_final::run(data_dir_path, result_dir_path);
+        }
+        Commands::EvalLutConstruction {
+            data_dir_path,
+            result_dir_path,
+        } => {
+            eval_lut_construction::run(data_dir_path, result_dir_path);
         }
         Commands::EvalRqLut {
             data_dir_path,
@@ -125,17 +137,11 @@ fn main() -> Result<(), Box<dyn Error>> {
         } => {
             eval_rq_lut_no_lut::run(data_dir_path, result_dir_path);
         }
-        Commands::EvalFinal {
+        Commands::EvalSerde {
             data_dir_path,
             result_dir_path,
         } => {
-            eval_final::run(data_dir_path, result_dir_path);
-        }
-        Commands::EvalLutConstruction {
-            data_dir_path,
-            result_dir_path,
-        } => {
-            eval_lut_construction::run(data_dir_path, result_dir_path);
+            eval_serde::run(data_dir_path, result_dir_path);
         }
         Commands::EvalValgrind {} => {
             eval_valgrind::run();
@@ -168,12 +174,6 @@ fn main() -> Result<(), Box<dyn Error>> {
             let csv_dir = format!("{}/{}", out_dir, "performance");
 
             sichash_test_data_generator::generate_test_data_for_sichash(json_dir, &csv_dir);
-        }
-        Commands::Cutoff {
-            data_dir_path,
-            base_dir_path: result_dir_path,
-        } => {
-            eval_rq_lut_cutoffs::evaluate(data_dir_path, result_dir_path);
         }
         Commands::Hot {} => {
             test_hotness();

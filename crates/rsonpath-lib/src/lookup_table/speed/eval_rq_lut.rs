@@ -32,8 +32,8 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
 
     // 2^40 = 1,099,511,627,776, we basically use a cutoff so high we do not trigger the skipping
     // with the lut. We want to see how slow the overall application is.
-    let cutoffs = vec![0, 64, 128, 512, 1024, 2048, 4096, 8192, 1099511627776];
-    // let cutoffs = vec![0, 64];
+    // let cutoffs = vec![0, 64, 128, 512, 1024, 2048, 4096, 8192, 1099511627776];
+    let cutoffs = vec![0, 64];
 
     if TRACK_SKIPPING_ON || SKIP_MODE != OFF {
         println!("Disable tracking of skips before running because it slows down the algorithm.");
@@ -48,38 +48,33 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
     fs::create_dir_all(&result_dir_path).expect("Failed to create directory");
 
     // GB_1
-    eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER_SCALED, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART_SCALED, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI_SCALED, &cutoffs);
+    evaluate(&data_dir_path, &result_dir_path, QUERY_BESTBUY, &cutoffs);
+    // evaluate(&data_dir_path, &result_dir_path, QUERY_CROSSREF1, &cutoffs);
+    // evaluate(&data_dir_path, &result_dir_path, QUERY_CROSSREF2, &cutoffs);
+    // evaluate(&data_dir_path, &result_dir_path, QUERY_CROSSREF4, &cutoffs);
+    // evaluate(&data_dir_path, &result_dir_path, QUERY_GOOGLE, &cutoffs);
+    // evaluate(&data_dir_path, &result_dir_path, QUERY_NSPL, &cutoffs);
+    // evaluate(&data_dir_path, &result_dir_path, QUERY_TWITTER, &cutoffs);
+    // evaluate(&data_dir_path, &result_dir_path, QUERY_TWITTER_SCALED, &cutoffs);
+    // evaluate(&data_dir_path, &result_dir_path, QUERY_WALMART, &cutoffs);
+    // evaluate(&data_dir_path, &result_dir_path, QUERY_WALMART_SCALED, &cutoffs);
+    // evaluate(&data_dir_path, &result_dir_path, QUERY_WIKI, &cutoffs);
+    // evaluate(&data_dir_path, &result_dir_path, QUERY_WIKI_SCALED, &cutoffs);
 
     println!("Done");
 }
 
-fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data: &str, cutoffs: &Vec<usize>) {
-    // Extract input
-    let (json_filename, queries) = read_queries(query_data);
-    let filename = json_filename.strip_suffix(".json").unwrap();
-    println!("JSON: {}", filename);
-
-    // All necessary paths to CSV and PNG
-    let json_path = format!("{}/{}.json", data_dir_path, filename);
+/// Measure the query times of rq-lut for different cutoffs. Results will be written into a csv.
+fn evaluate(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str, cutoffs: &Vec<usize>) {
+    let (json_path, json_name, queries) = extract_input(data_dir_path, query_data_csv);
 
     // Measurements
     for cutoff in cutoffs {
-        measure_query(&json_path, &result_dir_path, filename, &queries, *cutoff);
+        measure_query(&json_path, &result_dir_path, &json_name, &queries, *cutoff);
     }
 }
 
-// Measure query time
+// Measure query time of rq-lut for the given queries and cutoff on a given json.
 fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries: &[(String, String)], cutoff: usize) {
     let query_csv_path = format!("{}/rq_lut_time.csv", result_dir_path);
     let csv_exists = Path::new(&query_csv_path).exists();
@@ -95,8 +90,15 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
 
     // Write header if the file is new
     if !csv_exists {
-        wrt.write_record(&["JSON", "CUTOFF", "QUERY_ID", "QUERY_TEXT", "QUERY_TIME_SECONDS"])
-            .expect("Failed to write header");
+        wrt.write_record(&[
+            "JSON",
+            "CUTOFF",
+            "QUERY_ID",
+            "QUERY_TEXT",
+            "QUERY_TIME_SECONDS",
+            "REPETITIONS",
+        ])
+        .expect("Failed to write header");
     }
 
     // Build LUT once and read input file into memory
@@ -143,6 +145,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
             query_id.as_str(),
             query_text.as_str(),
             &format!("{:.5}", avg_time),
+            QUERY_REPETITIONS.to_string().as_str(),
         ])
         .expect("Failed to write to CSV");
     }

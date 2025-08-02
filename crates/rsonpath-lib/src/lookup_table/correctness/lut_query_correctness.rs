@@ -51,10 +51,10 @@ pub fn run(data_dir_path: &str) {
 
 /// Compares the rq-lut vs. rq-legacy implementation whether they have the same COUNT results.
 /// Will also trigger when the query has COUNT=0 because then it makes no sense to do tests with it.
-fn test_query_correctness_count(data_dir_path: &str, query_data: &str, cutoff: usize) {
-    let (filename, queries) = read_queries(query_data);
-    let json_path = format!("{data_dir_path}/{filename}");
-    println!("Building LUT: {}", json_path);
+fn test_query_correctness_count(data_dir_path: &str, query_data_csv: &str, cutoff: usize) {
+    let (json_path, json_name, queries) = extract_input(data_dir_path, query_data_csv);
+
+    println!("Building LUT...");
     let mut lut = LUT::build(&json_path, cutoff).expect("Fail @ building LUT");
 
     // Run all queries
@@ -111,10 +111,10 @@ fn test_query_correctness_count(data_dir_path: &str, query_data: &str, cutoff: u
     drop(lut);
 }
 
-fn test_query_correctness_nodes(data_dir_path: &str, query_data: &str, cutoff: usize) {
-    let (filename, queries) = read_queries(query_data);
-    let json_path = format!("{data_dir_path}/{filename}");
-    println!("Building LUT: {}", json_path);
+fn test_query_correctness_nodes(data_dir_path: &str, query_data_csv: &str, cutoff: usize) {
+    let (json_path, json_name, queries) = extract_input(data_dir_path, query_data_csv);
+
+    println!("Building LUT");
     let mut lut = LUT::build(&json_path, cutoff).expect("Fail @ building LUT");
 
     // Run all queries
