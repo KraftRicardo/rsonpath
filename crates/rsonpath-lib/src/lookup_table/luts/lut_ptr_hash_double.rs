@@ -3,8 +3,8 @@ use ptr_hash::{PtrHash, PtrHashParams};
 
 use std::fs;
 
-use crate::lookup_table::extra::pair_data;
-use crate::lookup_table::extra::pair_data::PairData;
+use crate::lookup_table::luts::pair_data;
+use crate::lookup_table::luts::pair_data::PairData;
 use crate::lookup_table::LookUpTable;
 use crate::{
     classification::{self, simd::Simd},
@@ -24,10 +24,7 @@ impl LookUpTable for LutPtrHashDouble {
     where
         Self: Sized,
     {
-        assert!(
-            cutoff % crate::BLOCK_SIZE == 0,
-            "cutoff must be a multiple of block size"
-        );
+        assert_eq!(cutoff % crate::BLOCK_SIZE, 0, "cutoff must be a multiple of block size");
         let file = fs::File::open(json_path).expect("Failed to open file");
         // SAFETY: We keep the file open throughout the entire duration.
         let input = unsafe { input::MmapInput::map_file(&file)? };

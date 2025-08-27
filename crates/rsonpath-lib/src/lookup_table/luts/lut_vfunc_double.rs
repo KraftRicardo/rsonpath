@@ -6,8 +6,8 @@ use sux::{
     utils::FromIntoIterator,
 };
 
-use crate::lookup_table::extra::pair_data;
-use crate::lookup_table::extra::pair_data::PairData;
+use crate::lookup_table::luts::pair_data;
+use crate::lookup_table::luts::pair_data::PairData;
 use crate::lookup_table::LookUpTable;
 use crate::{
     classification::{self, simd::Simd},

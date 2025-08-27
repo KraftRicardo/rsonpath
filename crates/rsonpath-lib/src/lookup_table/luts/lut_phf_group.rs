@@ -1,7 +1,6 @@
 use super::lut_phf::DEFAULT_THREADED;
-use super::{lut_phf::DEFAULT_LAMBDA, lut_phf_double::LutPHFDouble};
-use crate::lookup_table::extra::pair_data;
-use crate::lookup_table::extra::pair_data::PairData;
+use super::{lut_phf::DEFAULT_LAMBDA, lut_phf_double::LutPHFDouble, pair_data};
+use crate::lookup_table::luts::pair_data::PairData;
 use crate::lookup_table::{LookUpTable, LookUpTableLambda};
 use crate::{
     classification::{self, simd::Simd},

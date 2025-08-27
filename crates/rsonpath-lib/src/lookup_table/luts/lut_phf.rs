@@ -1,4 +1,4 @@
-use crate::lookup_table::extra::pair_data;
+use crate::lookup_table::luts::pair_data;
 use crate::lookup_table::{LookUpTable, LookUpTableLambda};
 use crate::{
     classification::{self, simd::Simd},

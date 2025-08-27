@@ -12,8 +12,21 @@ use std::path::Path;
 use std::time::Instant;
 use std::{fs, io::BufReader};
 
-// Run with: cargo run --bin lut --release -- eval-serde res/json res/data/speed/local/serde
-// Run with: cargo run --bin lut --release -- eval-serde ricardo-jsons final-results-2
+/// Measures build time and query for given json and their queries using the serde crate.
+/// Output will be saved in build.csv and serde_time.csv.
+/// build.csv e.g.:
+///     JSON,BUILD_TIME_SECONDS,SIZE_IN_BYTES
+///     crossref1_(551MB),4.83730,3030361082
+///     bestbuy_large_record_(1GB),11.80644,5177256301
+///     ...
+/// serde_time.csv e.g.:
+///     JSON,QUERY_ID,QUERY_TEXT,QUERY_TIME_SECONDS,REPETITIONS
+///     bestbuy_large_record_(1GB),1,$..freeShipping,1.77164,1
+///     bestbuy_large_record_(1GB),2,$.products[*].videoChapters,0.13674,1
+///     bestbuy_large_record_(1GB),3,$.products[*].additionalFeatures[*],0.08287,1
+///     ...
+/// Run with: cargo run --bin lut --release -- eval-serde res/json res/data/speed/local/serde
+/// Run with: cargo run --bin lut --release -- eval-serde ricardo-jsons final-results-2
 pub fn run(data_dir_path: &str, result_dir_path: &str) {
     println!("eval-serde");
 
@@ -21,14 +34,14 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
 
     // GB_1
     eval_all(&data_dir_path, result_dir_path, QUERY_BESTBUY);
-    eval_all(&data_dir_path, result_dir_path, QUERY_CROSSREF1);
-    eval_all(&data_dir_path, result_dir_path, QUERY_CROSSREF2);
-    eval_all(&data_dir_path, result_dir_path, QUERY_CROSSREF4);
-    eval_all(&data_dir_path, result_dir_path, QUERY_GOOGLE);
-    eval_all(&data_dir_path, result_dir_path, QUERY_NSPL);
-    eval_all(&data_dir_path, result_dir_path, QUERY_TWITTER);
-    eval_all(&data_dir_path, result_dir_path, QUERY_WALMART);
-    eval_all(&data_dir_path, result_dir_path, QUERY_WIKI);
+    // eval_all(&data_dir_path, result_dir_path, QUERY_CROSSREF1);
+    // eval_all(&data_dir_path, result_dir_path, QUERY_CROSSREF2);
+    // eval_all(&data_dir_path, result_dir_path, QUERY_CROSSREF4);
+    // eval_all(&data_dir_path, result_dir_path, QUERY_GOOGLE);
+    // eval_all(&data_dir_path, result_dir_path, QUERY_NSPL);
+    // eval_all(&data_dir_path, result_dir_path, QUERY_TWITTER);
+    // eval_all(&data_dir_path, result_dir_path, QUERY_WALMART);
+    // eval_all(&data_dir_path, result_dir_path, QUERY_WIKI);
 
     println!("Done");
 }
@@ -42,7 +55,7 @@ fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str) {
 
 // Measure query time
 fn measure_query(json_path: &str, result_dir_path: &str, query_data_csv: &str, queries: Vec<(String, String)>) {
-    let query_csv_path = format!("{}/{}.csv", result_dir_path, query_data_csv);
+    let query_csv_path = format!("{result_dir_path}/serde_time.csv");
     let csv_exists = Path::new(&query_csv_path).exists();
 
     // Open CSV in append mode
@@ -56,7 +69,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, query_data_csv: &str, q
 
     // Write header if the file is new
     if !csv_exists {
-        wrt.write_record(["QUERY_ID", "QUERY_TEXT", "QUERY_TIME_SECONDS"])
+        wrt.write_record(["JSON", "QUERY_ID", "QUERY_TEXT", "QUERY_TIME_SECONDS", "REPETITIONS"])
             .expect("Failed to write header");
     }
 
@@ -91,14 +104,21 @@ fn measure_query(json_path: &str, result_dir_path: &str, query_data_csv: &str, q
             query_id, query_text, avg_time, result
         );
 
-        wrt.write_record([query_id, query_text, format!("{:.5}", avg_time)])
-            .expect("Failed to write to CSV");
+        wrt.write_record([
+            query_data_csv.to_string(),
+            query_id,
+            query_text,
+            format!("{:.5}", avg_time),
+            QUERY_REPETITIONS.to_string(),
+        ])
+        .expect("Failed to write to CSV");
     }
 
     wrt.flush().expect("Failed to flush CSV");
     println!("Generated: {query_csv_path}");
 }
 
+/// Measure build time
 fn measure_build(json_path: &str, serde_dir_path: &str, query_data_csv: &str) {
     let build_csv_path = format!("{}/build.csv", serde_dir_path);
     let file_exists = Path::new(&build_csv_path).exists();

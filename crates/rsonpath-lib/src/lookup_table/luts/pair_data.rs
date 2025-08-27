@@ -296,6 +296,7 @@ pub fn count_brackets(json_path: &str, cutoff: usize) -> Result<(usize, usize), 
     .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
 }
 
+/// Count the number of curly and squary individually.
 #[inline]
 pub(crate) fn count_brackets_curly_squary<I, V>(
     input: &I,

@@ -1,18 +1,7 @@
-use crate::{
-    engine::{Compiler, Engine, RsonpathEngine},
-    input::OwnedBytes,
-    lookup_table::{LookUpTable, LUT},
-};
+use crate::lookup_table::{LookUpTable, LUT};
 
-use crate::input::MmapInput;
-use crate::lookup_table::extra::pair_data;
-use crate::lookup_table::luts::lut_hash_map;
+use crate::lookup_table::luts::{lut_hash_map, pair_data};
 use crate::lookup_table::speed::lut_query_data::*;
-use rsonpath_lib_ref::engine::{Compiler as CompilerLegacy, Engine as EngineLegacy};
-use std::{
-    fs,
-    io::{BufReader, Read},
-};
 
 /// Checks whether the distances covered by the LUT are actually correct.
 ///

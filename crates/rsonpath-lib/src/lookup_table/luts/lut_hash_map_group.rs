@@ -1,6 +1,6 @@
 use super::lut_hash_map_double::LutHashMapDouble;
-use crate::lookup_table::extra::pair_data;
-use crate::lookup_table::extra::pair_data::PairData;
+use crate::lookup_table::luts::pair_data;
+use crate::lookup_table::luts::pair_data::PairData;
 use crate::lookup_table::LookUpTable;
 use crate::{
     classification::{self, simd::Simd},

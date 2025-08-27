@@ -8,3 +8,4 @@ pub mod lut_phf_group;
 pub mod lut_ptr_hash_double;
 pub mod lut_sichash;
 pub mod lut_vfunc_double;
+pub mod pair_data;

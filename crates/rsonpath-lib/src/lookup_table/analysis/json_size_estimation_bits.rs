@@ -1,3 +1,4 @@
+/// Print the max index number possible for different JSON sizes in GB.
 pub fn print_estimation() {
     for bit in 32..64 {
         let max_idx = 2_usize.pow(bit);

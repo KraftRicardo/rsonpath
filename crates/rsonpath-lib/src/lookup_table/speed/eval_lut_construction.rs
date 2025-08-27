@@ -1,5 +1,6 @@
 use crate::lookup_table::analysis::distance_distribution;
-use crate::lookup_table::extra::{pair_data, util_path};
+use crate::lookup_table::extra::util_path;
+use crate::lookup_table::luts::pair_data;
 use crate::lookup_table::speed::lut_evaluation::{measure_performance, EvalConfig};
 use crate::lookup_table::speed::lut_query_data::*;
 use crate::lookup_table::QUERY_REPETITIONS;

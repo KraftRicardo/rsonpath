@@ -4,8 +4,8 @@ use super::lut_phf::{
     phf_generator_double_hash::{self, HashState},
     DEFAULT_LAMBDA, DEFAULT_THREADED,
 };
-use crate::lookup_table::extra::pair_data;
-use crate::lookup_table::extra::pair_data::PairData;
+use crate::lookup_table::luts::pair_data;
+use crate::lookup_table::luts::pair_data::PairData;
 use crate::lookup_table::{LookUpTable, LookUpTableLambda};
 use crate::{
     classification::{self, simd::Simd},

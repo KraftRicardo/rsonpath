@@ -15,7 +15,9 @@ use std::{
     fs,
     io::{BufReader, Read, Write},
 };
-
+/// Run with: cargo run --bin lut --release -- eval-distance-cutoff res/json res/data/speed/local/distance_cutoff
+/// Run with: cargo run --bin lut --release -- eval-distance-cutoff ricardo-jsons final-results-4
+///
 /// Measure build time, build size and query speed on real queries of the JSON. It does that for
 /// each cutoff so that it can be compared which cutoff performs the best. The output will create
 /// a folder per cutoff e.g. cutoff=0 has folder named "0". Then in each fodler there will be
@@ -30,9 +32,6 @@ use std::{
 ///     1,$.products[4].categoryPath[2],0.00954
 ///     2,$.products[*].categoryPath[2],0.26674
 ///     ...
-///
-/// Run with: cargo run --bin lut --release -- cutoff res/json res/data/speed/local/distance_cutoff
-/// Run with: cargo run --bin lut --release -- cutoff ricardo-jsons final-results-4
 pub fn run(data_dir_path: &str, result_dir_path: &str) {
     println!("lut_ptrhash_double_empty_list_opt");
 

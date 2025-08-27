@@ -2,11 +2,10 @@ use clap::{Parser, Subcommand};
 use rsonpath::lookup_table::analysis::distance_distribution_per_query;
 use rsonpath::lookup_table::correctness::{lut_build_correctness, lut_query_correctness};
 use rsonpath::lookup_table::extra::query_with_lut::query_with_lut;
-use rsonpath::lookup_table::extra::sichash_test_data_generator;
-use rsonpath::lookup_table::speed::lut_hot::test_hotness;
+use rsonpath::lookup_table::extra::{eval_valgrind, lut_hot, sichash_test_data_generator};
 use rsonpath::lookup_table::speed::{
     eval_distance_cutoff, eval_final, eval_lut_construction, eval_rq_lut, eval_rq_lut_no_lut, eval_serde,
-    eval_valgrind, lut_skip_evaluation,
+    lut_skip_evaluation,
 };
 use rsonpath::lookup_table::{
     analysis::{distance_distribution, json_size_estimation_bits::print_estimation},
@@ -82,9 +81,7 @@ enum Commands {
         data_dir_path: String,
         base_dir_path: String,
     },
-    Analysis {
-        json_folder_path: String,
-    },
+    EstimateIndexForJsonSize {},
     Hot {},
 }
 
@@ -153,8 +150,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             lut_build_correctness::run(data_dir_path);
         }
 
-        Commands::Analysis { json_folder_path: _ } => {
-            // create_json_size_csv(json_folder_path);
+        Commands::EstimateIndexForJsonSize {} => {
             print_estimation();
         }
         Commands::Performance { json_dir, out_dir } => {
@@ -176,7 +172,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             sichash_test_data_generator::generate_test_data_for_sichash(json_dir, &csv_dir);
         }
         Commands::Hot {} => {
-            test_hotness();
+            lut_hot::test_hotness();
         }
     }
 

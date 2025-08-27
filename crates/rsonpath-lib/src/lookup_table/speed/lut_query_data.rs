@@ -52,6 +52,8 @@ pub fn read_queries_test(file_name: &str) -> Vec<(String, String)> {
 ///      3,$..includedItemList[*],9096,0.00000000000000000
 ///      4,$.products[*].videoChapters,769,0.09227438889806847
 ///      ...
+///
+/// Check the extract_input function to see which csv_path names are viable.
 fn read_queries_from_csv(csv_path: &str) -> Vec<(String, String)> {
     let file = File::open(&csv_path).expect("Cannot open CSV file");
     let mut rdr = ReaderBuilder::new().has_headers(true).from_reader(BufReader::new(file));
