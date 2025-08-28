@@ -5,7 +5,7 @@ repository = { workspace = true }
 homepage = { workspace = true }
 edition = { workspace = true }
 name = "rsonpath-syntax"
-version = "0.3.2"
+version = "0.4.0"
 description = "A JSONPath parser."
 readme = "README.md"
 keywords = ["json", "jsonpath", "query", "search", "parser"]
@@ -19,21 +19,27 @@ all-features = true
 
 [dependencies]
 arbitrary = { workspace = true, features = ["derive"], optional = true }
-owo-colors = { version = "4.1.0", default-features = false, optional = true }
-nom = "7.1.3"
+owo-colors = { version = "4.2.2", default-features = false, optional = true }
+nom = "8.0.0"
+serde = { workspace = true, optional = true, features = ["derive"] }
 thiserror = { workspace = true }
-unicode-width = "0.2.0"
+unicode-width = "0.2.1"
 
 [dev-dependencies]
-insta = "1.41.1"
+ciborium = { workspace = true, default-features = true }
+insta = { workspace = true, features = ["ron"] }
 pretty_assertions = { workspace = true }
 proptest = { workspace = true }
+rmp-serde = { workspace = true }
+rsonpath-syntax-proptest = { workspace = true }
+serde_json = { workspace = true }
 test-case = { workspace = true }
 
 [features]
 default = []
 arbitrary = ["dep:arbitrary"]
 color = ["dep:owo-colors"]
+serde = ["dep:serde"]
 
 [lints]
 workspace = true

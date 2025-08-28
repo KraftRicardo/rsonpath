@@ -18,6 +18,7 @@
 /// assert_eq!(needle.unquoted(), "needle");
 /// assert_eq!(needle.quoted(), "\"needle\"");
 /// ```
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone)]
 pub struct JsonString {
     quoted: String,
@@ -147,7 +148,7 @@ pub fn escape(str: &str, mode: EscapeMode) -> String {
             '\r' => result.push_str(r"\r"),
             '\t' => result.push_str(r"\t"),
             // ## Other control sequences escaped as Unicode escapes.
-            '\u{0000}'..='\u{001F}' => write!(result, "\\u{:0>4x}", c as u8).unwrap(),
+            '\u{0000}'..='\u{001F}' => write!(result, "\\u{:0>4x}", c as u8).expect("writing to string never fails"),
             // # Non-escapable characters.
             _ => result.push(c),
         }

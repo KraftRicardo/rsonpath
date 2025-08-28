@@ -70,11 +70,14 @@ use smallvec::{smallvec, SmallVec};
 ///
 /// The engine is stateless, meaning that it can be executed
 /// on any number of separate inputs, even on separate threads.
+#[derive(Clone, Debug)]
 pub struct MainEngine {
     automaton: Automaton,
     simd: SimdConfiguration,
     lut: Option<LUT>,
 }
+
+static_assertions::assert_impl_all!(MainEngine: Send, Sync);
 
 impl MainEngine {
     #[inline(always)]
@@ -86,11 +89,19 @@ impl MainEngine {
     pub fn take_lut(&mut self) -> Option<LUT> {
         self.lut.take()
     }
+
+    /// Get a reference to the underlying compiled query.
+    #[inline(always)]
+    #[must_use]
+    pub fn automaton(&self) -> &Automaton {
+        &self.automaton
+    }
 }
 
 impl Compiler for MainEngine {
     type E = Self;
 
+    #[must_use = "compiling the query only creates an engine instance that should be used"]
     #[inline(always)]
     fn compile_query(query: &JsonPathQuery) -> Result<Self, CompilerError> {
         let automaton = Automaton::new(query)?;

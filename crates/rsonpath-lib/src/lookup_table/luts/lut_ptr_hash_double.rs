@@ -10,7 +10,9 @@ use crate::{
     classification::{self, simd::Simd},
     input::{self, error, Input},
 };
+use std::fmt;
 
+#[derive(Clone)]
 pub struct LutPtrHashDouble {
     ptr_hash: PtrHash<usize>,
     values: Vec<u16>,
@@ -118,5 +120,17 @@ impl LutPtrHashDouble {
             values_64,
             cutoff,
         }
+    }
+}
+
+impl fmt::Debug for LutPtrHashDouble {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("LutPtrHashDouble")
+            .field("ptr_hash", &self.ptr_hash.n())
+            .field("values", &self.values)
+            .field("ptr_hash_64", &self.ptr_hash_64.n())
+            .field("values_64", &self.values_64)
+            .field("cutoff", &self.cutoff)
+            .finish()
     }
 }

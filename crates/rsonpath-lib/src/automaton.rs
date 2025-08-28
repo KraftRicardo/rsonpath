@@ -12,26 +12,29 @@ use crate::{automaton::error::CompilerError, debug, string_pattern::StringPatter
 use nfa::NondeterministicAutomaton;
 use rsonpath_syntax::{num::JsonUInt, JsonPathQuery};
 use smallvec::SmallVec;
-use std::{fmt::Display, ops::Index, rc::Rc};
+use std::{fmt::Display, ops::Index, sync::Arc};
 
 /// A minimal, deterministic automaton representing a JSONPath query.
-#[derive(Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Automaton {
     states: Vec<StateTable>,
 }
 
 /// Transition when a JSON member name matches a [`StringPattern`].
-pub type MemberTransition = (Rc<StringPattern>, State);
+pub type MemberTransition = (Arc<StringPattern>, State);
 
 /// Transition on elements of an array with indices specified by either a single index
 /// or a simple slice expression.
-#[derive(Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ArrayTransition {
     label: ArrayTransitionLabel,
     target: State,
 }
 
 /// Represent the distinct methods of moving on a match between states.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Copy, PartialEq, Clone, Eq)]
 pub(super) enum ArrayTransitionLabel {
     /// Transition on the n-th element of an array, with n specified by a [`JsonUInt`].
@@ -44,7 +47,8 @@ pub(super) enum ArrayTransitionLabel {
 ///
 /// Contains transitions triggered by matching member names or array indices, and a fallback transition
 /// triggered when none of the labelled transitions match.
-#[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone)]
 pub struct StateTable {
     attributes: StateAttributes,
     member_transitions: SmallVec<[MemberTransition; 2]>,
@@ -52,6 +56,7 @@ pub struct StateTable {
     fallback_state: State,
 }
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Copy, PartialEq, Clone, Eq)]
 pub(crate) struct SimpleSlice {
     start: JsonUInt,

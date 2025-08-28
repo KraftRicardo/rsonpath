@@ -6,7 +6,7 @@ default: (build-all "release")
 # === INIT ===
 
 # Initialize the repository for development.
-init: check-cargo hooks-init checkout-submodules
+init: check-cargo hooks-init checkout-submodules init-benchmarks
 
 # Check if cargo is installed and install it from rustup if not.
 [private]
@@ -267,40 +267,43 @@ assert-benchmarks-committed:
 
 # === RELEASE ===
 
-# Execute prerequisits for a release for the given version.
+# Execute prerequisites for a release for the given version.
 release ver:
     cargo update
     just release-patch {{ver}}
     just release-readme
     just release-bug-template {{ver}}
-    cargo build
-    cargo +nightly fuzz build
 
-# Execute prerequisits for a release of `rsonpath-syntax` for the given version.
+# Execute prerequisites for a release of `rsonpath-syntax` for the given version.
 release-syntax ver:
     #!/usr/bin/env nu
     let ver = "{{ver}}";
     sed -i $'s/^version = "[^"]*"/version = "($ver)"/' "./crates/rsonpath-syntax/Cargo.toml"
+    sed -i $'s/^version = "[^"]*"/version = "($ver)"/' "./crates/rsonpath-syntax-proptest/Cargo.toml"
     sed -i $'s/^rsonpath-syntax = { version = "[^"]*"/rsonpath-syntax = { version = "($ver)"/' "./Cargo.toml"
+    sed -i $'s/^rsonpath-syntax-proptest = { version = "[^"]*"/rsonpath-syntax-proptest = { version = "($ver)"/' "./Cargo.toml"
 
 [private]
-release-patch ver:
+release-main ver:
     #!/usr/bin/env nu
     let ver = "{{ver}}";
     let paths = ["./Cargo.toml", "./crates/rsonpath-benchmarks/Cargo.toml", "./crates/rsonpath-test-codegen/Cargo.toml"];
     $paths | each { |path|
         sed -i $'s/^version = "[^"]*"/version = "($ver)"/;s/^rsonpath-lib = { version = "[^"]*"/rsonpath-lib = { version = "($ver)"/;s/rsonpath-test-codegen = { version = "[^"]*"/rsonpath-test-codegen = { version = "($ver)"/' $path;
     };
+    sed -z -i $"s/\\$ rq -V\\nrq \\\([^\\n]*\\\)\\n/\\$ rq -V\\nrq ($ver)\\n/" ./book/src/user/installation.md
 
 [private]
 release-readme:
     #!/usr/bin/env nu
     let rsonpath_deps = (cargo tree --package rsonpath --edges normal --edges build --depth 1 --target=all --all-features);
     let rsonpath_lib_deps = (cargo tree --package rsonpath-lib --edges normal --edges build --depth 1 --target=all --all-features);
+    let rsonpath_syntax_deps = (cargo tree --package rsonpath-syntax --edges normal --edges build --depth 1 --target=all --all-features);
     let rsonpath_full_deps = (cargo tree --package rsonpath --edges normal --edges build --target=all --all-features);
     let params = [
         [$rsonpath_deps, "rsonpath", "./README.md"],
         [$rsonpath_lib_deps, "rsonpath-lib", "./README.md"],
+        [$rsonpath_syntax_deps, "rsonpath-syntax", "./crates/rsonpath-syntax/README.md"],
         [$rsonpath_lib_deps, "rsonpath-lib", "./crates/rsonpath-lib/README.md"],
         [$rsonpath_full_deps, "rsonpath-full", "./README.md"]
     ];

@@ -5,9 +5,9 @@
 //! 1. Your platform supports memory maps.
 //! 2. The input data is in a file or comes from standard input:
 //!    a) if from a file, then you can guarantee that the file is not going to be modified
-//!       in or out of process while the input is alive;
+//!    in or out of process while the input is alive;
 //!    b) if from stdin, then that the input lives in memory (for example comes via a pipe);
-//!       input from a tty is not memory-mappable.
+//!    input from a tty is not memory-mappable.
 //!
 //! ## Performance characteristics
 //!
@@ -58,7 +58,7 @@ impl MmapInput {
         }
     }
 
-    pub(super) fn as_padded_input(&self) -> EndPaddedInput {
+    pub(super) fn as_padded_input(&self) -> EndPaddedInput<'_> {
         let middle = &self.mmap.as_ref()[..self.last_block_start];
         EndPaddedInput::new(middle, &self.last_block)
     }

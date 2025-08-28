@@ -3,6 +3,7 @@ use rsonpath_syntax::str::JsonString;
 /// String pattern coming from a JSONPath query that can be matched against strings in a JSON.
 ///
 /// Right now the only pattern is matching against a given [`JsonString`].
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone)]
 pub struct StringPattern(JsonString);
 
@@ -16,7 +17,7 @@ impl std::hash::Hash for StringPattern {
 impl PartialOrd for StringPattern {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.0.unquoted().cmp(other.0.unquoted()))
+        Some(self.cmp(other))
     }
 }
 
