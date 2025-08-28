@@ -114,7 +114,7 @@ fn track_count(lut: LUT, json_path: &str, result_dir_path: &str, query_id: &str,
     let filename = get_filename(json_path);
     if SKIP_MODE == COUNT {
         let csv_path = format!("{result_dir_path}/COUNTER_{filename}.csv");
-        _ = skip_tracker::save_count_to_csv(json_path, &csv_path, filename, query_id, query_text);
+        skip_tracker::save_count_to_csv(json_path, &csv_path, filename, query_id, query_text);
         skip_tracker::reset();
         // println!("Write to: {}", csv_path);
     } else if SKIP_MODE == TRACK {

@@ -5,7 +5,6 @@ use crate::{
     classification::{self, simd::Simd},
     input::{self, error, Input},
 };
-use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fs};
 
 #[derive(Clone, Debug)]

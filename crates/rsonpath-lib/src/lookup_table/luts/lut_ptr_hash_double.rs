@@ -124,6 +124,7 @@ impl LutPtrHashDouble {
 }
 
 impl fmt::Debug for LutPtrHashDouble {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("LutPtrHashDouble")
             .field("ptr_hash", &self.ptr_hash.n())

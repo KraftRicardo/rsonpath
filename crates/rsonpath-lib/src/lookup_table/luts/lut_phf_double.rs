@@ -119,6 +119,7 @@ impl LutPHFDouble {
 }
 
 impl fmt::Debug for LutPHFDouble {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("LutPHFDouble")
             .field("lambda", &self.lambda)

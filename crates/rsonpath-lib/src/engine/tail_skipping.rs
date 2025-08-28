@@ -18,6 +18,7 @@ use crate::{
     lookup_table::{LookUpTable, LUT},
     FallibleIterator, MaskType, BLOCK_SIZE,
 };
+use log::warn;
 use std::{marker::PhantomData, time::Instant};
 
 pub(crate) struct TailSkip<'i, I, Q, S, V, const N: usize> {
@@ -328,12 +329,13 @@ fn track_skip(prefix: &str, distance: usize) {
     if SKIP_MODE == SkipMode::COUNT || SKIP_MODE == SkipMode::TRACK {
         debug!("{prefix}: Track distance = {distance}");
 
-        if prefix == "ITE" {
-            track_distance_ite(distance);
-        } else if prefix == "LUT" {
-            track_distance_lut(distance)
-        } else {
-            panic!("Wrong debug input!")
+        match prefix {
+            "ITE" => track_distance_ite(distance),
+            "LUT" => track_distance_lut(distance),
+            other => {
+                // Instead of panicking, just log a warning
+                warn!("track_skip: unexpected prefix '{other}', skipping tracking");
+            }
         }
     }
 }

@@ -25,7 +25,7 @@ fn eval(json_folder_path: &str, result_folder_path: &str) {
     for entry in paths.flatten() {
         let path = entry.path();
         if path.extension() == Some(OsStr::new("json")) {
-            let json_path = path.to_str().unwrap();
+            let json_path = path.to_str().expect("Could not convert path to string");
             let file_name = path
                 .file_name()
                 .expect("Fail @ reading file")

@@ -1,7 +1,6 @@
 use std::{fmt, fs};
 
 use dsi_progress_logger::no_logging;
-use ptr_hash::PtrHash;
 use sux::{
     func::{VBuilder, VFunc},
     utils::FromIntoIterator,
@@ -106,6 +105,7 @@ impl LutVFuncDouble {
 }
 
 impl fmt::Debug for LutVFuncDouble {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("LutVFuncDouble")
             .field("vfunc", &self.vfunc.len())       // placeholder
