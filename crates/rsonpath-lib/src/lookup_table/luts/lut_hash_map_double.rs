@@ -5,8 +5,10 @@ use crate::{
     classification::{self, simd::Simd},
     input::{self, error, Input},
 };
+use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fs};
 
+#[derive(Clone, Debug)]
 pub struct LutHashMapDouble {
     pub hash_map: HashMap<usize, u16>,
     pub hash_map_64: HashMap<usize, usize>,

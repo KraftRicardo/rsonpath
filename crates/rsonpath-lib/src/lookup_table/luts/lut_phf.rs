@@ -5,7 +5,7 @@ use crate::{
     input::{self, error, Input},
 };
 use phf_generator_double_hash::HashState;
-use std::fs;
+use std::{fmt, fs};
 
 pub mod phf_generator;
 pub mod phf_generator_double_hash;
@@ -15,6 +15,7 @@ pub const DEFAULT_LAMBDA: usize = 1; // Range = [1, ... , 5]
 pub const DEFAULT_THREADED: bool = false;
 pub const MAX_LAMBDA: usize = 5; // 5 because the source paper did so
 
+// #[derive(Clone)]
 pub struct LutPHF {
     pub hash_state: HashState<usize>,
     pub values: Vec<usize>,
@@ -70,5 +71,15 @@ impl LookUpTableLambda for LutPHF {
                 })
         });
         lut_phf_double.map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
+    }
+}
+
+impl fmt::Debug for LutPHF {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("LutPHF")
+            .field("hash_state", &"<HashState>")
+            .field("values_len", &self.values.len())
+            .field("cutoff", &self.cutoff)
+            .finish()
     }
 }

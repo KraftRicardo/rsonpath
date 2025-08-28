@@ -13,6 +13,7 @@ use std::fs;
 // A bit map that only keeps the lower 4 bit because we currently have 16 lut in the group. 16 is represented by 4 bits.
 const DEFAULT_BIT_MASK: usize = 0xF;
 
+#[derive(Clone, Debug)]
 pub struct LutHashMapGroup {
     pub lut_doubles: Vec<LutHashMapDouble>,
     pub bit_mask: usize,

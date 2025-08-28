@@ -5,6 +5,7 @@ use crate::{
     input::{self, error, Input},
 };
 use serde::{Deserialize, Serialize};
+use std::fmt;
 use std::fs::{self, File};
 use std::io::Read;
 use std::io::Write;
@@ -163,5 +164,15 @@ impl Bucket {
         let value = self.elements[hash];
 
         (value != usize::MAX).then_some(value)
+    }
+}
+
+impl fmt::Debug for LutPerfectNaive {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("LutPerfectNaive")
+            .field("buckets_len", &self.buckets.len())
+            .field("size", &self.size)
+            .field("cutoff", &self.cutoff)
+            .finish()
     }
 }

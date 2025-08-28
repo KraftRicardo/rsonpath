@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fmt, fs};
 
 use super::lut_phf::{
     phf_generator_double_hash::{self, HashState},
@@ -12,6 +12,7 @@ use crate::{
     input::{self, error, Input},
 };
 
+// #[derive(Clone)]
 pub struct LutPHFDouble {
     pub lambda: usize,
     pub hash_state: HashState<u16>,
@@ -114,5 +115,16 @@ impl LutPHFDouble {
             hash_state_64,
             cutoff,
         }
+    }
+}
+
+impl fmt::Debug for LutPHFDouble {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("LutPHFDouble")
+            .field("lambda", &self.lambda)
+            .field("hash_state", &"<HashState<u16>>")     // placeholder
+            .field("hash_state_64", &"<HashState<usize>>") // placeholder
+            .field("cutoff", &self.cutoff)
+            .finish()
     }
 }

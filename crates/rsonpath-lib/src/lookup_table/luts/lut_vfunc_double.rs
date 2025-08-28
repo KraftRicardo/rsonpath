@@ -1,6 +1,7 @@
-use std::fs;
+use std::{fmt, fs};
 
 use dsi_progress_logger::no_logging;
+use ptr_hash::PtrHash;
 use sux::{
     func::{VBuilder, VFunc},
     utils::FromIntoIterator,
@@ -14,6 +15,7 @@ use crate::{
     input::{self, error, Input},
 };
 
+// #[derive(Clone)]
 pub struct LutVFuncDouble {
     vfunc: VFunc<usize, u16>,
     vfunc_64: VFunc<usize, usize>,
@@ -100,5 +102,15 @@ impl LutVFuncDouble {
             vfunc_64,
             cutoff,
         }
+    }
+}
+
+impl fmt::Debug for LutVFuncDouble {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("LutVFuncDouble")
+            .field("vfunc", &self.vfunc.len())       // placeholder
+            .field("vfunc_64", &self.vfunc_64.len())  // placeholder
+            .field("cutoff", &self.cutoff)
+            .finish()
     }
 }
