@@ -31,6 +31,7 @@ impl LookUpTable for LutPHFGroup {
         self.lut_doubles[bucket].get(key)
     }
 
+    #[inline]
     fn get_cutoff(&self) -> usize {
         self.cutoff
     }

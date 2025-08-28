@@ -23,6 +23,7 @@ use std::{
 ///     1,$..freeShipping,0.08720
 ///     2,$.products[*].videoChapters,0.79716
 ///     ...
+#[inline]
 pub fn run(data_dir_path: &str, result_dir_path: &str) {
     println!("rq-lut-no-lut");
 
@@ -30,24 +31,24 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
         println!("Disable tracking of skips before running because it slows down the algorithm.");
         return;
     }
-    if !(cfg! {feature = "empty-list-opt"}) {
+    if !cfg! {feature = "empty-list-opt"} {
         println!("empty-list-opt not set, aborting");
         return;
     }
 
     // Create results dir
-    fs::create_dir_all(&result_dir_path).expect("Failed to create directory");
+    fs::create_dir_all(result_dir_path).expect("Failed to create directory");
 
     // GB_1
-    eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
+    eval_all(data_dir_path, result_dir_path, QUERY_BESTBUY);
+    eval_all(data_dir_path, result_dir_path, QUERY_CROSSREF1);
+    eval_all(data_dir_path, result_dir_path, QUERY_CROSSREF2);
+    eval_all(data_dir_path, result_dir_path, QUERY_CROSSREF4);
+    eval_all(data_dir_path, result_dir_path, QUERY_GOOGLE);
+    eval_all(data_dir_path, result_dir_path, QUERY_NSPL);
+    eval_all(data_dir_path, result_dir_path, QUERY_TWITTER);
+    eval_all(data_dir_path, result_dir_path, QUERY_WALMART);
+    eval_all(data_dir_path, result_dir_path, QUERY_WIKI);
 
     println!("Done");
 }
@@ -55,12 +56,12 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
 fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str) {
     let (json_path, _, queries) = extract_input(data_dir_path, query_data_csv);
 
-    measure_query(&json_path, &result_dir_path, query_data_csv, queries);
+    measure_query(&json_path, result_dir_path, query_data_csv, queries);
 }
 
 // Measure query time
 fn measure_query(json_path: &str, result_dir_path: &str, query_data_csv: &str, queries: Vec<(String, String)>) {
-    let query_csv_path = format!("{}/rq_lut_no_lut_time.csv", result_dir_path);
+    let query_csv_path = format!("{result_dir_path}/rq_lut_no_lut_time.csv");
     let csv_exists = Path::new(&query_csv_path).exists();
 
     // Open CSV in append mode
@@ -74,7 +75,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, query_data_csv: &str, q
 
     // Write header if the file is new
     if !csv_exists {
-        wrt.write_record(&["JSON", "QUERY_ID", "QUERY_TEXT", "QUERY_TIME_SECONDS", "REPETITIONS"])
+        wrt.write_record(["JSON", "QUERY_ID", "QUERY_TEXT", "QUERY_TIME_SECONDS", "REPETITIONS"])
             .expect("Failed to write header");
     }
 
@@ -107,15 +108,14 @@ fn measure_query(json_path: &str, result_dir_path: &str, query_data_csv: &str, q
 
         let avg_time = total_time / (QUERY_REPETITIONS as f64);
         println!(
-            "  - File: {}, Query {}: {}, Time = {:.5}s, Result = {}",
-            query_data_csv, query_id, query_text, avg_time, result
+            "  - File: {query_data_csv}, Query {query_id}: {query_text}, Time = {avg_time:.5}s, Result = {result}",
         );
 
         wrt.write_record(&[
             query_data_csv.to_string(),
             query_id,
             query_text,
-            format!("{:.5}", avg_time),
+            format!("{avg_time:.5}"),
             QUERY_REPETITIONS.to_string(),
         ])
         .expect("Failed to write to CSV");

@@ -43,6 +43,7 @@ impl LookUpTable for LutPHFDouble {
         None
     }
 
+    #[inline]
     fn get_cutoff(&self) -> usize {
         self.cutoff
     }

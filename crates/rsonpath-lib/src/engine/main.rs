@@ -91,13 +91,12 @@ impl MainEngine {
 impl Compiler for MainEngine {
     type E = Self;
 
-    #[must_use = "compiling the query only creates an engine instance that should be used"]
     #[inline(always)]
     fn compile_query(query: &JsonPathQuery) -> Result<Self, CompilerError> {
         let automaton = Automaton::new(query)?;
         debug!("DFA:\n {}", automaton);
         let simd = simd::configure();
-        log::info!("SIMD configuration:\n {}", simd);
+        log::info!("SIMD configuration:\n {simd}");
         Ok(Self {
             automaton,
             simd,
@@ -108,7 +107,7 @@ impl Compiler for MainEngine {
     #[inline(always)]
     fn from_compiled_query(automaton: Automaton) -> Self::E {
         let simd = simd::configure();
-        log::info!("SIMD configuration:\n {}", simd);
+        log::info!("SIMD configuration:\n {simd}");
         Self {
             automaton,
             simd,

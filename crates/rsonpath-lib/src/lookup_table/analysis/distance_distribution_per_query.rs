@@ -92,7 +92,7 @@ fn track(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str, cutof
 }
 
 fn track_count(lut: LUT, json_path: &str, result_dir_path: &str, query_id: &str, query_text: &str) -> LUT {
-    print!("\tQuery {} = {}", query_id, query_text);
+    print!("\tQuery {query_id} = {query_text}");
 
     // Build query and engine with LUT
     let query = rsonpath_syntax::parse(query_text).expect("Fail @ parse query");
@@ -108,7 +108,7 @@ fn track_count(lut: LUT, json_path: &str, result_dir_path: &str, query_id: &str,
     };
 
     let result = engine.count(&input).expect("Failed to run query normally");
-    print!(" Result={} ", result);
+    print!(" Result={result} ");
 
     // Save to csv
     let filename = get_filename(json_path);
@@ -128,7 +128,7 @@ fn track_count(lut: LUT, json_path: &str, result_dir_path: &str, query_id: &str,
 }
 
 fn track_timed(json_path: &str, result_dir_path: &str, query_id: &str, query_text: &str) {
-    print!("\tQuery {} = {}", query_id, query_text);
+    print!("\tQuery {query_id} = {query_text}");
 
     // Build query
     let query = rsonpath_syntax::parse(query_text).expect("Fail @ parse query");
@@ -146,12 +146,12 @@ fn track_timed(json_path: &str, result_dir_path: &str, query_id: &str, query_tex
     for _ in 0..QUERY_REPETITIONS {
         result = engine.count(&input).expect("Failed to run query normally");
     }
-    print!("Result={} ", result);
+    print!("Result={result} ");
 
     // Save to csv
     let filename = get_filename(json_path);
     let csv_path = format!("{result_dir_path}/{filename}_query={query_id}.csv");
     _ = skip_tracker::save_track_timed_to_csv(&csv_path);
     skip_tracker::reset();
-    println!("Write to: {}", csv_path);
+    println!("Write to: {csv_path}");
 }

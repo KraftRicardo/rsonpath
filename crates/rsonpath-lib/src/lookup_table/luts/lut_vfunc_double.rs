@@ -21,6 +21,7 @@ pub struct LutVFuncDouble {
 }
 
 impl LookUpTable for LutVFuncDouble {
+    #[inline]
     fn build(json_path: &str, cutoff: usize) -> Result<Self, Box<dyn std::error::Error>>
     where
         Self: Sized,
@@ -51,6 +52,7 @@ impl LookUpTable for LutVFuncDouble {
         lut_vfunc_double.map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
     }
 
+    #[inline]
     fn get(&self, key: &usize) -> Option<usize> {
         let mut result = self.vfunc.get(key) as usize;
         if result == 0 {
@@ -60,6 +62,7 @@ impl LookUpTable for LutVFuncDouble {
         Some(key + result)
     }
 
+    #[inline]
     fn get_cutoff(&self) -> usize {
         self.cutoff
     }

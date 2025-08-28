@@ -189,20 +189,20 @@ impl Display for NondeterministicAutomaton {
                 Recursive(Transition::Member(label)) => {
                     writeln!(f, "s{i}.{} -> s{i}, s{};", stringify_label(label), i + 1)?;
                     for label in all_labels.iter().filter(|&l| l != stringify_label(label)) {
-                        writeln!(f, "s{i}.{} -> s{i};", label)?;
+                        writeln!(f, "s{i}.{label} -> s{i};")?;
                     }
                     writeln!(f, "s{i}.X -> s{i};")?;
                 }
                 Recursive(Transition::Array(label)) => {
                     writeln!(f, "s{i}.{} -> s{i}, s{};", label, i + 1)?;
                     for label in all_labels.iter().filter(|&l| l != &label.to_string()) {
-                        writeln!(f, "s{i}.{} -> s{i};", label)?;
+                        writeln!(f, "s{i}.{label} -> s{i};")?;
                     }
                     writeln!(f, "s{i}.X -> s{i};")?;
                 }
                 Recursive(Transition::Wildcard) => {
                     for label in &all_labels {
-                        writeln!(f, "s{i}.{} -> s{i}, s{};", label, i + 1)?;
+                        writeln!(f, "s{i}.{label} -> s{i}, s{};", i + 1)?;
                     }
                     writeln!(f, "s{i}.X -> s{i}, s{};", i + 1)?;
                 }

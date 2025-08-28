@@ -31,7 +31,7 @@ pub fn run(json_dir_path: &str, result_dir_path: &str) {
             if let Some(extension) = path.extension() {
                 if extension == "json" {
                     let json_path = path.to_str().expect("Failed to convert path to string");
-                    println!("  Processing: {}", json_path);
+                    println!("  Processing: {json_path}");
                     count_distances_with_simd(json_path, result_dir_path);
                 }
             }
@@ -84,7 +84,7 @@ fn count_distances_with_simd(json_path: &str, result_dir_path: &str) {
     });
 
     // Save in CSV: First column = distance, second column = frequency
-    let csv_path = format!("{}/{}_distances.csv", result_dir_path, filename);
+    let csv_path = format!("{result_dir_path}/{filename}_distances.csv");
     let mut wtr = csv::Writer::from_writer(File::create(&csv_path).expect("Failed to create CSV file"));
     wtr.write_record(["distance", "frequency"])
         .expect("Failed to write CSV header");
@@ -93,7 +93,7 @@ fn count_distances_with_simd(json_path: &str, result_dir_path: &str) {
             .expect("Failed to write record");
     }
     wtr.flush().expect("Failed to flush CSV writer");
-    println!("Generated: {}", csv_path);
+    println!("Generated: {csv_path}");
 }
 
 fn count_distances<I, V>(input: &I, simd: V) -> HashMap<usize, usize>

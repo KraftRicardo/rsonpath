@@ -40,29 +40,30 @@ pub struct EvalConfig<'a> {
 ///
 /// Run with: cargo run --bin lut --release -- eval-lut-construction res/json res/data/speed/local/lut_construction
 /// Run with: cargo run --bin lut --release -- eval-lut-construction ricardo-jsons final-results-10
+#[inline]
 pub fn run(data_dir_path: &str, result_dir_path: &str) {
     println!("eval-lut-construction");
 
     let cutoff: usize = 0;
 
-    fs::create_dir_all(&result_dir_path).expect("Failed to create directory");
+    fs::create_dir_all(result_dir_path).expect("Failed to create directory");
 
     // MB_100
-    eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY_SHORT, cutoff);
+    eval_all(data_dir_path, result_dir_path, QUERY_BESTBUY_SHORT, cutoff);
 
     // GB_1
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY, cutoff);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1, cutoff);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2, cutoff);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4, cutoff);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE, cutoff);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL, cutoff);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER, cutoff);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART, cutoff);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI, cutoff);
+    // eval_all(data_dir_path, result_dir_path, QUERY_BESTBUY, cutoff);
+    // eval_all(data_dir_path, result_dir_path, QUERY_CROSSREF1, cutoff);
+    // eval_all(data_dir_path, result_dir_path, QUERY_CROSSREF2, cutoff);
+    // eval_all(data_dir_path, result_dir_path, QUERY_CROSSREF4, cutoff);
+    // eval_all(data_dir_path, result_dir_path, QUERY_GOOGLE, cutoff);
+    // eval_all(data_dir_path, result_dir_path, QUERY_NSPL, cutoff);
+    // eval_all(data_dir_path, result_dir_path, QUERY_TWITTER, cutoff);
+    // eval_all(data_dir_path, result_dir_path, QUERY_WALMART, cutoff);
+    // eval_all(data_dir_path, result_dir_path, QUERY_WIKI, cutoff);
 
     // 25 GB
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_NESTED_COL);
+    // eval_all(data_dir_path, result_dir_path, QUERY_NESTED_COL);
 
     println!("Done");
 }
@@ -87,20 +88,20 @@ fn eval_all(data_dir_path: &str, final_dir_path: &str, query_data_csv: &str, cut
         data_line: &mut data_line,
     };
 
-    println!("Measuring LUT size with REPETITIONS = {}", QUERY_REPETITIONS);
+    println!("Measuring LUT size with REPETITIONS = {QUERY_REPETITIONS}");
     measure_performance(&mut config, cutoff).expect("Fail");
 
     // Write CSV header and data
-    let csv_path = format!("{}/result.csv", final_dir_path);
+    let csv_path = format!("{final_dir_path}/result.csv");
     let mut csv_file = fs::OpenOptions::new()
         .append(true)
         .create(true)
         .open(csv_path)
         .expect("Fail");
     if csv_file.metadata().expect("Fail").len() == 0 {
-        writeln!(csv_file, "{}", head_line).expect("Fail");
+        writeln!(csv_file, "{head_line}").expect("Fail");
     }
-    writeln!(csv_file, "{}", data_line).expect("Fail");
+    writeln!(csv_file, "{data_line}").expect("Fail");
 }
 
 #[inline]
@@ -113,13 +114,13 @@ pub fn measure_performance(config: &mut EvalConfig, cutoff: usize) -> Result<(),
     eval::<LutPtrHashDouble>(config, "ptr_hash_double", cutoff);
     eval::<LutVFuncDouble>(config, "vfunc_double", cutoff);
 
-    for bit_mask in [15] {
+    for bit_mask in [7, 15] {
         eval_hash_map_group(config, "hash_map_group", bit_mask, cutoff); // BROKEN
     }
 
     // Measure LUTs with lambda parameter
     for lambda in [1, 5] {
-        for threaded in [false] {
+        for threaded in [true, false] {
             eval_phf::<LutPHF>(config, "phf", lambda, threaded, cutoff);
             eval_phf::<LutPHFDouble>(config, "phf_double", lambda, threaded, cutoff);
         }
@@ -127,11 +128,11 @@ pub fn measure_performance(config: &mut EvalConfig, cutoff: usize) -> Result<(),
 
     // Measure LUTs with bucket parameter
     for lambda in [1, 5] {
-        // for bit_mask in [3, 7, 15, 31, 63, 127] {
-        // for bit_mask in [63, 127, 255, 511] {
-        // for bit_mask in [2047, 4095, 8191] {
-        // for bit_mask in [2047] {
-        for bit_mask in [63] {
+        for bit_mask in [3, 7, 15, 31, 63, 127] {
+            // for bit_mask in [63, 127, 255, 511] {
+            // for bit_mask in [2047, 4095, 8191] {
+            // for bit_mask in [2047] {
+            // for bit_mask in [63] {
             eval_phf_group(config, "phf_group", bit_mask, lambda, false, cutoff);
         }
     }
@@ -150,7 +151,7 @@ fn eval<T: LookUpTable>(config: &mut EvalConfig, name: &str, cutoff: usize) {
         let _ = T::build(config.json_path, cutoff).expect("Fail @ build lut");
         build_time += start_build.elapsed().as_secs_f64();
     }
-    build_time = build_time / (BUILD_REPETITIONS as f64);
+    build_time /= BUILD_REPETITIONS as f64;
 
     // Size
     let start_heap = Region::new(HEAP_TRACKER);
@@ -164,11 +165,10 @@ fn eval<T: LookUpTable>(config: &mut EvalConfig, name: &str, cutoff: usize) {
         my_black_box(get_every_key_once(&lut, &config.keys));
         query_time += start_query.elapsed().as_secs_f64();
     }
-    query_time = query_time / (QUERY_REPETITIONS as f64);
+    query_time /= QUERY_REPETITIONS as f64;
 
     // Save measurements
-    let name = name;
-    save_measurements(config, &name, build_time, query_time, heap_bytes);
+    save_measurements(config, name, build_time, query_time, heap_bytes);
 }
 
 fn eval_phf<T: LookUpTableLambda>(config: &mut EvalConfig, name: &str, lambda: usize, threaded: bool, cutoff: usize) {
@@ -214,7 +214,7 @@ fn eval_phf_group(config: &mut EvalConfig, name: &str, bit_mask: usize, lambda: 
             LutPHFGroup::build_buckets(lambda, config.json_path, cutoff, bit_mask, threaded).expect("Fail @ build lut");
         build_time += start_build.elapsed().as_secs_f64();
     }
-    build_time = build_time / (BUILD_REPETITIONS as f64);
+    build_time /= BUILD_REPETITIONS as f64;
 
     // Size
     let start_heap = Region::new(HEAP_TRACKER);
@@ -229,7 +229,7 @@ fn eval_phf_group(config: &mut EvalConfig, name: &str, bit_mask: usize, lambda: 
         my_black_box(get_every_key_once(&lut, &config.keys));
         query_time += start_query.elapsed().as_secs_f64();
     }
-    query_time = query_time / (QUERY_REPETITIONS as f64);
+    query_time /= QUERY_REPETITIONS as f64;
 
     // Save measurements
     let name = format!("#{buckets}_λ={lambda}:{name}");
@@ -247,7 +247,7 @@ fn eval_hash_map_group(config: &mut EvalConfig, name: &str, bit_mask: usize, cut
         let _ = LutHashMapGroup::build_buckets(config.json_path, bit_mask, cutoff).expect("Fail @ build lut");
         build_time += start_build.elapsed().as_secs_f64();
     }
-    build_time = build_time / (BUILD_REPETITIONS as f64);
+    build_time /= BUILD_REPETITIONS as f64;
 
     // Size
     let start_heap = Region::new(HEAP_TRACKER);

@@ -5,13 +5,14 @@ use std::io::{BufWriter, Write};
 
 const RESULTS_FOLDER: &str = ".a_lut_tests/analysis";
 
+#[inline]
 pub fn create_json_size_csv(json_folder_path: &str) {
     eval(json_folder_path, RESULTS_FOLDER);
 }
 
 fn eval(json_folder_path: &str, result_folder_path: &str) {
     // Create CSV file
-    let output_path = format!("{}/json_size_analysis.csv", result_folder_path);
+    let output_path = format!("{result_folder_path}/json_size_analysis.csv");
     let file = File::create(&output_path).expect("Could not create output CSV file");
     let mut writer = BufWriter::new(file);
 
@@ -25,7 +26,11 @@ fn eval(json_folder_path: &str, result_folder_path: &str) {
         let path = entry.path();
         if path.extension() == Some(OsStr::new("json")) {
             let json_path = path.to_str().unwrap();
-            let file_name = path.file_name().unwrap().to_string_lossy().to_string();
+            let file_name = path
+                .file_name()
+                .expect("Fail @ reading file")
+                .to_string_lossy()
+                .to_string();
             let metadata = fs::metadata(&path).expect("Could not read file metadata");
             let size_bytes = metadata.len();
 
@@ -42,8 +47,7 @@ fn eval(json_folder_path: &str, result_folder_path: &str) {
 
             writeln!(
                 writer,
-                "{},{},{},{:.2},{:.2}",
-                file_name, size_bytes, total, curly_percent, squary_percent
+                "{file_name},{size_bytes},{total},{curly_percent:.2},{squary_percent:.2}",
             )
             .expect("Could not write CSV line");
         }

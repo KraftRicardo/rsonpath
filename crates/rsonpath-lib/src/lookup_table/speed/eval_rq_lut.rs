@@ -27,6 +27,7 @@ use std::{fs, io::BufReader};
 //  google_map_large_record_(1.1GB),0,0,$[4000].routes[*].bounds,0.00652
 //  google_map_large_record_(1.1GB),0,1,$[*].routes[*].legs[*].steps[*].html_instructions,0.47458
 //  ...
+#[inline]
 pub fn run(data_dir_path: &str, result_dir_path: &str) {
     println!("eval-rq-lut");
 
@@ -45,21 +46,21 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
     }
 
     // Create results dir
-    fs::create_dir_all(&result_dir_path).expect("Failed to create directory");
+    fs::create_dir_all(result_dir_path).expect("Failed to create directory");
 
     // GB_1
-    evaluate(&data_dir_path, &result_dir_path, QUERY_BESTBUY, &cutoffs);
-    // evaluate(&data_dir_path, &result_dir_path, QUERY_CROSSREF1, &cutoffs);
-    // evaluate(&data_dir_path, &result_dir_path, QUERY_CROSSREF2, &cutoffs);
-    // evaluate(&data_dir_path, &result_dir_path, QUERY_CROSSREF4, &cutoffs);
-    // evaluate(&data_dir_path, &result_dir_path, QUERY_GOOGLE, &cutoffs);
-    // evaluate(&data_dir_path, &result_dir_path, QUERY_NSPL, &cutoffs);
-    // evaluate(&data_dir_path, &result_dir_path, QUERY_TWITTER, &cutoffs);
-    // evaluate(&data_dir_path, &result_dir_path, QUERY_TWITTER_SCALED, &cutoffs);
-    // evaluate(&data_dir_path, &result_dir_path, QUERY_WALMART, &cutoffs);
-    // evaluate(&data_dir_path, &result_dir_path, QUERY_WALMART_SCALED, &cutoffs);
-    // evaluate(&data_dir_path, &result_dir_path, QUERY_WIKI, &cutoffs);
-    // evaluate(&data_dir_path, &result_dir_path, QUERY_WIKI_SCALED, &cutoffs);
+    evaluate(data_dir_path, result_dir_path, QUERY_BESTBUY, &cutoffs);
+    // evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF1, &cutoffs);
+    // evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF2, &cutoffs);
+    // evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF4, &cutoffs);
+    // evaluate(data_dir_path, result_dir_path, QUERY_GOOGLE, &cutoffs);
+    // evaluate(data_dir_path, result_dir_path, QUERY_NSPL, &cutoffs);
+    // evaluate(data_dir_path, result_dir_path, QUERY_TWITTER, &cutoffs);
+    // evaluate(data_dir_path, result_dir_path, QUERY_TWITTER_SCALED, &cutoffs);
+    // evaluate(data_dir_path, result_dir_path, QUERY_WALMART, &cutoffs);
+    // evaluate(data_dir_path, result_dir_path, QUERY_WALMART_SCALED, &cutoffs);
+    // evaluate(data_dir_path, result_dir_path, QUERY_WIKI, &cutoffs);
+    // evaluate(data_dir_path, result_dir_path, QUERY_WIKI_SCALED, &cutoffs);
 
     println!("Done");
 }
@@ -70,13 +71,13 @@ fn evaluate(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str, cu
 
     // Measurements
     for cutoff in cutoffs {
-        measure_query(&json_path, &result_dir_path, &json_name, &queries, *cutoff);
+        measure_query(&json_path, result_dir_path, &json_name, &queries, *cutoff);
     }
 }
 
 // Measure query time of rq-lut for the given queries and cutoff on a given json.
 fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries: &[(String, String)], cutoff: usize) {
-    let query_csv_path = format!("{}/rq_lut_time.csv", result_dir_path);
+    let query_csv_path = format!("{result_dir_path}/rq_lut_time.csv");
     let csv_exists = Path::new(&query_csv_path).exists();
 
     // Open CSV in append mode
@@ -90,7 +91,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
 
     // Write header if the file is new
     if !csv_exists {
-        wrt.write_record(&[
+        wrt.write_record([
             "JSON",
             "CUTOFF",
             "QUERY_ID",
@@ -112,7 +113,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
     };
 
     for (query_id, query_text) in queries {
-        let query = rsonpath_syntax::parse(&query_text).expect("Failed to parse query");
+        let query = rsonpath_syntax::parse(query_text).expect("Failed to parse query");
         let mut engine = RsonpathEngine::compile_query(&query).expect("Failed to compile query");
         engine.add_lut(lut);
 
@@ -135,21 +136,20 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
         lut = engine.take_lut().expect("Failed to retrieve LUT");
 
         println!(
-            "  - File: {}, Cutoff: {}, Query {}: {}, Time = {:.5}s, Result = {}",
-            filename, cutoff, query_id, query_text, avg_time, result
+            "  - File: {filename}, Cutoff: {cutoff}, Query {query_id}: {query_text}, Time = {avg_time:.5}s, Result = {result}",
         );
 
-        wrt.write_record(&[
+        wrt.write_record([
             filename,
             cutoff.to_string().as_str(),
             query_id.as_str(),
             query_text.as_str(),
-            &format!("{:.5}", avg_time),
+            &format!("{avg_time:.5}"),
             QUERY_REPETITIONS.to_string().as_str(),
         ])
         .expect("Failed to write to CSV");
     }
 
     wrt.flush().expect("Failed to flush CSV");
-    println!("Generated: {}", query_csv_path);
+    println!("Generated: {query_csv_path}");
 }

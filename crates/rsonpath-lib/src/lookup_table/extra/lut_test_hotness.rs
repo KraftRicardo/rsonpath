@@ -23,10 +23,10 @@ pub fn run() {
 }
 
 fn hot_lut(json_path: &str, query_text: &str, cutoff: usize) {
-    println!("Building LUT: {}", json_path);
+    println!("Building LUT: {json_path}");
     let lut = LUT::build(json_path, cutoff).expect("Fail @ building LUT");
 
-    println!(" Query: \"{}\" ... ", query_text);
+    println!(" Query: \"{query_text}\" ... ");
     let input = {
         let mut file = BufReader::new(fs::File::open(json_path).expect("Fail @ open File"));
         let mut buf = vec![];
@@ -44,11 +44,11 @@ fn hot_lut(json_path: &str, query_text: &str, cutoff: usize) {
         sum += lut_count;
     }
     let query_time = start_queries.elapsed().as_secs_f64();
-    println!(" Total: {}, Time {}", sum, query_time);
+    println!(" Total: {sum}, Time {query_time}");
 }
 
 fn hot_ite(json_path: &str, query_text: &str) {
-    println!(" Query: \"{}\" ... ", query_text);
+    println!(" Query: \"{query_text}\" ... ");
     let input = {
         let mut file = BufReader::new(fs::File::open(json_path).expect("Fail @ open File"));
         let mut buf = vec![];
@@ -65,5 +65,5 @@ fn hot_ite(json_path: &str, query_text: &str) {
         sum += lut_count;
     }
     let query_time = start_queries.elapsed().as_secs_f64();
-    println!(" Total: {}, Time {}", sum, query_time);
+    println!(" Total: {sum}, Time {query_time}");
 }

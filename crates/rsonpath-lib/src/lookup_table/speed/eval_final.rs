@@ -41,6 +41,7 @@ const RQ_LUT_CUTOFF_512_NAME: &str = "rq-lut-cutoff-512";
 ///
 /// Run with: cargo run --bin lut --release -- eval-final res/json res/data/speed/local/final
 /// Run with: cargo run --bin lut --release -- eval-final ricardo-jsons plot-results
+#[inline]
 pub fn run(data_dir_path: &str, result_dir_path: &str) {
     println!("eval-final");
 
@@ -54,15 +55,15 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
     }
 
     // GB_1
-    eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
+    eval_all(data_dir_path, result_dir_path, QUERY_BESTBUY);
+    eval_all(data_dir_path, result_dir_path, QUERY_CROSSREF1);
+    eval_all(data_dir_path, result_dir_path, QUERY_CROSSREF2);
+    eval_all(data_dir_path, result_dir_path, QUERY_CROSSREF4);
+    eval_all(data_dir_path, result_dir_path, QUERY_GOOGLE);
+    eval_all(data_dir_path, result_dir_path, QUERY_NSPL);
+    eval_all(data_dir_path, result_dir_path, QUERY_TWITTER);
+    eval_all(data_dir_path, result_dir_path, QUERY_WALMART);
+    eval_all(data_dir_path, result_dir_path, QUERY_WIKI);
 
     println!("Done");
 }
@@ -70,7 +71,7 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
 fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str) {
     let (json_path, json_name, queries) = extract_input(data_dir_path, query_data_csv);
 
-    fs::create_dir_all(&result_dir_path).expect("Failed to create directory");
+    fs::create_dir_all(result_dir_path).expect("Failed to create directory");
 
     // Measurements
     measure_build(&json_path, &json_name, result_dir_path);
@@ -78,7 +79,7 @@ fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str) {
 }
 
 fn measure_query_index(json_path: &str, filename: &str, result_dir_path: &str, queries: &[(String, String)]) {
-    let query_csv_path = format!("{}/query.csv", result_dir_path);
+    let query_csv_path = format!("{result_dir_path}/query.csv");
     let file_exists = Path::new(&query_csv_path).exists();
 
     // Open CSV in append mode
@@ -92,20 +93,20 @@ fn measure_query_index(json_path: &str, filename: &str, result_dir_path: &str, q
 
     // Write header if the file is new
     if !file_exists {
-        wtr.write_record(&["JSON", "ALGORITHM", "QUERY_ID", "QUERY_TEXT", "AVERAGE_TIME"])
+        wtr.write_record(["JSON", "ALGORITHM", "QUERY_ID", "QUERY_TEXT", "AVERAGE_TIME"])
             .expect("F");
         wtr.flush().expect("Failed to flush build CSV");
     }
 
     // Measurements
-    let serde_query_times = query_serde_index(&json_path, queries);
-    let rq_legacy_query_times = query_rq_legacy_index(&json_path, queries);
-    let rq_lut_cutoff_0_query_times = query_rq_lut_index(&json_path, queries, 0);
-    let rq_lut_cutoff_512_query_times = query_rq_lut_index(&json_path, queries, 512);
+    let serde_query_times = query_serde_index(json_path, queries);
+    let rq_legacy_query_times = query_rq_legacy_index(json_path, queries);
+    let rq_lut_cutoff_0_query_times = query_rq_lut_index(json_path, queries, 0);
+    let rq_lut_cutoff_512_query_times = query_rq_lut_index(json_path, queries, 512);
 
     for (index, (query_id, query_text)) in queries.iter().enumerate() {
         // Write the results
-        wtr.write_record(&[
+        wtr.write_record([
             filename,
             SERDE_NAME,
             query_id,
@@ -113,7 +114,7 @@ fn measure_query_index(json_path: &str, filename: &str, result_dir_path: &str, q
             &format!("{:.5}", serde_query_times[index]),
         ])
         .expect("Fail write");
-        wtr.write_record(&[
+        wtr.write_record([
             filename,
             RQ_LEGACY_NAME,
             query_id,
@@ -121,7 +122,7 @@ fn measure_query_index(json_path: &str, filename: &str, result_dir_path: &str, q
             &format!("{:.5}", rq_legacy_query_times[index]),
         ])
         .expect("Fail write");
-        wtr.write_record(&[
+        wtr.write_record([
             filename,
             RQ_LUT_CUTOFF_0_NAME,
             query_id,
@@ -129,7 +130,7 @@ fn measure_query_index(json_path: &str, filename: &str, result_dir_path: &str, q
             &format!("{:.5}", rq_lut_cutoff_0_query_times[index]),
         ])
         .expect("Fail write");
-        wtr.write_record(&[
+        wtr.write_record([
             filename,
             RQ_LUT_CUTOFF_512_NAME,
             query_id,
@@ -155,7 +156,7 @@ fn query_rq_lut_index(json_path: &str, queries: &[(String, String)], cutoff: usi
 
     let mut avg_times = vec![];
     for (query_id, query_text) in queries {
-        let query = rsonpath_syntax::parse(&query_text).expect("Failed to parse query");
+        let query = rsonpath_syntax::parse(query_text).expect("Failed to parse query");
         let mut engine = RsonpathEngine::compile_query(&query).expect("Failed to compile query");
         engine.add_lut(lut);
 
@@ -187,10 +188,7 @@ fn query_rq_lut_index(json_path: &str, queries: &[(String, String)], cutoff: usi
 
         let avg_time = total_time / QUERY_REPETITIONS as f64;
 
-        println!(
-            "  - LUT ({}): id={}, query_text={}, time={:.5}s, result={}",
-            cutoff, query_id, query_text, avg_time, result
-        );
+        println!("  - LUT ({cutoff}): id={query_id}, query_text={query_text}, time={avg_time:.5}s, result={result}",);
         avg_times.push(avg_time);
 
         lut = engine.take_lut().expect("Failed to retrieve LUT");
@@ -209,7 +207,7 @@ fn query_rq_legacy_index(json_path: &str, queries: &[(String, String)]) -> Vec<f
 
     let mut avg_times = vec![];
     for (query_id, query_text) in queries {
-        let legacy_query = syntax_ref::parse(&query_text).expect("Failed to parse query");
+        let legacy_query = syntax_ref::parse(query_text).expect("Failed to parse query");
         let legacy_engine =
             rsonpath_lib_ref::engine::RsonpathEngine::compile_query(&legacy_query).expect("Failed to compile query");
 
@@ -245,10 +243,7 @@ fn query_rq_legacy_index(json_path: &str, queries: &[(String, String)]) -> Vec<f
 
         let avg_time = total_time / QUERY_REPETITIONS as f64;
 
-        println!(
-            "  - LEGACY: id={}, query_text={}, time={:.5}s, result={}",
-            query_id, query_text, avg_time, result
-        );
+        println!("  - LEGACY: id={query_id}, query_text={query_text}, time={avg_time:.5}s, result={result}",);
         avg_times.push(avg_time);
     }
 
@@ -280,10 +275,7 @@ fn query_serde_index(json_path: &str, queries: &[(String, String)]) -> Vec<f64> 
 
         let avg_time = total_time / QUERY_REPETITIONS as f64;
 
-        println!(
-            "  - SERDE: id={}, query_text={}, time={:.5}s, result={}",
-            query_id, query_text, avg_time, result
-        );
+        println!("  - SERDE: id={query_id}, query_text={query_text}, time={avg_time:.5}s, result={result}",);
         avg_times.push(avg_time);
     }
 
@@ -291,7 +283,7 @@ fn query_serde_index(json_path: &str, queries: &[(String, String)]) -> Vec<f64> 
 }
 
 fn measure_build(json_path: &str, filename: &str, result_dir_path: &str) {
-    let build_csv_path = format!("{}/build.csv", result_dir_path);
+    let build_csv_path = format!("{result_dir_path}/build.csv");
     let file_exists = Path::new(&build_csv_path).exists();
 
     // Open CSV in append mode
@@ -300,38 +292,38 @@ fn measure_build(json_path: &str, filename: &str, result_dir_path: &str) {
             .create(true)
             .append(true)
             .open(&build_csv_path)
-            .expect(&format!("Failed to open build CSV {}", build_csv_path)),
+            .expect("Failed to open build CSV "),
     );
 
     // Write header if the file is new
     if !file_exists {
         println!("File did not exist");
-        wtr.write_record(&["JSON", "ALGORITHM", "BUILD_TIME_SECONDS"])
+        wtr.write_record(["JSON", "ALGORITHM", "BUILD_TIME_SECONDS"])
             .expect("Failed to write header");
         wtr.flush().expect("Failed to flush build CSV");
     }
 
     // Measurements
-    let serde_build_time = build_serde(&json_path);
+    let serde_build_time = build_serde(json_path);
     let rq_legacy_build_time = 0; // Because it does not need to build anything
-    let rq_lut_cutoff_0_build_time = build_rq_lut(&json_path, 0);
-    let rq_lut_cutoff_512_build_time = build_rq_lut(&json_path, 512);
+    let rq_lut_cutoff_0_build_time = build_rq_lut(json_path, 0);
+    let rq_lut_cutoff_512_build_time = build_rq_lut(json_path, 512);
 
     // Write the results
-    wtr.write_record(&[filename, SERDE_NAME, &format!("{:.5}", serde_build_time)])
+    wtr.write_record([filename, SERDE_NAME, &format!("{serde_build_time:.5}")])
         .expect("Fail write");
-    wtr.write_record(&[filename, RQ_LEGACY_NAME, &format!("{:.5}", rq_legacy_build_time)])
+    wtr.write_record([filename, RQ_LEGACY_NAME, &format!("{rq_legacy_build_time:.5}")])
         .expect("Fail write");
-    wtr.write_record(&[
+    wtr.write_record([
         filename,
         RQ_LUT_CUTOFF_0_NAME,
-        &format!("{:.5}", rq_lut_cutoff_0_build_time),
+        &format!("{rq_lut_cutoff_0_build_time:.5}",),
     ])
     .expect("Fail write");
-    wtr.write_record(&[
+    wtr.write_record([
         filename,
         RQ_LUT_CUTOFF_512_NAME,
-        &format!("{:.5}", rq_lut_cutoff_512_build_time),
+        &format!("{rq_lut_cutoff_512_build_time:.5}"),
     ])
     .expect("Fail write");
 
@@ -354,7 +346,7 @@ fn build_rq_lut(json_path: &str, cutoff: usize) -> f64 {
     }
 
     let avg_time = total_time / BUILD_REPETITIONS as f64;
-    println!(" rq-lut-cutoff={}: build time = {:.5}s", cutoff, avg_time);
+    println!(" rq-lut-cutoff={cutoff}: build time = {avg_time:.5}s",);
 
     avg_time
 }
@@ -380,7 +372,7 @@ fn build_serde(json_path: &str) -> f64 {
     }
 
     let avg_time = total_time / BUILD_REPETITIONS as f64;
-    println!(" SERDE build time = {:.5}s", avg_time);
+    println!(" SERDE build time = {avg_time:.5}s");
 
     avg_time
 }

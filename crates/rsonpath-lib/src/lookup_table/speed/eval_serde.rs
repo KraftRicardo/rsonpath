@@ -26,21 +26,22 @@ use std::{fs, io::BufReader};
 ///     ...
 /// Run with: cargo run --bin lut --release -- eval-serde res/json res/data/speed/local/serde
 /// Run with: cargo run --bin lut --release -- eval-serde ricardo-jsons final-results-2
+#[inline]
 pub fn run(data_dir_path: &str, result_dir_path: &str) {
     println!("eval-serde");
 
-    fs::create_dir_all(&result_dir_path).expect("Failed to create directory");
+    fs::create_dir_all(result_dir_path).expect("Failed to create directory");
 
     // GB_1
-    eval_all(&data_dir_path, result_dir_path, QUERY_BESTBUY);
-    // eval_all(&data_dir_path, result_dir_path, QUERY_CROSSREF1);
-    // eval_all(&data_dir_path, result_dir_path, QUERY_CROSSREF2);
-    // eval_all(&data_dir_path, result_dir_path, QUERY_CROSSREF4);
-    // eval_all(&data_dir_path, result_dir_path, QUERY_GOOGLE);
-    // eval_all(&data_dir_path, result_dir_path, QUERY_NSPL);
-    // eval_all(&data_dir_path, result_dir_path, QUERY_TWITTER);
-    // eval_all(&data_dir_path, result_dir_path, QUERY_WALMART);
-    // eval_all(&data_dir_path, result_dir_path, QUERY_WIKI);
+    eval_all(data_dir_path, result_dir_path, QUERY_BESTBUY);
+    // eval_all(data_dir_path, result_dir_path, QUERY_CROSSREF1);
+    // eval_all(data_dir_path, result_dir_path, QUERY_CROSSREF2);
+    // eval_all(data_dir_path, result_dir_path, QUERY_CROSSREF4);
+    // eval_all(data_dir_path, result_dir_path, QUERY_GOOGLE);
+    // eval_all(data_dir_path, result_dir_path, QUERY_NSPL);
+    // eval_all(data_dir_path, result_dir_path, QUERY_TWITTER);
+    // eval_all(data_dir_path, result_dir_path, QUERY_WALMART);
+    // eval_all(data_dir_path, result_dir_path, QUERY_WIKI);
 
     println!("Done");
 }
@@ -98,16 +99,13 @@ fn measure_query(json_path: &str, result_dir_path: &str, query_data_csv: &str, q
         }
 
         let avg_time = total_time / (QUERY_REPETITIONS as f64);
-        println!(
-            "  - query = {}, query_text={}, time = {:.5}s, result = {}",
-            query_id, query_text, avg_time, result
-        );
+        println!("  - query = {query_id}, query_text={query_text}, time = {avg_time:.5}s, result = {result}",);
 
         wrt.write_record([
             query_data_csv.to_string(),
             query_id,
             query_text,
-            format!("{:.5}", avg_time),
+            format!("{avg_time:.5}"),
             QUERY_REPETITIONS.to_string(),
         ])
         .expect("Failed to write to CSV");
@@ -119,7 +117,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, query_data_csv: &str, q
 
 /// Measure build time
 fn measure_build(json_path: &str, serde_dir_path: &str, query_data_csv: &str) {
-    let build_csv_path = format!("{}/build.csv", serde_dir_path);
+    let build_csv_path = format!("{serde_dir_path}/build.csv");
     let file_exists = Path::new(&build_csv_path).exists();
 
     // Open CSV in append mode
@@ -169,10 +167,10 @@ fn measure_build(json_path: &str, serde_dir_path: &str, query_data_csv: &str) {
     }
 
     let avg_time = total_time / BUILD_REPETITIONS as f64;
-    println!(" build time = {:.5}s, size = {} B", avg_time, heap_bytes);
+    println!(" build time = {avg_time:.5}s, size = {heap_bytes} B");
 
     // Write the results
-    wtr.write_record([query_data_csv, &format!("{:.5}", avg_time), &heap_bytes.to_string()])
+    wtr.write_record([query_data_csv, &format!("{avg_time:.5}"), &heap_bytes.to_string()])
         .expect("Failed to write build record");
 
     wtr.flush().expect("Failed to flush build CSV");

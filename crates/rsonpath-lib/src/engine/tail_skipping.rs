@@ -85,8 +85,7 @@ where
                 self.skip_lut_abort(idx_open, idx, bracket_type, lut, padding)
             }
         } else {
-            let idx_close: usize;
-            idx_close = self.skip_ite(bracket_type)?;
+            let idx_close = self.skip_ite(bracket_type)?;
 
             track_skip("ITE", idx_close - idx - 1);
             // debug_msg("ITE", idx, idx_open, idx_close, padding);
@@ -193,7 +192,7 @@ where
                                 track_skipped_distance = false;
                             }
                         }
-                     skipped_distance = skipped_distance + BLOCK_SIZE;
+                     skipped_distance += BLOCK_SIZE;
                     }
 
                     vector.add_depth(current_depth);

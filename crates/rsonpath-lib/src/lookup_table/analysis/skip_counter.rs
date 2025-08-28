@@ -8,6 +8,7 @@ static SKIP_TIME_ATOMIC_CUTOFF_512: AtomicU64 = AtomicU64::new(0);
 static SKIP_TIME_ATOMIC_CUTOFF_1024: AtomicU64 = AtomicU64::new(0);
 static SKIP_TIME_ATOMIC_CUTOFF_2048: AtomicU64 = AtomicU64::new(0);
 
+#[inline]
 pub fn add_skip_time(distance: usize, added_time: u64) {
     if distance > 0 {
         SKIP_TIME_ATOMIC_CUTOFF_0.fetch_add(added_time, Ordering::Relaxed);
@@ -32,6 +33,7 @@ pub fn add_skip_time(distance: usize, added_time: u64) {
     }
 }
 
+#[inline]
 pub fn reset_skip_counters() {
     SKIP_TIME_ATOMIC_CUTOFF_0.store(0, Ordering::Relaxed);
     SKIP_TIME_ATOMIC_CUTOFF_64.store(0, Ordering::Relaxed);

@@ -35,6 +35,7 @@ impl LookUpTable for LutPHF {
             .copied()
     }
 
+    #[inline]
     fn get_cutoff(&self) -> usize {
         self.cutoff
     }

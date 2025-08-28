@@ -6,12 +6,12 @@ use crate::{
 };
 use std::fs;
 use std::io::{BufReader, Read};
-// Run with: cargo run --bin lut --release -- eval-valgrind
-
-// Build with: cargo build --release --bin lut
-// Analyse with: sudo perf stat target/release/lut eval-valgrind
-// Analyse with: valgrind --tool=cachegrind target/release/lut eval-valgrind
-
+/// Run with: cargo run --bin lut --release -- eval-valgrind
+///
+/// Build with: cargo build --release --bin lut
+/// Analyse with: sudo perf stat target/release/lut eval-valgrind
+/// Analyse with: valgrind --tool=cachegrind target/release/lut eval-valgrind
+#[inline]
 pub fn run() {
     println!("eval-valgrind");
     println!("REPETITIONS: {QUERY_REPETITIONS}");
@@ -70,7 +70,7 @@ fn eval(json_name: &str, query_text: &str, data_dir_path: &str, cutoff: usize) {
         // result = engine.count(&input).expect("Query execution failed");
         result = std::hint::black_box(engine.count(&input).expect("Query execution failed"));
     }
-    println!("result = {}", result);
+    println!("result = {result}");
 
     // let mut total_time = 0.0;
     // for _ in 0..QUERY_REPETITIONS {

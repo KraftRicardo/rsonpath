@@ -33,6 +33,7 @@ use std::{
 ///     1,$.products[4].categoryPath[2],0.00954
 ///     2,$.products[*].categoryPath[2],0.26674
 ///     ...
+#[inline]
 pub fn run(data_dir_path: &str, result_dir_path: &str) {
     println!("lut_ptrhash_double_empty_list_opt");
 
@@ -45,21 +46,21 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
         return;
     }
 
-    fs::create_dir_all(&result_dir_path).expect("Failed to create directory");
+    fs::create_dir_all(result_dir_path).expect("Failed to create directory");
 
     // MB_100
-    eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY_SHORT, &cutoffs);
+    eval_all(data_dir_path, result_dir_path, QUERY_BESTBUY_SHORT, &cutoffs);
 
     // GB_1
-    eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART, &cutoffs);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI, &cutoffs);
+    eval_all(data_dir_path, result_dir_path, QUERY_BESTBUY, &cutoffs);
+    eval_all(data_dir_path, result_dir_path, QUERY_CROSSREF1, &cutoffs);
+    eval_all(data_dir_path, result_dir_path, QUERY_CROSSREF2, &cutoffs);
+    eval_all(data_dir_path, result_dir_path, QUERY_CROSSREF4, &cutoffs);
+    eval_all(data_dir_path, result_dir_path, QUERY_GOOGLE, &cutoffs);
+    eval_all(data_dir_path, result_dir_path, QUERY_NSPL, &cutoffs);
+    eval_all(data_dir_path, result_dir_path, QUERY_TWITTER, &cutoffs);
+    eval_all(data_dir_path, result_dir_path, QUERY_WALMART, &cutoffs);
+    eval_all(data_dir_path, result_dir_path, QUERY_WIKI, &cutoffs);
 
     println!("Done");
 }
@@ -72,11 +73,11 @@ fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str, cu
         println!("  cutoff: {cutoff}");
 
         // All necessary paths to CSV and PNG
-        let cutoff_dir_path = format!("{}/{}", result_dir_path, cutoff);
+        let cutoff_dir_path = format!("{result_dir_path}/{cutoff}");
         fs::create_dir_all(&cutoff_dir_path).expect("Failed to create directory");
 
         measure_build(&json_path, &cutoff_dir_path, query_data_csv, *cutoff);
-        measure_query_count(&json_path, &result_dir_path, query_data_csv, *cutoff, &queries);
+        measure_query_count(&json_path, result_dir_path, query_data_csv, *cutoff, &queries);
     }
 }
 
@@ -91,7 +92,7 @@ fn measure_query_count(
     // Ensure the result directory exists
     fs::create_dir_all(result_dir_path).expect("Failed to create results directory");
 
-    let query_csv_path = format!("{}/{}/{}.csv", result_dir_path, cutoff, query_data_csv);
+    let query_csv_path = format!("{result_dir_path}/{cutoff}/{query_data_csv}.csv");
     let csv_exists = Path::new(&query_csv_path).exists();
 
     // Open CSV in append mode
@@ -105,7 +106,7 @@ fn measure_query_count(
 
     // Write header if the file is new
     if !csv_exists {
-        wrt.write_record(&["QUERY_ID", "QUERY_TEXT", "QUERY_TIME_SECONDS"])
+        wrt.write_record(["QUERY_ID", "QUERY_TEXT", "QUERY_TIME_SECONDS"])
             .expect("Failed to write header");
     }
 
@@ -142,21 +143,18 @@ fn measure_query_count(
         let avg_time = total_time / QUERY_REPETITIONS as f64;
         lut = engine.take_lut().expect("Failed to retrieve LUT");
 
-        println!(
-            "  - File {}, Query {}: {}, time = {:.5}s, result = {}",
-            query_data_csv, query_id, query_text, avg_time, result
-        );
+        println!("  - File {query_data_csv}, Query {query_id}: {query_text}, time = {avg_time:.5}s, result = {result}",);
 
-        wrt.write_record(&[query_id, query_text, &format!("{:.5}", avg_time)])
+        wrt.write_record([query_id, query_text, &format!("{avg_time:.5}")])
             .expect("Failed to write to CSV");
     }
 
     wrt.flush().expect("Failed to flush CSV");
-    println!("Generated: {}", query_csv_path);
+    println!("Generated: {query_csv_path}");
 }
 
 fn measure_build(json_path: &str, cutoff_dir_path: &str, query_data_csv: &str, cutoff: usize) {
-    let build_csv = format!("{}/build.csv", cutoff_dir_path);
+    let build_csv = format!("{cutoff_dir_path}/build.csv");
     let file_exists = Path::new(&build_csv).exists();
 
     // Ensure the directory exists
@@ -173,7 +171,7 @@ fn measure_build(json_path: &str, cutoff_dir_path: &str, query_data_csv: &str, c
 
     // Write header if the file is new
     if !file_exists {
-        wtr.write_record(&["JSON", "BUILD_TIME_SECONDS", "SIZE_IN_BYTES"])
+        wtr.write_record(["JSON", "BUILD_TIME_SECONDS", "SIZE_IN_BYTES"])
             .expect("Failed to write header");
     }
 
@@ -198,17 +196,19 @@ fn measure_build(json_path: &str, cutoff_dir_path: &str, query_data_csv: &str, c
     }
 
     let avg_time = total_time / BUILD_REPETITIONS as f64;
-    println!(" build time = {:.5}s, size = {} B", avg_time, heap_bytes);
+    println!(" build time = {avg_time:.5}s, size = {heap_bytes} B");
 
     // Write the results
-    wtr.write_record(&[query_data_csv, &format!("{:.5}", avg_time), &heap_bytes.to_string()])
+    wtr.write_record([query_data_csv, &format!("{avg_time:.5}"), &heap_bytes.to_string()])
         .expect("Failed to write build record");
 
     wtr.flush().expect("Failed to flush build CSV");
 }
 
-// We take the allocated bytes minus the deallocated and ignore the reallocated bytes because we are interested
-// in the total heap space taken
+/// We take the allocated bytes minus the deallocated and ignore the reallocated bytes because we are interested
+/// in the total heap space taken
+#[inline]
+#[must_use]
 pub fn heap_value(stats: stats_alloc::Stats) -> isize {
     stats.bytes_allocated as isize - stats.bytes_deallocated as isize
 }

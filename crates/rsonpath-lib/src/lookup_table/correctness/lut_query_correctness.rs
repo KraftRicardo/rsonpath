@@ -68,7 +68,7 @@ fn test_query_correctness_count(data_dir_path: &str, query_data_csv: &str, cutof
     };
 
     for (query_name, query_text) in queries {
-        println!(" Query {}: \"{}\" ... ", query_name, query_text);
+        println!(" Query {query_name}: \"{query_text}\" ... ");
 
         // ITE (LEGACY)
         let legacy_input = {
@@ -95,10 +95,10 @@ fn test_query_correctness_count(data_dir_path: &str, query_data_csv: &str, cutof
         let lut_count = engine.count(&input).expect("LUT: Failed to run query normally");
 
         if legacy_count != count {
-            println!("\tITE INCORRECT: Found {}, Expected {}", lut_count, count);
+            println!("\tITE INCORRECT: Found {lut_count}, Expected {count}");
         }
         if legacy_count != lut_count {
-            println!("\tLUT INCORRECT: Found {}, Expected {}", lut_count, count);
+            println!("\tLUT INCORRECT: Found {lut_count}, Expected {count}");
         }
 
         if legacy_count == 0 {
@@ -120,7 +120,7 @@ fn test_query_correctness_nodes(data_dir_path: &str, query_data_csv: &str, cutof
     // Run all queries
     println!("Checking queries:");
     for (query_name, query_text) in queries {
-        println!(" Query: {} = \"{}\" ... ", query_name, query_text);
+        println!(" Query: {query_name} = \"{query_text}\" ... ");
         let input = {
             let mut file = BufReader::new(fs::File::open(&json_path).expect("Fail @ open File"));
             let mut buf = vec![];
@@ -142,7 +142,7 @@ fn test_query_correctness_nodes(data_dir_path: &str, query_data_csv: &str, cutof
         // Print results
         println!("ITE Results found: ");
         for (i, result) in results.into_iter().enumerate() {
-            println!("Result {}:", i);
+            println!("Result {i}:");
             println!("{result}");
         }
 
@@ -158,7 +158,7 @@ fn test_query_correctness_nodes(data_dir_path: &str, query_data_csv: &str, cutof
 
         println!("LUT Results found: ");
         for (i, result) in results_lut.into_iter().enumerate() {
-            println!("Result {}:", i);
+            println!("Result {i}:");
             println!("{result}");
         }
 

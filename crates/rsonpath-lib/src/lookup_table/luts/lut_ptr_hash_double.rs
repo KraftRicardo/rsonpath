@@ -20,6 +20,7 @@ pub struct LutPtrHashDouble {
 }
 
 impl LookUpTable for LutPtrHashDouble {
+    #[inline]
     fn build(json_path: &str, cutoff: usize) -> Result<Self, Box<dyn std::error::Error>>
     where
         Self: Sized,
@@ -32,8 +33,9 @@ impl LookUpTable for LutPtrHashDouble {
         Self::build_from_input(&input, cutoff)
     }
 
+    #[inline]
     fn get(&self, key: &usize) -> Option<usize> {
-        debug!("PtrHash: Call get({})", key);
+        debug!("PtrHash: Call get({key})");
 
         let mut dst: usize = self.values[self.ptr_hash.index(key)] as usize;
         // Check ptr_hash and if that returns 0 then check ptr_hash_64
@@ -44,12 +46,14 @@ impl LookUpTable for LutPtrHashDouble {
         Some(*key + dst)
     }
 
+    #[inline]
     fn get_cutoff(&self) -> usize {
         self.cutoff
     }
 }
 
 impl LutPtrHashDouble {
+    #[inline]
     pub fn build_from_input<I: Input>(input: &I, cutoff: usize) -> Result<Self, Box<dyn std::error::Error>> {
         let simd_c = classification::simd::configure();
 

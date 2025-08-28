@@ -101,11 +101,11 @@ where
     debug!("find_pairs - Found keys and values:");
     debug!("Sizes: keys= {}, keys64= {}", pairs.keys.len(), pairs.keys_64.len());
     for (key, value) in pairs.keys.iter().zip(pairs.values.iter()) {
-        debug!("({}, {})", key, value);
+        debug!("({key}, {value})");
     }
     debug!("find_pairs - Found keys_64 and values_64:");
     for (key_64, value_64) in pairs.keys_64.iter().zip(pairs.values_64.iter()) {
-        debug!("({}, {})", key_64, value_64);
+        debug!("({key_64}, {value_64})");
     }
 
     Ok(pairs)
@@ -178,17 +178,15 @@ where
     }
 
     debug!("find_pairs_buckets - Found keys and values:");
-    let mut i = 0;
-    for pair_data in &lut_doubles_pair_data {
-        debug!("bucket:{}", i);
-        i += 1;
+    for (i, pair_data) in lut_doubles_pair_data.iter().enumerate() {
+        debug!("Bucket: {i}");
         debug!("  u16");
         for (key, value) in pair_data.keys.iter().zip(pair_data.values.iter()) {
-            debug!("  ({}, {})", key, value);
+            debug!("  ({key}, {value})");
         }
         debug!("  u64");
         for (key, value) in pair_data.keys_64.iter().zip(pair_data.values_64.iter()) {
-            debug!("  ({}, {})", key, value);
+            debug!("  ({key}, {value})");
         }
     }
 
@@ -243,7 +241,7 @@ where
 
     debug!("find_pairs_absolute - Found keys and values:");
     for (key, value) in keys.iter().zip(values.iter()) {
-        debug!("({}, {})", key, value);
+        debug!("({key}, {value})");
     }
 
     Ok((keys, values))

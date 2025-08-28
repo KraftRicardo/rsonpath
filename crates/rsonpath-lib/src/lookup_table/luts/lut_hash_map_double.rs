@@ -53,7 +53,7 @@ impl LookUpTable for LutHashMapDouble {
             }
         } else {
             // Neither map contains the key which should never happen because we added all keys and values at build
-            println!("Ups! You asked for a key that is not in the LutHashMap. Key = {}", key);
+            println!("Ups! You asked for a key that is not in the LutHashMap. Key = {key}");
             None
         }
     }

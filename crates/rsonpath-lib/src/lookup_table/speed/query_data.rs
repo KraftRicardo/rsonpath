@@ -70,11 +70,15 @@ pub const QUERY_WIKI_SCALED: &str = "wiki_large_record_(1.1GB)_scaled";
 // ##########
 pub const QUERY_NESTED_COL: &str = "nested_col_(27.7GB)";
 
+#[inline]
+#[must_use]
 pub fn read_queries(file_name: &str) -> Vec<(String, String)> {
     let csv_path = format!("{QUERY_DATA_FOLDER}/{file_name}.csv");
     read_queries_from_csv(&csv_path)
 }
 
+#[inline]
+#[must_use]
 pub fn read_queries_test(file_name: &str) -> Vec<(String, String)> {
     let csv_path = format!("{QUERY_DATA_FOLDER_TEST}/{file_name}.csv");
     read_queries_from_csv(&csv_path)
@@ -93,7 +97,7 @@ pub fn read_queries_test(file_name: &str) -> Vec<(String, String)> {
 ///
 /// Check the extract_input function to see which csv_path names are viable.
 fn read_queries_from_csv(csv_path: &str) -> Vec<(String, String)> {
-    let file = File::open(&csv_path).expect("Cannot open CSV file");
+    let file = File::open(csv_path).expect("Cannot open CSV file");
     let mut rdr = ReaderBuilder::new().has_headers(true).from_reader(BufReader::new(file));
 
     let mut queries = Vec::new();
@@ -111,6 +115,8 @@ fn read_queries_from_csv(csv_path: &str) -> Vec<(String, String)> {
 /// Based on the input this functions read the queries from the csv and also gives the associated
 /// json_path and json_name. We need the json_name so we can differentiate e.g. between QUERY_TWITTER
 /// and QUERY_TWITTER_SCALED which both want to query on the same json but have different queries.
+#[inline]
+#[must_use]
 pub fn extract_input(data_dir_path: &str, query_data_csv: &str) -> (String, String, Vec<(String, String)>) {
     let queries = read_queries(query_data_csv);
     let json_name = format!("{}.json", remove_common_suffix(query_data_csv));
@@ -122,6 +128,8 @@ pub fn extract_input(data_dir_path: &str, query_data_csv: &str) -> (String, Stri
 
 /// Extract only the json_path of the given query set, because some experiments only need the json
 /// and no queries.
+#[inline]
+#[must_use]
 pub fn extract_path(data_dir_path: &str, query_data_csv: &str) -> String {
     let json_name = format!("{}.json", remove_common_suffix(query_data_csv));
     let json_path = format!("{data_dir_path}/{json_name}");
@@ -140,7 +148,7 @@ fn remove_common_suffix(csv_path: &str) -> String {
 /// Remove the suffix from the string if possible and return it.
 fn remove_suffix(s: &str, suffix: &str) -> String {
     if s.ends_with(suffix) {
-        (&s[..s.len() - suffix.len()]).parse().unwrap()
+        s[..s.len() - suffix.len()].parse().unwrap()
     } else {
         s.parse().unwrap()
     }

@@ -55,13 +55,13 @@ pub fn run(json_path: &str, json_query: &str) {
     println!("Results found: ");
     let num_results = results.len();
     for (i, result) in results.into_iter().enumerate() {
-        println!("Result {}:", i);
+        println!("Result {i}:");
         println!("{result}");
     }
 
     println!("#### Stats ####");
-    println!(" - Num results:    {}", num_results);
+    println!(" - Num results:    {num_results}",);
     println!(" - LUT type:       {}", type_name::<LUT>());
-    println!(" - LUT build time: {} seconds", build_time);
-    println!(" - LUT query time: {} seconds", query_time);
+    println!(" - LUT build time: {build_time} seconds");
+    println!(" - LUT query time: {query_time} seconds");
 }

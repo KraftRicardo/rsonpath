@@ -1,4 +1,5 @@
 /// Print the max index number possible for different JSON sizes in GB.
+#[inline]
 pub fn print_estimation() {
     for bit in 32..64 {
         let max_idx = 2_usize.pow(bit);
@@ -29,21 +30,19 @@ fn format_size(bytes: usize) -> String {
         size /= 1024.0;
     }
 
-    format!("{:.2} {}", size, unit)
+    format!("{size:.2} {unit}")
 }
 
 /// Adds thousands separators to large numbers
 fn format_number(n: usize) -> String {
     let s = n.to_string();
     let mut result = String::new();
-    let mut count = 0;
 
-    for c in s.chars().rev() {
+    for (count, char) in s.chars().rev().enumerate() {
         if count > 0 && count % 3 == 0 {
             result.push('.');
         }
-        result.push(c);
-        count += 1;
+        result.push(char);
     }
 
     result.chars().rev().collect()

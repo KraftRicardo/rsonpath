@@ -24,38 +24,41 @@ static TOTAL_SKIP_COUNT_ITE: AtomicU64 = AtomicU64::new(0);
 static TOTAL_SKIP_DISTANCE_LUT: AtomicU64 = AtomicU64::new(0);
 static TOTAL_SKIP_DISTANCE_ITE: AtomicU64 = AtomicU64::new(0);
 
-// Note: when calling this function is usually not clear whether it was a LUT or ITE skip!
-// So ignore the skip tag (LUT or ITE)
+/// Note: when calling this function is usually not clear whether it was a LUT or ITE skip!
+/// So ignore the skip tag (LUT or ITE)
+#[inline]
 pub fn track_timed_distance(distance: usize, time_nanos: u64) {
     // Accumulate frequency
-    let mut frequency_map = TRACK_COUNT_ITE.lock().unwrap();
+    let mut frequency_map = TRACK_COUNT_ITE.lock().expect("Failed to lock TRACK_COUNT_ITE");
     *frequency_map.entry(distance).or_insert(0) += 1;
 
     // Accumulate time
-    let mut time_map = TRACK_TIME_NANOS.lock().unwrap();
+    let mut time_map = TRACK_TIME_NANOS.lock().expect("Failed to lock TRACK_TIME_NANOS.");
     *time_map.entry(distance).or_insert(0) += time_nanos;
 }
 
+#[inline]
 pub fn track_distance_lut(distance: usize) {
     // println!("Track: {distance}");
 
     if SKIP_MODE == SkipMode::COUNT {
         TOTAL_SKIP_COUNT_LUT.fetch_add(1, Ordering::Relaxed);
     } else if SKIP_MODE == SkipMode::TRACK {
-        let mut map = TRACK_COUNT_LUT.lock().unwrap();
+        let mut map = TRACK_COUNT_LUT.lock().expect("Failed to lock TRACK_COUNT_LUT");
         *map.entry(distance).or_insert(0) += 1;
     }
 
     TOTAL_SKIP_DISTANCE_LUT.fetch_add(distance as u64, ORDER);
 }
 
+#[inline]
 pub fn track_distance_ite(distance: usize) {
     // println!("Track: {distance}");
 
     if SKIP_MODE == SkipMode::COUNT {
         TOTAL_SKIP_COUNT_ITE.fetch_add(1, Ordering::Relaxed);
     } else if SKIP_MODE == SkipMode::TRACK {
-        let mut map = TRACK_COUNT_ITE.lock().unwrap();
+        let mut map = TRACK_COUNT_ITE.lock().expect("Unable to get TRACK_COUNT_ITE lock.");
         *map.entry(distance).or_insert(0) += 1;
     }
 
@@ -63,8 +66,9 @@ pub fn track_distance_ite(distance: usize) {
 }
 
 // SkipMode::TRACK
+#[inline]
 pub fn save_track_to_csv(file_path: &str) -> std::io::Result<()> {
-    debug!("Saving to {}", file_path);
+    debug!("Saving to {file_path}");
     let path = Path::new(file_path);
     let file = File::create(path)?;
     let mut writer = BufWriter::new(file);
@@ -73,15 +77,15 @@ pub fn save_track_to_csv(file_path: &str) -> std::io::Result<()> {
     writeln!(writer, "distance,frequency,skip_type")?;
 
     // LUT
-    let lut_map = TRACK_COUNT_LUT.lock().unwrap();
+    let lut_map = TRACK_COUNT_LUT.lock().expect("Unable to get TRACK_COUNT_LUT lock.");
     for (distance, frequency) in lut_map.iter() {
-        writeln!(writer, "{},{},lut", distance, frequency)?;
+        writeln!(writer, "{distance},{frequency},lut",)?;
     }
 
     // ITE
-    let ite_map = TRACK_COUNT_ITE.lock().unwrap();
+    let ite_map = TRACK_COUNT_ITE.lock().expect("Unable to get TRACK_COUNT_ITE lock.");
     for (distance, frequency) in ite_map.iter() {
-        writeln!(writer, "{},{},ite", distance, frequency)?;
+        writeln!(writer, "{distance},{frequency},ite")?;
     }
 
     drop(lut_map);
@@ -92,8 +96,9 @@ pub fn save_track_to_csv(file_path: &str) -> std::io::Result<()> {
 }
 
 // SkipMode::TRACK_TIMED
+#[inline]
 pub fn save_track_timed_to_csv(file_path: &str) -> std::io::Result<()> {
-    debug!("Saving to {}", file_path);
+    debug!("Saving to {file_path}");
     let path = Path::new(file_path);
     let file = File::create(path)?;
     let mut writer = BufWriter::new(file);
@@ -101,10 +106,10 @@ pub fn save_track_timed_to_csv(file_path: &str) -> std::io::Result<()> {
     // Headline
     writeln!(writer, "distance,frequency,skip_type,time_nanos,repetitions")?;
 
-    let time_nanos_map = TRACK_TIME_NANOS.lock().unwrap();
+    let time_nanos_map = TRACK_TIME_NANOS.lock().expect("Unable to get TRACK_TIME_NANOS lock.");
 
     // LUT
-    let lut_map = TRACK_COUNT_LUT.lock().unwrap();
+    let lut_map = TRACK_COUNT_LUT.lock().expect("Unable to get TRACK_COUNT_LUT lock.");
     for (distance, frequency_repeated) in lut_map.iter() {
         let time = time_nanos_map.get(distance).expect("Fail") / QUERY_REPETITIONS as u64;
         let frequency = frequency_repeated / QUERY_REPETITIONS;
@@ -112,7 +117,7 @@ pub fn save_track_timed_to_csv(file_path: &str) -> std::io::Result<()> {
     }
 
     // ITE
-    let ite_map = TRACK_COUNT_ITE.lock().unwrap();
+    let ite_map = TRACK_COUNT_ITE.lock().expect("Unable to get TRACK_COUNT_ITE lock");
     for (distance, frequency_repeated) in ite_map.iter() {
         let time = time_nanos_map.get(distance).expect("Fail") / QUERY_REPETITIONS as u64;
         let frequency = frequency_repeated / QUERY_REPETITIONS;
@@ -128,6 +133,7 @@ pub fn save_track_timed_to_csv(file_path: &str) -> std::io::Result<()> {
 }
 
 // SkipMode::COUNT
+#[inline]
 pub fn save_count_to_csv(json_path: &str, csv_path: &str, filename: &str, query_name: &str, query_text: &str) {
     let lut_count = TOTAL_SKIP_COUNT_LUT.load(ORDER);
     let ite_count = TOTAL_SKIP_COUNT_ITE.load(ORDER);
@@ -166,20 +172,7 @@ pub fn save_count_to_csv(json_path: &str, csv_path: &str, filename: &str, query_
     if !file_existed {
         writeln!(
             writer,
-            "{},{},{},{},{},{},{},{},{},{},{},{},{}",
-            "FILENAME",
-            "QUERY_NAME",
-            "QUERY_TEXT",
-            "LUT_PERCENT_SKIP",
-            "ITE_PERCENT_SKIP",
-            "TOTAL_PERCENT_SKIP",
-            "LUT_COUNT",
-            "ITE_COUNT",
-            "TOTAL_COUNT",
-            "LUT_DISTANCE",
-            "ITE_DISTANCE",
-            "TOTAL_DISTANCE",
-            "FILE_SIZE",
+            "FILENAME,QUERY_NAME,QUERY_TEXT,LUT_PERCENT_SKIP,ITE_PERCENT_SKIP,TOTAL_PERCENT_SKIP,LUT_COUNT,ITE_COUNT,TOTAL_COUNT,LUT_DISTANCE,ITE_DISTANCE,TOTAL_DISTANCE,FILE_SIZE",
         )
         .expect("Fail @ writing head");
     }
@@ -187,29 +180,17 @@ pub fn save_count_to_csv(json_path: &str, csv_path: &str, filename: &str, query_
     // Write data to CSV
     writeln!(
         writer,
-        "{},{},{},{:.6},{:.6},{:.6},{},{},{},{},{},{},{}",
-        filename,
-        query_name,
-        query_text,
-        percentage_lut_skip,
-        percentage_ite_skip,
-        percentage_total_skip,
-        lut_count,
-        ite_count,
-        total_count,
-        lut_distance,
-        ite_distance,
-        total_distance,
-        json_size,
+        "{filename},{query_name},{query_text},{percentage_lut_skip:.6},{percentage_ite_skip:.6},{percentage_total_skip:.6},{lut_count},{ite_count},{total_count},{lut_distance},{ite_distance},{total_distance},{json_size}",
     )
     .expect("Fail @ writing line");
 
-    println!("TOTAL_SKIP_PERCENT = {}", percentage_total_skip);
+    println!("TOTAL_SKIP_PERCENT = {percentage_total_skip}");
 
     writer.flush().expect("Fail @ writing csv");
     reset();
 }
 
+#[inline]
 pub fn reset() {
     TOTAL_SKIP_COUNT_LUT.store(0, ORDER);
     TOTAL_SKIP_COUNT_ITE.store(0, ORDER);
@@ -217,7 +198,16 @@ pub fn reset() {
     TOTAL_SKIP_DISTANCE_LUT.store(0, ORDER);
     TOTAL_SKIP_DISTANCE_ITE.store(0, ORDER);
 
-    TRACK_COUNT_LUT.lock().unwrap().clear();
-    TRACK_COUNT_ITE.lock().unwrap().clear();
-    TRACK_TIME_NANOS.lock().unwrap().clear();
+    TRACK_COUNT_LUT
+        .lock()
+        .expect("Unable to get TRACK_COUNT_LUT lock")
+        .clear();
+    TRACK_COUNT_ITE
+        .lock()
+        .expect("Unable to get TRACK_COUNT_ITE lock")
+        .clear();
+    TRACK_TIME_NANOS
+        .lock()
+        .expect("Unable to get TRACK_TIME_NANOS lock")
+        .clear();
 }

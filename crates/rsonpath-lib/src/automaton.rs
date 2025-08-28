@@ -134,7 +134,6 @@ impl ArrayTransitionLabel {
 }
 
 impl From<JsonUInt> for ArrayTransitionLabel {
-    #[must_use]
     #[inline(always)]
     fn from(index: JsonUInt) -> Self {
         Self::Index(index)
@@ -142,7 +141,6 @@ impl From<JsonUInt> for ArrayTransitionLabel {
 }
 
 impl From<SimpleSlice> for ArrayTransitionLabel {
-    #[must_use]
     #[inline(always)]
     fn from(slice: SimpleSlice) -> Self {
         Self::Slice(slice)

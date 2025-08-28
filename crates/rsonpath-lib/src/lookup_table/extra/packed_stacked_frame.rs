@@ -23,8 +23,7 @@ impl PackedStackFrame {
         // Bytes 0-6: array_count (56 bits)
         debug_assert!(
             array_count.as_u64() <= (MASK_56_BITS as u64),
-            "array_count exceeds 56-bit limit: {}",
-            array_count
+            "array_count exceeds 56-bit limit: {array_count}",
         );
         frame[0..7].copy_from_slice(&array_count.as_u64().to_le_bytes()[..7]);
 
@@ -34,8 +33,7 @@ impl PackedStackFrame {
         // Bytes 8-14 minus the last bit: idx_of_last_opening (55 bits)
         debug_assert!(
             idx_of_last_opening <= MASK_55_BITS,
-            "idx_of_last_opening exceeds 55-bit limit: {}",
-            idx_of_last_opening
+            "idx_of_last_opening exceeds 55-bit limit: {idx_of_last_opening}",
         );
         let idx_masked = (idx_of_last_opening & MASK_55_BITS) as u64;
         let idx_bytes = idx_masked.to_le_bytes();

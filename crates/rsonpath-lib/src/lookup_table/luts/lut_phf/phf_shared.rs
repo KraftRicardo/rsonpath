@@ -226,7 +226,7 @@ impl FmtConst for [u8] {
     #[inline]
     fn fmt_const(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // slices need a leading reference
-        write!(f, "&{:?}", self)
+        write!(f, "&{self:?}")
     }
 }
 
@@ -272,7 +272,7 @@ impl PhfHash for char {
 
 // minimize duplicated code since formatting drags in quite a bit
 fn fmt_array<T: core::fmt::Debug>(array: &[T], f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    write!(f, "{:?}", array)
+    write!(f, "{array:?}")
 }
 
 macro_rules! array_impl (
