@@ -1,0 +1,13 @@
+ID,Path,Result,SkipPercentage
+1,$.inner[0].name,0,0.00000000000000000
+2,$.inner[1].name,0,0.00000000000000000
+3,$.inner[*].type.qualType,0,0.00000000000000000
+4,$.inner[2].type.qualType,0,0.00000000000000000
+5,$.inner[0].inner[0].kind,0,0.00000000000000000
+6,$.inner[1].inner[0].kind,0,0.00000000000000000
+7,$..inner[0].kind,0,0.00000000000000000
+10,$.inner[0].isImplicit,0,0.00000000000000000
+11,$.inner[1].isImplicit,0,0.00000000000000000
+12,$..range.begin.offset,0,0.00000000000000000
+14,$..range.begin.col,0,0.00000000000000000
+17,$..isReferenced,0,0.00000000000000000

@@ -1,0 +1,16 @@
+ID,Path,Result,SkipPercentage
+1,$.statuses[0].metadata.result_type,0,0.00000000000000000
+2,$.statuses[0].metadata.iso_language_code,0,0.00000000000000000
+3,$.statuses[0].created_at,0,0.00000000000000000
+4,$.statuses[*].id,0,0.00000000000000000
+5,$.statuses[*].text,0,0.00000000000000000
+6,$.statuses[0].source,0,0.00000000000000000
+7,$.statuses[0].user.id,0,0.00000000000000000
+8,$.statuses[*].user.name,0,0.00000000000000000
+9,$.statuses[0].user.screen_name,0,0.00000000000000000
+10,$.statuses[*].user.followers_count,0,0.00000000000000000
+11,$.statuses[*].user.friends_count,0,0.00000000000000000
+12,$.statuses[0].retweet_count,0,0.00000000000000000
+13,$.statuses[*].favorite_count,0,0.00000000000000000
+14,$.statuses[0].entities.user_mentions,0,0.00000000000000000
+15,$.statuses[*].lang,0,0.00000000000000000

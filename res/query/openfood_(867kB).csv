@@ -1,0 +1,15 @@
+ID,Path,Result,SkipPercentage
+1,$.products[0].brands,0,0.00000000000000000
+2,$.products[*].brands,0,0.00000000000000000
+3,$.products[0].categories,0,0.00000000000000000
+4,$.products[0].categories_hierarchy,0,0.00000000000000000
+5,$.products[0].ingredients_text,0,0.00000000000000000
+6,$.products[0].allergens,0,0.00000000000000000
+7,$.products[0].ecoscore_grade,0,0.00000000000000000
+8,$.products[*].ecoscore_grade,0,0.00000000000000000
+9,$.products[0].packaging,0,0.00000000000000000
+10,$.products[0].countries,0,0.00000000000000000
+13,$.products[0].ecoscore_score,0,0.00000000000000000
+14,$.products[0].categories_properties,0,0.00000000000000000
+15,$.products[0].ciqual_food_name_tags,0,0.00000000000000000
+16,$.products[0].ingredients_n,0,0.00000000000000000

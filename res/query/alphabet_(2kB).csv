@@ -1,0 +1,8 @@
+ID,Path,Result,SkipPercentage
+1,$.alphabet[0],0,0.00000000000000000
+2,$.alphabet[*],0,0.00000000000000000
+3,$.alphabet[*].ID,0,0.00000000000000000
+4,$.alphabet[*].Letter,0,0.00000000000000000
+5,$.alphabet[*].Pronunciation,0,0.00000000000000000
+6,$.alphabet[10].Letter,0,0.00000000000000000
+7,$.alphabet[25].Pronunciation,0,0.00000000000000000

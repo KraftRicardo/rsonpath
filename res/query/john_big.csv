@@ -1,0 +1,9 @@
+ID,Path,Result,SkipPercentage
+0,$.person.address,0,0.00000000000000000
+1,$.person.firstName,0,0.00000000000000000
+2,$.person.lastName,0,0.00000000000000000
+3,$.person.phoneNumber[1].type,0,0.00000000000000000
+4,$.person.spouse.person.phoneNumber.*,0,0.00000000000000000
+5,$.person.spouse.person.phoneNumber[0],0,0.00000000000000000
+6,$.person.spouse.person.phoneNumber[1],0,0.00000000000000000
+7,$[1],0,0.00000000000000000
