@@ -3,9 +3,9 @@ use crate::lookup_table::{LookUpTable, LUT};
 use crate::lookup_table::luts::{lut_hash_map, pair_data};
 use crate::lookup_table::speed::lut_query_data::*;
 
-/// Checks whether the distances covered by the LUT are actually correct.
-///
 /// Run with: cargo run --bin lut --release -- test-build-correctness res/json
+///
+/// Checks whether the distances covered by the LUT are actually correct.
 #[inline]
 pub fn run(data_dir_path: &str) {
     let cutoff = 0;

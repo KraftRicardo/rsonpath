@@ -4,6 +4,5 @@ pub mod eval_lut_construction;
 pub mod eval_rq_lut;
 pub mod eval_rq_lut_no_lut;
 pub mod eval_serde;
-pub mod lut_evaluation;
 pub mod lut_query_data;
 pub mod lut_skip_evaluation;

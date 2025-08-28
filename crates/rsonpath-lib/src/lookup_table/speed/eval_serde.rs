@@ -1,5 +1,5 @@
 use crate::lookup_table::speed::eval_distance_cutoff::heap_value;
-use crate::lookup_table::speed::lut_evaluation::HEAP_TRACKER;
+use crate::lookup_table::speed::eval_lut_construction::HEAP_TRACKER;
 use crate::lookup_table::speed::lut_query_data::*;
 use crate::lookup_table::{BUILD_REPETITIONS, QUERY_REPETITIONS};
 use csv::Writer;

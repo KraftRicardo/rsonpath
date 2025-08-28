@@ -1,4 +1,4 @@
-use crate::lookup_table::speed::lut_evaluation::HEAP_TRACKER;
+use crate::lookup_table::speed::eval_lut_construction::HEAP_TRACKER;
 use crate::lookup_table::speed::lut_query_data::*;
 use crate::lookup_table::speed::lut_skip_evaluation::SkipMode::OFF;
 use crate::lookup_table::{LookUpTable, BUILD_REPETITIONS, LUT, QUERY_REPETITIONS, SKIP_MODE, TRACK_SKIPPING_ON};
@@ -15,6 +15,7 @@ use std::{
     fs,
     io::{BufReader, Read, Write},
 };
+
 /// Run with: cargo run --bin lut --release -- eval-distance-cutoff res/json res/data/speed/local/distance_cutoff
 /// Run with: cargo run --bin lut --release -- eval-distance-cutoff ricardo-jsons final-results-4
 ///

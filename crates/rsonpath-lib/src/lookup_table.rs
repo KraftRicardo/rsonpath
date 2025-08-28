@@ -5,7 +5,6 @@ pub mod analysis;
 pub mod correctness;
 pub mod extra;
 pub mod luts;
-pub mod performance;
 pub mod speed;
 
 // CONFIG

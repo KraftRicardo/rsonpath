@@ -11,11 +11,11 @@ use std::{
     io::{BufReader, Read},
 };
 
+/// Run with: cargo run --bin lut --release -- test-query-correctness res/json
+///
 /// Compares the rq-lut vs. the rq-legacy implementation whether they have the same results. It is
 /// a rather unclean test, but it can already cover the difference between the original and the lut
 /// adaption.
-///
-/// Run with: cargo run --bin lut --release -- test-query-correctness res/json
 #[inline]
 pub fn run(data_dir_path: &str) {
     let cutoff = 0;

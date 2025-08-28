@@ -1,15 +1,12 @@
 use clap::{Parser, Subcommand};
 use rsonpath::lookup_table::analysis::distance_distribution_per_query;
+use rsonpath::lookup_table::analysis::{distance_distribution, json_size_estimation_bits::print_estimation};
 use rsonpath::lookup_table::correctness::{lut_build_correctness, lut_query_correctness};
 use rsonpath::lookup_table::extra::query_with_lut::query_with_lut;
 use rsonpath::lookup_table::extra::{eval_valgrind, lut_hot, sichash_test_data_generator};
 use rsonpath::lookup_table::speed::{
     eval_distance_cutoff, eval_final, eval_lut_construction, eval_rq_lut, eval_rq_lut_no_lut, eval_serde,
     lut_skip_evaluation,
-};
-use rsonpath::lookup_table::{
-    analysis::{distance_distribution, json_size_estimation_bits::print_estimation},
-    performance::{self, EVAL_DIR},
 };
 use std::{error::Error, fs, path::Path};
 
@@ -25,10 +22,9 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    Query {
-        json_path: String,
-        query: String,
-    },
+    // ##############
+    // ## Analysis ##
+    // ##############
     AnalyseDistanceDistribution {
         json_dir_path: String,
         result_dir_path: String,
@@ -37,15 +33,11 @@ enum Commands {
         json_dir_path: String,
         result_dir_path: String,
     },
-    EvalSerde {
-        data_dir_path: String,
-        result_dir_path: String,
-    },
-    EvalRqLut {
-        data_dir_path: String,
-        result_dir_path: String,
-    },
-    EvalRqLutNoLut {
+    EstimateIndexForJsonSize {},
+    // ##############
+    // # Evaluation #
+    // ##############
+    EvalDistanceCutoff {
         data_dir_path: String,
         result_dir_path: String,
     },
@@ -57,19 +49,34 @@ enum Commands {
         data_dir_path: String,
         result_dir_path: String,
     },
+    EvalRqLut {
+        data_dir_path: String,
+        result_dir_path: String,
+    },
+    EvalRqLutNoLut {
+        data_dir_path: String,
+        result_dir_path: String,
+    },
+    EvalSerde {
+        data_dir_path: String,
+        result_dir_path: String,
+    },
     EvalValgrind {},
+    // ###############
+    // # Correctness #
+    // ###############
     TestQueryCorrectness {
         data_dir_path: String,
     },
     TestBuildCorrectness {
         data_dir_path: String,
     },
-    /// Run performance tests
-    Performance {
-        /// Path to the input JSON folder
-        json_dir: String,
-        /// Path to the output directory
-        out_dir: String,
+    // ##############
+    // ### Extra ####
+    // ##############
+    Query {
+        json_path: String,
+        query: String,
     },
     Skip {},
     /// Create the test data used in this project: https://github.com/KraftRicardo/test-SicHash
@@ -77,11 +84,6 @@ enum Commands {
         json_dir: String,
         out_dir: String,
     },
-    EvalDistanceCutoff {
-        data_dir_path: String,
-        base_dir_path: String,
-    },
-    EstimateIndexForJsonSize {},
     Hot {},
 }
 
@@ -89,9 +91,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     let cli = Cli::parse();
 
     match &cli.command {
-        Commands::Query { json_path, query } => {
-            query_with_lut(json_path, query);
-        }
+        // ##############
+        // ## Analysis ##
+        // ##############
         Commands::AnalyseDistanceDistribution {
             json_dir_path,
             result_dir_path,
@@ -104,9 +106,15 @@ fn main() -> Result<(), Box<dyn Error>> {
         } => {
             distance_distribution_per_query::run(json_dir_path, result_dir_path);
         }
+        Commands::EstimateIndexForJsonSize {} => {
+            print_estimation();
+        }
+        // ##############
+        // # Evaluation #
+        // ##############
         Commands::EvalDistanceCutoff {
             data_dir_path,
-            base_dir_path: result_dir_path,
+            result_dir_path,
         } => {
             eval_distance_cutoff::run(data_dir_path, result_dir_path);
         }
@@ -140,69 +148,36 @@ fn main() -> Result<(), Box<dyn Error>> {
         } => {
             eval_serde::run(data_dir_path, result_dir_path);
         }
-        Commands::EvalValgrind {} => {
-            eval_valgrind::run();
-        }
+        // ###############
+        // # Correctness #
+        // ###############
         Commands::TestQueryCorrectness { data_dir_path } => {
             lut_query_correctness::run(data_dir_path);
         }
         Commands::TestBuildCorrectness { data_dir_path } => {
             lut_build_correctness::run(data_dir_path);
         }
-
-        Commands::EstimateIndexForJsonSize {} => {
-            print_estimation();
-        }
-        Commands::Performance { json_dir, out_dir } => {
-            check_if_dir_exists(json_dir);
-            create_folder_setup(out_dir)?;
-            let csv_dir = format!("{}/{}", out_dir, "performance");
-
-            performance::performance_test(json_dir, &csv_dir);
-        }
-        Commands::Skip {} => {
-            lut_skip_evaluation::skip_evaluation();
-        }
-
-        Commands::Sichash { json_dir, out_dir } => {
-            check_if_dir_exists(json_dir);
-            create_folder_setup(out_dir)?;
-            let csv_dir = format!("{}/{}", out_dir, "performance");
-
-            sichash_test_data_generator::generate_test_data_for_sichash(json_dir, &csv_dir);
+        // ##############
+        // ### Extra ####
+        // ##############
+        Commands::EvalValgrind {} => {
+            eval_valgrind::run();
         }
         Commands::Hot {} => {
             lut_hot::test_hotness();
         }
-    }
+        Commands::Query { json_path, query } => {
+            query_with_lut(json_path, query);
+        }
+        Commands::Sichash { json_dir, out_dir } => {
+            let csv_dir = format!("{}/{}", out_dir, "performance");
 
-    Ok(())
-}
-
-/// Creates the required folder structure if it does not exist.
-fn create_folder_setup(dir_name: &str) -> std::io::Result<()> {
-    let dirs = [
-        dir_name,
-        &format!("{}/performance", dir_name),
-        &format!("{}/performance/{}", dir_name, EVAL_DIR),
-        &format!("{}/test_data", dir_name),
-    ];
-
-    for dir in &dirs {
-        let path = Path::new(dir);
-        if !path.exists() {
-            fs::create_dir_all(path)?;
-            println!("Created directory: {}", dir);
+            sichash_test_data_generator::generate_test_data_for_sichash(json_dir, &csv_dir);
+        }
+        Commands::Skip {} => {
+            lut_skip_evaluation::skip_evaluation();
         }
     }
 
     Ok(())
-}
-
-fn check_if_dir_exists(path: &str) {
-    if fs::metadata(path).is_err() {
-        panic!("Error: The provided folder '{}' does not exist.", path);
-    } else if !Path::new(path).is_dir() {
-        panic!("Error: The provided folder '{}' is not a directory.", path);
-    }
 }
