@@ -38,7 +38,6 @@ impl LookUpTable for LutHashMap {
     }
 
     #[inline]
-    #[must_use]
     fn get(&self, key: &usize) -> Option<usize> {
         self.hash_map.get(key).copied()
     }

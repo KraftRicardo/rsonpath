@@ -12,8 +12,10 @@ use crate::{
 use std::io::Read;
 
 #[inline]
-/// Apply a query on the given json
-pub fn query_with_lut(json_path: &str, json_query: &str) {
+/// Run with: cargo run --bin lut --release -- query-with-lut res/json/alphabet_(2kB).json $.alphabet[0]
+///
+/// Apply a query on the given json.
+pub fn run(json_path: &str, json_query: &str) {
     // Input
     let cutoff = 0;
 

@@ -1,5 +1,5 @@
-use crate::lookup_table::speed::lut_query_data::*;
-use crate::lookup_table::speed::lut_skip_evaluation::SkipMode::OFF;
+use crate::lookup_table::speed::query_data::*;
+use crate::lookup_table::SkipMode::OFF;
 use crate::lookup_table::{LookUpTable, LUT, QUERY_REPETITIONS, SKIP_MODE, TRACK_SKIPPING_ON};
 use crate::{
     engine::{Compiler, Engine, RsonpathEngine},
@@ -7,7 +7,7 @@ use crate::{
 };
 use csv::Writer;
 use std::fs::OpenOptions;
-use std::io::{Read, Write};
+use std::io::Read;
 use std::path::Path;
 use std::time::Instant;
 use std::{fs, io::BufReader};

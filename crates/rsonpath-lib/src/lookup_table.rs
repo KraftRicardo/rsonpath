@@ -1,5 +1,4 @@
 use crate::lookup_table::luts::lut_ptr_hash_double::LutPtrHashDouble;
-use crate::lookup_table::speed::lut_skip_evaluation::SkipMode;
 
 pub mod analysis;
 pub mod correctness;
@@ -26,6 +25,18 @@ pub const BUILD_REPETITIONS: usize = 1;
 // pub type LUT = LutSicHash; // bugged and broken
 pub type LUT = LutPtrHashDouble;
 // pub type LUT = LutVFuncDouble;
+
+#[derive(Debug, PartialEq)]
+pub enum SkipMode {
+    // Track how many jumps are happening
+    COUNT,
+    // Track each jump value individually in a data structure (slow)
+    TRACK,
+    // Track each jump value individually in a data structure and measure the time of each (slower)
+    TRACKTIMED,
+    // Turned off, tracking nothing
+    OFF,
+}
 
 /// Lookup-table = LUT
 pub trait LookUpTable {

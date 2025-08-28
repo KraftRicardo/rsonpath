@@ -6,12 +6,14 @@ use std::{
     io::{BufReader, Read},
 };
 
-// Run with: cargo run --bin lut --release -- hot
-// or for samply:
-// cargo build --bin lut --release
-// samply record ./target/release/lut hot
+/// Run with: cargo run --bin lut --release -- hot
+/// or for samply:
+/// cargo build --bin lut --release
+/// samply record ./target/release/lut hot
+///
+/// Code to test the hotness of the code.
 #[inline]
-pub fn test_hotness() {
+pub fn run() {
     let json_path = ".a_lut_tests/test_data/GB_1/google_map_large_record_(1.1GB).json";
     let query_text = "$[4000].routes[*].bounds"; // 99% skip
     let cutoff = 128;
@@ -54,7 +56,7 @@ fn hot_ite(json_path: &str, query_text: &str) {
         OwnedBytes::new(buf)
     };
     let query = rsonpath_syntax::parse(query_text).expect("Fail @ parse query");
-    let mut engine = RsonpathEngine::compile_query(&query).expect("Fail @ compile query");
+    let engine = RsonpathEngine::compile_query(&query).expect("Fail @ compile query");
 
     let start_queries = std::time::Instant::now();
     let mut sum = 0;

@@ -4,7 +4,7 @@ use crate::{
     lookup_table::{LookUpTable, LUT},
 };
 
-use crate::lookup_table::speed::lut_query_data::*;
+use crate::lookup_table::speed::query_data::*;
 use rsonpath_lib_ref::engine::{Compiler as CompilerLegacy, Engine as EngineLegacy};
 use std::{
     fs,

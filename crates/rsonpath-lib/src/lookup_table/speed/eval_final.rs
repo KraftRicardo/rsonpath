@@ -1,5 +1,5 @@
-use crate::lookup_table::speed::lut_query_data::*;
-use crate::lookup_table::speed::lut_skip_evaluation::SkipMode::OFF;
+use crate::lookup_table::speed::query_data::*;
+use crate::lookup_table::SkipMode::OFF;
 use crate::lookup_table::{BUILD_REPETITIONS, QUERY_REPETITIONS, SKIP_MODE, TRACK_SKIPPING_ON};
 use crate::{
     engine::{Compiler, Engine, RsonpathEngine},

@@ -10,7 +10,6 @@ use crate::lookup_table::{LookUpTable, LookUpTableLambda};
 use crate::{
     classification::{self, simd::Simd},
     input::{self, error, Input},
-    FallibleIterator,
 };
 
 pub struct LutPHFDouble {

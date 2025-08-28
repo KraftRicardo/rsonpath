@@ -1,9 +1,6 @@
 #![allow(clippy::expect_used)] // Enforcing the classifier invariant is clunky without this.
 use crate::engine::skip_tracker;
-use crate::lookup_table::analysis::skip_counter;
-use crate::lookup_table::speed::lut_skip_evaluation;
-use crate::lookup_table::speed::lut_skip_evaluation::SkipMode;
-use crate::lookup_table::{SKIP_MODE, TRACK_SKIPPING_ON};
+use crate::lookup_table::{SkipMode, SKIP_MODE, TRACK_SKIPPING_ON};
 use crate::{
     classification::{
         depth::{DepthBlock, DepthIterator, DepthIteratorResumeOutcome},
@@ -62,11 +59,10 @@ where
             let skip_time_nanos = start_skip.elapsed().as_nanos() as u64;
 
             let distance = idx_close - idx - 1;
-            if SKIP_MODE == SkipMode::TRACK_TIMED {
+            if SKIP_MODE == SkipMode::TRACKTIMED {
                 skip_tracker::track_timed_distance(distance, skip_time_nanos);
             }
 
-            lut_skip_evaluation::add_skip_time(skip_time_nanos);
             // skip_counter::add_skip_time(distance, skip_time_nanos);
             Ok(idx_close)
         } else {
@@ -89,7 +85,7 @@ where
                 self.skip_lut_abort(idx_open, idx, bracket_type, lut, padding)
             }
         } else {
-            let mut idx_close: usize;
+            let idx_close: usize;
             idx_close = self.skip_ite(bracket_type)?;
 
             track_skip("ITE", idx_close - idx - 1);

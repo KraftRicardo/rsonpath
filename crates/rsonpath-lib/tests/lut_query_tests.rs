@@ -1,5 +1,5 @@
 use log::debug;
-use rsonpath::lookup_table::speed::lut_query_data::*;
+use rsonpath::lookup_table::speed::query_data::*;
 use rsonpath::{
     engine::{Compiler, Engine, RsonpathEngine},
     input::OwnedBytes,

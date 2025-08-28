@@ -1,5 +1,5 @@
-use crate::lookup_table::speed::lut_query_data::*;
-use crate::lookup_table::speed::lut_skip_evaluation::SkipMode::OFF;
+use crate::lookup_table::speed::query_data::*;
+use crate::lookup_table::SkipMode::OFF;
 use crate::lookup_table::{QUERY_REPETITIONS, SKIP_MODE, TRACK_SKIPPING_ON};
 use crate::{
     engine::{Compiler, Engine, RsonpathEngine},
@@ -11,9 +11,11 @@ use std::path::Path;
 use std::time::Instant;
 use std::{
     fs,
-    io::{BufReader, Read, Write},
+    io::{BufReader, Read},
 };
 
+/// Run with: cargo run --bin lut --release -- eval-rq-lut-no-lut res/json res/data/speed/local/rq_lut_no_lut
+///
 /// Run rq-lut without using a LUT but just using the non-lut version of rq. This is to see whether
 /// there is a measurable speed change in the changes of the base code.
 /// Output is one csv per json file. Structure e.g. :
@@ -21,8 +23,6 @@ use std::{
 ///     1,$..freeShipping,0.08720
 ///     2,$.products[*].videoChapters,0.79716
 ///     ...
-///
-/// Run with: cargo run --bin lut --release -- eval-rq-lut-no-lut res/json res/data/speed/local/rq_lut_no_lut
 pub fn run(data_dir_path: &str, result_dir_path: &str) {
     println!("rq-lut-no-lut");
 

@@ -10,7 +10,7 @@ use crate::lookup_table::luts::lut_phf_group::LutPHFGroup;
 use crate::lookup_table::luts::lut_ptr_hash_double::LutPtrHashDouble;
 use crate::lookup_table::luts::lut_vfunc_double::LutVFuncDouble;
 use crate::lookup_table::luts::pair_data;
-use crate::lookup_table::speed::lut_query_data::*;
+use crate::lookup_table::speed::query_data::*;
 use crate::lookup_table::{LookUpTable, LookUpTableLambda, BUILD_REPETITIONS, QUERY_REPETITIONS};
 use stats_alloc::{Region, StatsAlloc, INSTRUMENTED_SYSTEM};
 use std::alloc::System;
@@ -172,7 +172,7 @@ fn eval<T: LookUpTable>(config: &mut EvalConfig, name: &str, cutoff: usize) {
 }
 
 fn eval_phf<T: LookUpTableLambda>(config: &mut EvalConfig, name: &str, lambda: usize, threaded: bool, cutoff: usize) {
-    println!("  - {name}:λ={lambda},threaded={threaded}");
+    println!("  - {name}:λ={lambda},threaded={threaded},cutoff={cutoff}");
 
     // Build time
     let mut build_time: f64 = 0.0;

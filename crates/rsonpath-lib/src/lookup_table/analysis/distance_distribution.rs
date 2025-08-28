@@ -1,7 +1,6 @@
 use std::{
     collections::{HashMap, VecDeque},
     fs::{self, File},
-    io::Write,
 };
 
 use crate::lookup_table::extra::util_path;

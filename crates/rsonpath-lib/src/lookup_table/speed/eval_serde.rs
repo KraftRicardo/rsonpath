@@ -1,13 +1,12 @@
 use crate::lookup_table::speed::eval_distance_cutoff::heap_value;
 use crate::lookup_table::speed::eval_lut_construction::HEAP_TRACKER;
-use crate::lookup_table::speed::lut_query_data::*;
+use crate::lookup_table::speed::query_data::*;
 use crate::lookup_table::{BUILD_REPETITIONS, QUERY_REPETITIONS};
 use csv::Writer;
 use serde_json::Value;
 use serde_json_path::JsonPath;
 use stats_alloc::Region;
 use std::fs::OpenOptions;
-use std::io::Write;
 use std::path::Path;
 use std::time::Instant;
 use std::{fs, io::BufReader};

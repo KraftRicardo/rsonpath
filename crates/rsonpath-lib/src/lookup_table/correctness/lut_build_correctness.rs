@@ -1,7 +1,7 @@
 use crate::lookup_table::{LookUpTable, LUT};
 
 use crate::lookup_table::luts::{lut_hash_map, pair_data};
-use crate::lookup_table::speed::lut_query_data::*;
+use crate::lookup_table::speed::query_data::*;
 
 /// Run with: cargo run --bin lut --release -- test-build-correctness res/json
 ///

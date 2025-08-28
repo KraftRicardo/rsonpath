@@ -2,13 +2,11 @@ use clap::{Parser, Subcommand};
 use rsonpath::lookup_table::analysis::distance_distribution_per_query;
 use rsonpath::lookup_table::analysis::{distance_distribution, json_size_estimation_bits::print_estimation};
 use rsonpath::lookup_table::correctness::{lut_build_correctness, lut_query_correctness};
-use rsonpath::lookup_table::extra::query_with_lut::query_with_lut;
-use rsonpath::lookup_table::extra::{eval_valgrind, lut_hot, sichash_test_data_generator};
+use rsonpath::lookup_table::extra::{eval_valgrind, lut_test_hotness, query_with_lut};
 use rsonpath::lookup_table::speed::{
     eval_distance_cutoff, eval_final, eval_lut_construction, eval_rq_lut, eval_rq_lut_no_lut, eval_serde,
-    lut_skip_evaluation,
 };
-use std::{error::Error, fs, path::Path};
+use std::error::Error;
 
 #[derive(Parser)]
 #[command(
@@ -74,17 +72,11 @@ enum Commands {
     // ##############
     // ### Extra ####
     // ##############
-    Query {
+    QueryWithLut {
         json_path: String,
         query: String,
     },
-    Skip {},
-    /// Create the test data used in this project: https://github.com/KraftRicardo/test-SicHash
-    Sichash {
-        json_dir: String,
-        out_dir: String,
-    },
-    Hot {},
+    TestHotness {},
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -163,19 +155,11 @@ fn main() -> Result<(), Box<dyn Error>> {
         Commands::EvalValgrind {} => {
             eval_valgrind::run();
         }
-        Commands::Hot {} => {
-            lut_hot::test_hotness();
+        Commands::TestHotness {} => {
+            lut_test_hotness::run();
         }
-        Commands::Query { json_path, query } => {
-            query_with_lut(json_path, query);
-        }
-        Commands::Sichash { json_dir, out_dir } => {
-            let csv_dir = format!("{}/{}", out_dir, "performance");
-
-            sichash_test_data_generator::generate_test_data_for_sichash(json_dir, &csv_dir);
-        }
-        Commands::Skip {} => {
-            lut_skip_evaluation::skip_evaluation();
+        Commands::QueryWithLut { json_path, query } => {
+            query_with_lut::run(json_path, query);
         }
     }
 

@@ -7,8 +7,7 @@ use std::path::Path;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Mutex;
 
-use crate::lookup_table::speed::lut_skip_evaluation::SkipMode;
-use crate::lookup_table::{QUERY_REPETITIONS, SKIP_MODE};
+use crate::lookup_table::{SkipMode, QUERY_REPETITIONS, SKIP_MODE};
 
 const ORDER: Ordering = Ordering::Relaxed;
 

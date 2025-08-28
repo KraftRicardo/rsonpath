@@ -8,7 +8,7 @@ use rsonpath::lookup_table::luts::lut_phf_double::LutPHFDouble;
 use rsonpath::lookup_table::luts::lut_phf_group::LutPHFGroup;
 use rsonpath::lookup_table::luts::lut_ptr_hash_double::LutPtrHashDouble;
 use rsonpath::lookup_table::{
-    speed::lut_query_data::{QUERY_BESTBUY_SHORT, QUERY_JOHN_BIG, QUERY_POKEMON_MINI, QUERY_TWITTER_SHORT},
+    speed::query_data::{QUERY_BESTBUY_SHORT, QUERY_JOHN_BIG, QUERY_POKEMON_MINI, QUERY_TWITTER_SHORT},
     LookUpTable,
 };
 

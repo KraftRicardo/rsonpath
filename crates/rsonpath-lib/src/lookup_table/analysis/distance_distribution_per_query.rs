@@ -5,19 +5,16 @@ use crate::{
     lookup_table::LUT,
 };
 
-use crate::lookup_table::speed::lut_query_data;
-use crate::lookup_table::speed::lut_query_data::*;
-use crate::lookup_table::speed::lut_skip_evaluation::SkipMode::{COUNT, TRACK};
-use crate::lookup_table::speed::lut_skip_evaluation::{get_filename, SkipMode};
+use crate::lookup_table::extra::util_path::get_filename;
+use crate::lookup_table::speed::query_data::*;
+use crate::lookup_table::SkipMode::{COUNT, TRACK, TRACKTIMED};
 use crate::lookup_table::{QUERY_REPETITIONS, SKIP_MODE, TRACK_SKIPPING_ON};
-use crate::result::MatchCount;
 use crate::{
     engine::{Compiler, RsonpathEngine},
     input::OwnedBytes,
     lookup_table::LookUpTable,
 };
 use std::fs;
-use SkipMode::TRACK_TIMED;
 
 pub const COUNTER_FILE_PATH: &str = ".a_lut_tests/performance/skip_tracker/COUNTER_";
 
@@ -47,7 +44,7 @@ pub fn run(json_dir_path: &str, base_path: &str) {
     } else if SKIP_MODE == TRACK {
         println!("Skip mode = TRACK");
         result_dir_path = format!("{base_path}/track/cutoff={cutoff}");
-    } else if SKIP_MODE == TRACK_TIMED {
+    } else if SKIP_MODE == TRACKTIMED {
         println!("Skip mode = TRACK_TIMED");
         result_dir_path = format!("{base_path}/track_timed/cutoff={cutoff}");
     } else {
@@ -79,7 +76,7 @@ pub fn run(json_dir_path: &str, base_path: &str) {
 }
 
 fn track(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str, cutoff: usize) {
-    let (json_path, json_name, queries) = extract_input(data_dir_path, query_data_csv);
+    let (json_path, _, queries) = extract_input(data_dir_path, query_data_csv);
 
     // Build LUT with set cutoff
     let mut lut = LUT::build(&json_path, cutoff).expect("Fail @ building LUT");
@@ -88,7 +85,7 @@ fn track(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str, cutof
         if SKIP_MODE == COUNT || SKIP_MODE == TRACK {
             let new_lut = track_count(lut, &json_path, result_dir_path, &query_id, &query_text);
             lut = new_lut;
-        } else if SKIP_MODE == TRACK_TIMED {
+        } else if SKIP_MODE == TRACKTIMED {
             track_timed(&json_path, result_dir_path, &query_id, &query_text);
         }
     }
@@ -135,7 +132,7 @@ fn track_timed(json_path: &str, result_dir_path: &str, query_id: &str, query_tex
 
     // Build query
     let query = rsonpath_syntax::parse(query_text).expect("Fail @ parse query");
-    let mut engine = RsonpathEngine::compile_query(&query).expect("Fail @ compile query");
+    let engine = RsonpathEngine::compile_query(&query).expect("Fail @ compile query");
 
     // Get result while tracking skips
     let input = {

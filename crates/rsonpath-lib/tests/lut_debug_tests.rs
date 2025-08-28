@@ -6,16 +6,17 @@ use std::{
 use log::debug;
 use rsonpath::engine::main::MainEngine;
 use rsonpath::input::{BorrowedBytes, Input};
-use rsonpath::lookup_table::luts::lut_hash_map;
 use rsonpath::lookup_table::luts::lut_hash_map::LutHashMap;
 use rsonpath::lookup_table::luts::lut_phf_double::LutPHFDouble;
 use rsonpath::lookup_table::luts::lut_phf_group::LutPHFGroup;
+use rsonpath::lookup_table::luts::pair_data;
 use rsonpath::{
     engine::{Compiler, Engine, RsonpathEngine},
     input::OwnedBytes,
     lookup_table::{LookUpTable, LUT},
 };
-use serde_json::json;
+#[allow(unused_imports)]
+use std::str;
 
 /// cargo test --test lut_debug_tests -- test_build_and_queries --nocapture | rg "(lut_debug_tests)"
 /// cargo test --test lut_debug_tests -- test_build_and_queries --nocapture | rg "(tail_skipping)" > log.txt
@@ -222,12 +223,6 @@ fn debug_lut_phf_double() {
     debug!("Incorrect: {}/{}", count_incorrect, total);
     assert_eq!(count_incorrect, 0);
 }
-
-use rayon::current_num_threads;
-use rsonpath::lookup_table::extra::pair_data;
-use rsonpath::lookup_table::speed::lut_query_data::QUERY_CANADA;
-#[allow(unused_imports)]
-use std::str;
 
 fn test_bug() {
     let json_path = "../../crates/rsonpath-test/documents/json/compressed/lists.json";

@@ -1,12 +1,12 @@
 use super::lut_hash_map_double::LutHashMapDouble;
+use crate::classification;
+use crate::classification::simd::Simd;
+use crate::input;
+use crate::input::error;
+use crate::input::Input;
 use crate::lookup_table::luts::pair_data;
 use crate::lookup_table::luts::pair_data::PairData;
 use crate::lookup_table::LookUpTable;
-use crate::{
-    classification::{self, simd::Simd},
-    input::{self, error, Input},
-    FallibleIterator,
-};
 use rayon::prelude::*;
 use std::fs;
 

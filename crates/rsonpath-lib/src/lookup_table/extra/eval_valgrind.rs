@@ -1,4 +1,4 @@
-use crate::lookup_table::speed::lut_skip_evaluation::SkipMode::OFF;
+use crate::lookup_table::SkipMode::OFF;
 use crate::lookup_table::{LookUpTable, LUT, QUERY_REPETITIONS, SKIP_MODE, TRACK_SKIPPING_ON};
 use crate::{
     engine::{Compiler, Engine, RsonpathEngine},
@@ -6,8 +6,6 @@ use crate::{
 };
 use std::fs;
 use std::io::{BufReader, Read};
-use std::time::Instant;
-
 // Run with: cargo run --bin lut --release -- eval-valgrind
 
 // Build with: cargo build --release --bin lut
@@ -27,7 +25,7 @@ pub fn run() {
 
     let json_google = "google_map_large_record_(1.1GB).json";
     let query_google_14 = "$[*].routes[*].legs[*].steps[*].polyline.points";
-    let query_google_15 = "$[*].routes[*].legs[*]..lat";
+    // let query_google_15 = "$[*].routes[*].legs[*]..lat";
 
     // Abort conditions
     if TRACK_SKIPPING_ON || SKIP_MODE != OFF {

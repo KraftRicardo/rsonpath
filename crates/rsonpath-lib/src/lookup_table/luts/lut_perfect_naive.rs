@@ -46,7 +46,6 @@ impl LookUpTable for LutPerfectNaive {
     }
 
     #[inline]
-    #[must_use]
     fn get(&self, key: &usize) -> Option<usize> {
         match &self.buckets[key % self.size] {
             Entry::Number(v) => Some(*v),

@@ -55,7 +55,7 @@ use crate::{
         Compiler, Engine, Input,
     },
     input::error::InputErrorConvertible,
-    lookup_table::{LookUpTable, LUT},
+    lookup_table::LUT,
     result::{
         approx_span::ApproxSpanRecorder, count::CountRecorder, index::IndexRecorder, nodes::NodesRecorder, Match,
         MatchCount, MatchIndex, MatchSpan, MatchedNodeType, Recorder, Sink,
@@ -684,7 +684,7 @@ where
     /// Trigger the transition to the `target` state into a new subtree
     /// that opened with `opening`.
     #[inline(always)]
-    fn transition_to(&mut self, target: State, opening: BracketType) {
+    fn transition_to(&mut self, target: State, _opening: BracketType) {
         // let target_is_list = opening == BracketType::Square;
 
         // let fallback = self.automaton[self.state].fallback_state();

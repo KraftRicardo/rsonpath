@@ -28,7 +28,6 @@ impl LookUpTable for LutPHF {
     }
 
     #[inline]
-    #[must_use]
     fn get(&self, key: &usize) -> Option<usize> {
         self.hash_state
             .get(key)
