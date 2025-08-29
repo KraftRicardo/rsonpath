@@ -284,3 +284,64 @@ fn test_bug() {
         }
     }
 }
+
+fn test_bug_2() {
+    let json_path = "../../res/json/1_error.json";
+    let query = "$[1:5: 2]";
+    let cutoff = 0;
+    for requested_padding in 1..=128 {
+        debug!("padding: {requested_padding}");
+        let jsonpath_query = rsonpath_syntax::parse(query).expect("Fail at parse");
+        let raw_json = fs::read_to_string(&json_path).expect("Fail at reading json");
+
+        /// [' ' x256] [JSON]
+        let json_with_leading_whitespace = {
+            let mut json = String::new();
+            for _ in 0..256 {
+                json.push(' ');
+            }
+            json += &raw_json;
+            json
+        };
+        let misalignment = json_with_leading_whitespace.as_ptr().align_offset(128);
+        /// [' ' x256-m] [JSON]
+        let aligned_json = &json_with_leading_whitespace.as_bytes()[misalignment..];
+        /// [' ' x256-m-pad] [JSON]
+        let forced_padding_json = &aligned_json[requested_padding..];
+
+        // [' ' x256-m-pad] [JSON] -> add 'pad' padding [' ' xpad][' ' x256-m-pad][JSON]
+        let p = format!("/tmp/luttest.json{requested_padding}");
+        std::fs::write(&p, forced_padding_json).expect("Fail");
+
+        let input = BorrowedBytes::new(forced_padding_json);
+        assert_eq!(input.leading_padding_len(), requested_padding);
+        let lut = LUT::build(&p, cutoff).expect("Fail lut");
+        let mut engine = MainEngine::compile_query(&jsonpath_query).expect("Fail compile query");
+
+        // ITE
+        debug!("---- ITE STYLE ----");
+        let mut result = vec![];
+        engine.indices(&input, &mut result).expect("Fail matching");
+        //let utf8: Result<Vec<&str>, _> = result.iter().map(|x| str::from_utf8(x.bytes())).collect();
+        //let utf8 = utf8.expect("valid utf8");
+        debug!("result ITE: {:?}", result);
+
+        // LUT
+        debug!("---- LUT STYLE ----");
+        engine.add_lut(lut);
+        let mut result_lut = vec![];
+        engine.indices(&input, &mut result_lut).expect("Fail matching");
+        //let utf8_lut: Result<Vec<&str>, _> = result_lut.iter().map(|x| str::from_utf8(x.bytes())).collect();
+        //let utf8_lut = utf8_lut.expect("valid utf8");
+        debug!("result LUT: {:?}", result_lut);
+
+        let expected_str = r#"[[[],0],[[],0],[[],0]]"#;
+        let expected = vec![14];
+        if result == result_lut {
+            // assert_eq!(utf8, expected, "result != expected");
+            debug!("Correct ITE");
+        } else {
+            debug!("NOT Correct ITE");
+        }
+    }
+}

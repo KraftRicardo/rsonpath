@@ -75,7 +75,7 @@ test-case = { workspace = true }
 
 [features]
 #default = ["simd", "empty-list-opt"] # Added by Ricardo
-default = ["simd"]
+default = ["simd", "serde"]
 serde = ["dep:serde", "smallvec/serde", "rsonpath-syntax/serde"]
 simd = []
 empty-list-opt = []

@@ -8,6 +8,9 @@ const QUERY_DATA_FOLDER_TEST: &str = "../../res/query";
 // DEBUG
 pub const QUERY_NSPL_MINI: &str = "nspl_mini"; // cargo run --bin rq -- -v $.data[*][10] res/json/nspl_mini.json > run.log
 
+// ERRORS
+pub const QUERY_ERROR_1: &str = "error1";
+
 // ##########
 // 1 kB
 // ##########
