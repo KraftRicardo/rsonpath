@@ -344,12 +344,7 @@ fn debug_msg(prefix: &str, idx: usize, idx_open: usize, idx_close: usize, paddin
     let distance = idx_close - idx_open;
     if idx >= padding && idx_open >= padding && idx_close >= padding {
         debug!(
-            "{}[dst={}]: idx={}: (idx_open={} -> idx_close={}) No-PAD: {}, ({} -> {}), padding={}",
-            prefix,
-            distance,
-            idx,
-            idx_open,
-            idx_close,
+            "{prefix}[dst={distance}]: idx={idx}: (idx_open={idx_open} -> idx_close={idx_close}) No-PAD: {}, ({} -> {}), padding={}",
             idx - padding,
             idx_open - padding,
             idx_close - padding,
@@ -357,8 +352,7 @@ fn debug_msg(prefix: &str, idx: usize, idx_open: usize, idx_close: usize, paddin
         );
     } else {
         debug!(
-            "{}[dst={}]: idx={}: (idx_open={} -> idx_close={}) No-PAD: not possible because padding = {} is too high.",
-            prefix, distance, idx, idx_open, idx_close, padding
+            "{prefix}[dst={distance}]: idx={idx}: (idx_open={idx_open} -> idx_close={idx_close}) No-PAD: not possible because padding={padding} is too high.",
         );
     }
 }

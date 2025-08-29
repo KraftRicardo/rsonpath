@@ -58,21 +58,21 @@ pub fn run(json_dir_path: &str, base_path: &str) {
     track(json_dir_path, &result_dir_path, QUERY_NSPL_MINI, cutoff);
 
     // GB_1
-    track(json_dir_path, &result_dir_path, QUERY_BESTBUY, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_CROSSREF1, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_CROSSREF2, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_CROSSREF4, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_GOOGLE, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_NSPL, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_TWITTER, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_TWITTER_SCALED, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_WALMART, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_WALMART_SCALED, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_WIKI, cutoff);
-    track(json_dir_path, &result_dir_path, QUERY_WIKI_SCALED, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_BESTBUY, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_CROSSREF1, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_CROSSREF2, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_CROSSREF4, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_GOOGLE, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_NSPL, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_TWITTER, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_TWITTER_SCALED, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_WALMART, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_WALMART_SCALED, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_WIKI, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_WIKI_SCALED, cutoff);
 
     // GB_25
-    track(json_dir_path, &result_dir_path, QUERY_NESTED_COL, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_NESTED_COL, cutoff);
 }
 
 fn track(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str, cutoff: usize) {

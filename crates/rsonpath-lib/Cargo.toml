@@ -74,8 +74,8 @@ serde_json = { workspace = true }
 test-case = { workspace = true }
 
 [features]
-default = ["simd", "empty-list-opt"] # Added by Ricardo
-#default = ["simd"]
+#default = ["simd", "empty-list-opt"] # Added by Ricardo
+default = ["simd"]
 serde = ["dep:serde", "smallvec/serde", "rsonpath-syntax/serde"]
 simd = []
 empty-list-opt = []
