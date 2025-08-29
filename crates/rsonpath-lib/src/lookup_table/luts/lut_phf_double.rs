@@ -12,7 +12,7 @@ use crate::{
     input::{self, error, Input},
 };
 
-// #[derive(Clone)]
+#[derive(Clone)]
 pub struct LutPHFDouble {
     pub lambda: usize,
     pub hash_state: HashState<u16>,

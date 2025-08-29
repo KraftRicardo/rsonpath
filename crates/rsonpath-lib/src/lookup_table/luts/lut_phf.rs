@@ -15,7 +15,7 @@ pub const DEFAULT_LAMBDA: usize = 1; // Range = [1, ... , 5]
 pub const DEFAULT_THREADED: bool = false;
 pub const MAX_LAMBDA: usize = 5; // 5 because the source paper did so
 
-// #[derive(Clone)]
+#[derive(Clone)]
 pub struct LutPHF {
     pub hash_state: HashState<usize>,
     pub values: Vec<usize>,

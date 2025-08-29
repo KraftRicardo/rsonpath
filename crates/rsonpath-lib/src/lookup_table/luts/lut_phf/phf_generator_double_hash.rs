@@ -32,6 +32,7 @@ impl FromUsize for u64 {
     }
 }
 
+#[derive(Clone)]
 pub struct HashState<U> {
     pub lambda: usize,
     pub hash_key: HashKey,
