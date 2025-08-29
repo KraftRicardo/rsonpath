@@ -453,7 +453,7 @@ where
     /// This method only handles atomic values after the comma.
     /// Objects and arrays are processed at their respective opening character.
     #[inline(always)]
-    fn handle_comma(&mut self, _classifier: &mut Classifier!(), idx: usize) -> Result<(), EngineError> {
+    fn handle_comma(&mut self, classifier: &mut Classifier!(), idx: usize) -> Result<(), EngineError> {
         debug!("Comma");
 
         self.recorder.record_value_terminator(idx, self.depth)?;
@@ -482,6 +482,26 @@ where
             {
                 debug!("Accepting list item on comma.");
                 self.record_match_detected_at(idx + 1, NodeType::Atomic)?;
+
+                if self.automaton.is_unitary(self.state) {
+                    self.next_event = classifier.next()?;
+                    match self.next_event {
+                        None | Some(Structural::Closing(_, _)) => {
+                            return Ok(());
+                        }
+                        Some(Structural::Comma(idx)) => self.recorder.record_value_terminator(idx, self.depth)?,
+                        Some(Structural::Colon(_) | Structural::Opening(_, _)) => (),
+                    }
+                    debug!("Skipping unique state from {:?}", BracketType::Square);
+                    let stop_at = classifier.skip(
+                        self.idx_open,
+                        idx,
+                        BracketType::Square,
+                        self.lut,
+                        self.input.leading_padding_len(),
+                    )?;
+                    self.next_event = Some(Structural::Closing(BracketType::Square, stop_at));
+                }
             }
         }
 
