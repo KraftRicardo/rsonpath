@@ -70,11 +70,21 @@ use smallvec::{smallvec, SmallVec};
 ///
 /// The engine is stateless, meaning that it can be executed
 /// on any number of separate inputs, even on separate threads.
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct MainEngine {
     automaton: Automaton,
     simd: SimdConfiguration,
     lut: Option<LUT>,
+}
+
+impl Clone for MainEngine {
+    fn clone(&self) -> Self {
+        Self {
+            automaton: self.automaton.clone(),
+            simd: self.simd.clone(),
+            lut: None,
+        }
+    }
 }
 
 static_assertions::assert_impl_all!(MainEngine: Send, Sync);
