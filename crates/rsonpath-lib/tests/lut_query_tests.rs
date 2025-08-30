@@ -133,8 +133,10 @@ fn debug_test_1() -> Result<(), Box<dyn Error>> {
 /// If you need to run on no-simd mode:
 /// cargo test --test lut_query_tests --no-default-features --features serde -- debug_test_1 --nocapture | rg "(tail_skipping|lut_query_tests)"
 fn debug_one_query() -> Result<(), Box<dyn Error>> {
-    let json_path = "../../res/json/1_error.json";
-    let query = "$[1:5: 2]";
+    let json_path = "../rsonpath-test/documents/json/large/wikidata_properties.json";
+    let query = "$..P7103.claims.P31..references..snaks.P4656..hash";
+    // let json_path = "../../res/json/1_error.json";
+    // let query = "$[1:5: 2]";
     let cutoff = 0;
 
     // Enables to see log messages when running tests

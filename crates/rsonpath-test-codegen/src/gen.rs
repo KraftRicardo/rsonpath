@@ -212,7 +212,8 @@ pub(crate) fn generate_test_fns(files: &mut Files) -> Result<(), io::Error> {
             }
             EngineTypeToTest::MainWithLut => {
                 quote! {
-                    let lut = LUT::build(#raw_input_path, 64)?;
+                    let cutoff = 64; // Important: cutoff must be either 0 or multiple of 64 (= BLOCK_SIZE)
+                    let lut = LUT::build(#raw_input_path, cutoff)?;
                     let mut #ident = MainEngine::compile_query(&#query_ident)?;
                     #ident.add_lut(lut);
                 }
