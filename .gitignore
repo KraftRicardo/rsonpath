@@ -16,5 +16,6 @@ log.txt
 /res/data
 /res/json
 /res/tmp.json
+/res/notes.md
 
 /.idea
