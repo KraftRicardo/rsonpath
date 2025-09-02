@@ -1,4 +1,4 @@
-Query,JsonPath,Result,SkipPercentage
+QUERY_ID,QUERY_TEXT,COUNT_RESULT,SKIP_PERCENTAGE
 1,$[0].c_custkey,0,1
 1,$[10000].c_name,0,1
 1,$[20000].c_orders[*],0,1

@@ -1,4 +1,4 @@
-ID,Path,Result,SkipPercentage
+QUERY_ID,QUERY_TEXT,COUNT_RESULT,SKIP_PERCENTAGE
 1,$.statuses[0].metadata.result_type,0,0.00000000000000000
 2,$.statuses[0].metadata.iso_language_code,0,0.00000000000000000
 3,$.statuses[0].created_at,0,0.00000000000000000

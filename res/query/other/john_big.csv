@@ -1,4 +1,4 @@
-ID,Path,Result,SkipPercentage
+QUERY_ID,QUERY_TEXT,COUNT_RESULT,SKIP_PERCENTAGE
 0,$.person.address,0,0.00000000000000000
 1,$.person.firstName,0,0.00000000000000000
 2,$.person.lastName,0,0.00000000000000000

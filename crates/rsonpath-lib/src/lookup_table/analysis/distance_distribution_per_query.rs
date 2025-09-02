@@ -35,7 +35,7 @@ use std::fs;
 /// cargo run --bin lut --release -- analyse-distance-distribution-per-query res/json res/data/analysis/distance_distribution_per_query 0
 /// ```
 #[inline]
-pub fn run(json_dir_path: &str, base_path: &str, cutoff: usize) {
+pub fn analyse_distance_distribution_per_query(json_dir_path: &str, base_path: &str, cutoff: usize) {
     // Abort conditions
     if !cfg! {feature = "track-skipping"} {
         println!("TRACK_SKIPPING_ON = FALSE, so abort. Set it to TRUE if you want this to work.");
@@ -51,7 +51,7 @@ pub fn run(json_dir_path: &str, base_path: &str, cutoff: usize) {
 
     if SKIP_MODE == COUNT {
         println!("Skip mode = COUNT");
-        result_dir_path = format!("{base_path}/count");
+        result_dir_path = format!("{base_path}/count/cutoff={cutoff}");
     } else if SKIP_MODE == TRACK {
         println!("Skip mode = TRACK");
         result_dir_path = format!("{base_path}/track/cutoff={cutoff}");
@@ -66,23 +66,62 @@ pub fn run(json_dir_path: &str, base_path: &str, cutoff: usize) {
     fs::create_dir_all(&result_dir_path).expect("Fail at creating result folder.");
 
     // DEBUG
-    track(json_dir_path, &result_dir_path, QUERY_NSPL_MINI, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_NSPL_MINI, cutoff);
 
-    // GB_1
-    // track(json_dir_path, &result_dir_path, QUERY_BESTBUY, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_CROSSREF1, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_CROSSREF2, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_CROSSREF4, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_GOOGLE, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_NSPL, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_TWITTER, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_TWITTER_SCALED, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_WALMART, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_WALMART_SCALED, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_WIKI, cutoff);
-    // track(json_dir_path, &result_dir_path, QUERY_WIKI_SCALED, cutoff);
+    // ##########
+    // 1 kB
+    // ##########
+    // track(json_dir_path, &result_dir_path, QUERY_ALPHABET, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_JOHN, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_NUMBERS, cutoff);
 
-    // GB_25
+    // ##########
+    // 1 MB
+    // ##########
+    // track(json_dir_path, &result_dir_path, QUERY_CANADA, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_OPENFOOD, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_PEOPLE, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_PRETTY_PEOPLE, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_TWITTER_MINI, cutoff);
+
+    // ##########
+    // 15 MB
+    // ##########
+    // track(json_dir_path, &result_dir_path, QUERY_AST, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_DUMMY_10, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_DUMMY_20, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_POKEMON_MINI, cutoff);
+
+    // ##########
+    // 100 MB
+    // ##########
+    // track(json_dir_path, &result_dir_path, QUERY_APP, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_POKEMON, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_BESTBUY_SHORT, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_CROSSREF0, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_GOOGLE_SHORT, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_TWITTER_SHORT, cutoff);
+    // track(json_dir_path, &result_dir_path, QUERY_WALMART_SHORT, cutoff);
+
+    // ##########
+    // 1 GB
+    // ##########
+    track(json_dir_path, &result_dir_path, QUERY_BESTBUY, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_CROSSREF1, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_CROSSREF2, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_CROSSREF4, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_GOOGLE, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_NSPL, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_TWITTER, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_TWITTER_SCALED, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_WALMART, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_WALMART_SCALED, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_WIKI, cutoff);
+    track(json_dir_path, &result_dir_path, QUERY_WIKI_SCALED, cutoff);
+
+    // ##########
+    // 25 GB
+    // ##########
     // track(json_dir_path, &result_dir_path, QUERY_NESTED_COL, cutoff);
 }
 
@@ -125,7 +164,7 @@ fn track_count(lut: LUT, json_path: &str, result_dir_path: &str, query_id: &str,
     let filename = get_filename(json_path);
     if SKIP_MODE == COUNT {
         let csv_path = format!("{result_dir_path}/COUNTER_{filename}.csv");
-        skip_tracker::save_count_to_csv(json_path, &csv_path, filename, query_id, query_text);
+        skip_tracker::save_count_to_csv(json_path, &csv_path, filename, query_id, query_text, result, true);
         skip_tracker::reset();
         // println!("Write to: {}", csv_path);
     } else if SKIP_MODE == TRACK {

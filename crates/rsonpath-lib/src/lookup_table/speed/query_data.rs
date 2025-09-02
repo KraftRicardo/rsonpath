@@ -12,8 +12,6 @@ pub const QUERY_NSPL_MINI: &str = "nspl_mini"; // cargo run --bin rq -- -v $.dat
 // 1 kB
 // ##########
 pub const QUERY_ALPHABET: &str = "alphabet_(2kB)";
-pub const QUERY_BUGS: &str = "bugs";
-pub const QUERY_BUGS_2: &str = "bugs_2";
 pub const QUERY_JOHN: &str = "john_119";
 pub const QUERY_NUMBERS: &str = "numbers_117";
 
@@ -41,6 +39,12 @@ pub const QUERY_APP: &str = "app_(97MB)";
 pub const QUERY_POKEMON: &str = "pokemon_(173MB)";
 pub const QUERY_BESTBUY_SHORT: &str = "bestbuy_short_(103MB)";
 pub const QUERY_CROSSREF0: &str = "crossref0_(320MB)";
+// QUERY_GOOGLE_SHORT has some broken queries
+// 4,$[1:3000].routes[*].legs[*].steps[*].polyline.points,1119140,0.5369940123619779
+// 8,$[1:2000].routes[*].legs[*].steps[*].polyline.points,728598,0.699618524934502
+// 14,$[1:400].routes[*].legs[*].steps[*].polyline.points,144049,0.9398240913199455
+// 16,$[1:500].routes[*].legs[*].steps[*].maneuver,164881,0.9751000812881957
+// 17,$[1:300].routes[*].legs[*].steps[*].start_location.lat,101059,0.985315480967129
 pub const QUERY_GOOGLE_SHORT: &str = "google_map_short_(107MB)";
 pub const QUERY_TWITTER_SHORT: &str = "twitter_short_(80MB)";
 pub const QUERY_WALMART_SHORT: &str = "walmart_short_(95MB)";
@@ -84,7 +88,7 @@ pub fn read_queries_test(file_name: &str) -> Vec<(String, String)> {
 /// expected to be the first 2 columns.
 ///
 /// Expected csv structure:
-///      ID,Path,Result,SkipPercentage
+///      QUERY_ID,QUERY_TEXT,COUNT_RESULT,SKIP_PERCENTAGE
 ///      1,$..freeShipping,230089,0.00000000000000000
 ///      2,$..additionalFeatures[*].feature,61098,0.00000000000000000
 ///      3,$..includedItemList[*],9096,0.00000000000000000
@@ -93,7 +97,7 @@ pub fn read_queries_test(file_name: &str) -> Vec<(String, String)> {
 ///
 /// Check the extract_input function to see which csv_path names are viable.
 fn read_queries_from_csv(csv_path: &str) -> Vec<(String, String)> {
-    let file = File::open(csv_path).expect("Cannot open CSV file");
+    let file = File::open(csv_path).expect(format!("Cannot open CSV file {csv_path}").as_str());
     let mut rdr = ReaderBuilder::new().has_headers(true).from_reader(BufReader::new(file));
 
     let mut queries = Vec::new();

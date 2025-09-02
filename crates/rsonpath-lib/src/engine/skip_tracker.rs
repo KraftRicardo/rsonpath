@@ -8,6 +8,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Mutex;
 
 use crate::lookup_table::{SkipMode, QUERY_REPETITIONS, SKIP_MODE};
+use crate::result::MatchCount;
 
 const ORDER: Ordering = Ordering::Relaxed;
 
@@ -74,7 +75,7 @@ pub fn save_track_to_csv(file_path: &str) -> std::io::Result<()> {
     let mut writer = BufWriter::new(file);
 
     // Headline
-    writeln!(writer, "distance,frequency,skip_type")?;
+    writeln!(writer, "DISTANCE,FREQUENCY,SKIP_TYPE")?;
 
     // LUT
     let lut_map = TRACK_COUNT_LUT.lock().expect("Unable to get TRACK_COUNT_LUT lock.");
@@ -104,7 +105,7 @@ pub fn save_track_timed_to_csv(file_path: &str) -> std::io::Result<()> {
     let mut writer = BufWriter::new(file);
 
     // Headline
-    writeln!(writer, "distance,frequency,skip_type,time_nanos,repetitions")?;
+    writeln!(writer, "DISTANCE,FREQUENCY,SKIP_TYPE,TIME_NANOS,REPETITIONS")?;
 
     let time_nanos_map = TRACK_TIME_NANOS.lock().expect("Unable to get TRACK_TIME_NANOS lock.");
 
@@ -134,7 +135,15 @@ pub fn save_track_timed_to_csv(file_path: &str) -> std::io::Result<()> {
 
 // SkipMode::COUNT
 #[inline]
-pub fn save_count_to_csv(json_path: &str, csv_path: &str, filename: &str, query_name: &str, query_text: &str) {
+pub fn save_count_to_csv(
+    json_path: &str,
+    csv_path: &str,
+    filename: &str,
+    query_id: &str,
+    query_text: &str,
+    result: MatchCount,
+    write_query_csv: bool,
+) {
     let lut_count = TOTAL_SKIP_COUNT_LUT.load(ORDER);
     let ite_count = TOTAL_SKIP_COUNT_ITE.load(ORDER);
     let total_count = lut_count + ite_count;
@@ -172,7 +181,7 @@ pub fn save_count_to_csv(json_path: &str, csv_path: &str, filename: &str, query_
     if !file_existed {
         writeln!(
             writer,
-            "FILENAME,QUERY_NAME,QUERY_TEXT,LUT_PERCENT_SKIP,ITE_PERCENT_SKIP,TOTAL_PERCENT_SKIP,LUT_COUNT,ITE_COUNT,TOTAL_COUNT,LUT_DISTANCE,ITE_DISTANCE,TOTAL_DISTANCE,FILE_SIZE",
+            "FILENAME,QUERY_ID,QUERY_TEXT,LUT_PERCENT_SKIP,ITE_PERCENT_SKIP,TOTAL_PERCENT_SKIP,LUT_COUNT,ITE_COUNT,TOTAL_COUNT,LUT_DISTANCE,ITE_DISTANCE,TOTAL_DISTANCE,FILE_SIZE",
         )
         .expect("Fail @ writing head");
     }
@@ -180,7 +189,7 @@ pub fn save_count_to_csv(json_path: &str, csv_path: &str, filename: &str, query_
     // Write data to CSV
     writeln!(
         writer,
-        "{filename},{query_name},{query_text},{percentage_lut_skip:.6},{percentage_ite_skip:.6},{percentage_total_skip:.6},{lut_count},{ite_count},{total_count},{lut_distance},{ite_distance},{total_distance},{json_size}",
+        "{filename},{query_id},{query_text},{percentage_lut_skip:.6},{percentage_ite_skip:.6},{percentage_total_skip:.6},{lut_count},{ite_count},{total_count},{lut_distance},{ite_distance},{total_distance},{json_size}",
     )
     .expect("Fail @ writing line");
 
@@ -188,6 +197,32 @@ pub fn save_count_to_csv(json_path: &str, csv_path: &str, filename: &str, query_
 
     writer.flush().expect("Fail @ writing csv");
     reset();
+
+    // ####################
+    // Note: This code is not necessary, but can come in handy when you just came up with your
+    // queries and did not run them yet, meaning you do not have the result and skip percentage
+    // value. If this code is enabled it will write a new csv with updated result and skip
+    // percentage values. It currently saves the file at "res/query2/{filename}.csv".
+    // Attention: Using _scaled will write the same csv as the non _scaled so you need to manually
+    // fix that.
+    // ####################
+    if write_query_csv {
+        let query_2_str = format!("res/query2/{filename}.csv");
+        let query_2_path = Path::new(&query_2_str);
+        let file_existed = query_2_path.exists();
+        let file = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(query_2_path)
+            .expect("Fail @ opening file");
+        let mut writer = BufWriter::new(file);
+
+        // Add the header if the file does not exist
+        if !file_existed {
+            writeln!(writer, "QUERY_ID,QUERY_TEXT,RESULT,SKIP_PERCENTAGE",).expect("Fail @ writing head");
+        }
+        writeln!(writer, "{query_id},{query_text},{result},{percentage_lut_skip}").expect("Fail @ writing line");
+    }
 }
 
 #[inline]

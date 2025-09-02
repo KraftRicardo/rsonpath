@@ -1,4 +1,4 @@
-ID,Path,Result,SkipPercentage
+QUERY_ID,QUERY_TEXT,COUNT_RESULT,SKIP_PERCENTAGE
 1,$.products[0].brands,0,0.00000000000000000
 2,$.products[*].brands,0,0.00000000000000000
 3,$.products[0].categories,0,0.00000000000000000

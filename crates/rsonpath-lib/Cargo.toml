@@ -75,13 +75,13 @@ test-case = { workspace = true }
 
 [features]
 #default = ["simd", "serde"]
-#default = ["simd", "empty-list-opt"] # Added by Ricardo
-#default = ["simd", "track-skipping"] # Added by Ricardo
-default = ["simd", "empty-list-opt", "track-skipping"] # Added by Ricardo
+#default = ["simd", "serde", "empty-list-opt"]
+default = ["simd", "serde", "track-skipping"]
+#default = ["simd", "serde", "empty-list-opt", "track-skipping"]
 serde = ["dep:serde", "smallvec/serde", "rsonpath-syntax/serde"]
 simd = []
-empty-list-opt = []
-track-skipping = []
+empty-list-opt = [] # Changes skip bahavior to skip empty list even faster.
+track-skipping = [] # Slow the skipping code down by tracking the skip behavior additionally.
 
 [[example]]
 name = "approx_spans_usage"
