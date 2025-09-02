@@ -1,6 +1,5 @@
 use crate::lookup_table::speed::query_data::*;
-use crate::lookup_table::SkipMode::OFF;
-use crate::lookup_table::{QUERY_REPETITIONS, SKIP_MODE, TRACK_SKIPPING_ON};
+use crate::lookup_table::QUERY_REPETITIONS;
 use crate::{
     engine::{Compiler, Engine, RsonpathEngine},
     input::OwnedBytes,
@@ -27,12 +26,12 @@ use std::{
 pub fn run(data_dir_path: &str, result_dir_path: &str) {
     println!("rq-lut-no-lut");
 
-    if TRACK_SKIPPING_ON || SKIP_MODE != OFF {
+    if cfg! {feature = "track-skipping"} {
         println!("Disable tracking of skips before running because it slows down the algorithm.");
         return;
     }
     if !cfg! {feature = "empty-list-opt"} {
-        println!("empty-list-opt not set, aborting");
+        println!("empty-list-opt not set, aborting. Turn the feature on.");
         return;
     }
 

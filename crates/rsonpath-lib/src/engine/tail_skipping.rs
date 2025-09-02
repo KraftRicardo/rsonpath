@@ -1,6 +1,6 @@
 #![allow(clippy::expect_used)] // Enforcing the classifier invariant is clunky without this.
 use crate::engine::skip_tracker;
-use crate::lookup_table::{SkipMode, SKIP_MODE, TRACK_SKIPPING_ON};
+use crate::lookup_table::{SkipMode, SKIP_MODE};
 use crate::{
     classification::{
         depth::{DepthBlock, DepthIterator, DepthIteratorResumeOutcome},
@@ -54,7 +54,7 @@ where
         lut: Option<&LUT>,
         padding: usize,
     ) -> Result<usize, EngineError> {
-        if TRACK_SKIPPING_ON {
+        if cfg! {feature = "track-skipping"} {
             let start_skip = Instant::now();
             let idx_close = self.skip_choice(idx_open, idx, bracket_type, lut, padding)?;
             let skip_time_nanos = start_skip.elapsed().as_nanos() as u64;

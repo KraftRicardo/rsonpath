@@ -8,9 +8,6 @@ const QUERY_DATA_FOLDER_TEST: &str = "../../res/query";
 // DEBUG
 pub const QUERY_NSPL_MINI: &str = "nspl_mini"; // cargo run --bin rq -- -v $.data[*][10] res/json/nspl_mini.json > run.log
 
-// ERRORS
-pub const QUERY_ERROR_1: &str = "error1";
-
 // ##########
 // 1 kB
 // ##########
@@ -21,7 +18,7 @@ pub const QUERY_JOHN: &str = "john_119";
 pub const QUERY_NUMBERS: &str = "numbers_117";
 
 // ##########
-// MB_1
+// 1 MB
 // ##########
 pub const QUERY_CANADA: &str = "canada_(3MB)";
 pub const QUERY_OPENFOOD: &str = "openfood_(867kB)";
@@ -30,7 +27,7 @@ pub const QUERY_PRETTY_PEOPLE: &str = "pretty_people_(1.8MB)";
 pub const QUERY_TWITTER_MINI: &str = "twitter_(767kB)";
 
 // ##########
-// MB_15
+// 15 MB
 // ##########
 pub const QUERY_AST: &str = "ast_(26MB)";
 pub const QUERY_DUMMY_10: &str = "dummy_(10MB)";
@@ -38,14 +35,10 @@ pub const QUERY_DUMMY_20: &str = "dummy_(20MB)";
 pub const QUERY_POKEMON_MINI: &str = "pokemon_(6MB)";
 
 // ##########
-// MB_100
+// 100 MB
 // ##########
 pub const QUERY_APP: &str = "app_(97MB)";
 pub const QUERY_POKEMON: &str = "pokemon_(173MB)";
-
-// ##########
-// 100 MB
-// ##########
 pub const QUERY_BESTBUY_SHORT: &str = "bestbuy_short_(103MB)";
 pub const QUERY_CROSSREF0: &str = "crossref0_(320MB)";
 pub const QUERY_GOOGLE_SHORT: &str = "google_map_short_(107MB)";

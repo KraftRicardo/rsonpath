@@ -1,6 +1,5 @@
 use crate::lookup_table::speed::query_data::*;
-use crate::lookup_table::SkipMode::OFF;
-use crate::lookup_table::{BUILD_REPETITIONS, QUERY_REPETITIONS, SKIP_MODE, TRACK_SKIPPING_ON};
+use crate::lookup_table::{BUILD_REPETITIONS, QUERY_REPETITIONS};
 use crate::{
     engine::{Compiler, Engine, RsonpathEngine},
     input::OwnedBytes,
@@ -45,7 +44,7 @@ const RQ_LUT_CUTOFF_512_NAME: &str = "rq-lut-cutoff-512";
 pub fn run(data_dir_path: &str, result_dir_path: &str) {
     println!("eval-final");
 
-    if TRACK_SKIPPING_ON || SKIP_MODE != OFF {
+    if cfg! {feature = "track-skipping"} {
         println!("Disable tracking of skips before running because it slows down the algorithm.");
         return;
     }

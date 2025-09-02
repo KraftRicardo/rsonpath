@@ -8,7 +8,7 @@ use crate::{
 use crate::lookup_table::extra::util_path::get_filename;
 use crate::lookup_table::speed::query_data::*;
 use crate::lookup_table::SkipMode::{COUNT, TRACK, TRACKTIMED};
-use crate::lookup_table::{QUERY_REPETITIONS, SKIP_MODE, TRACK_SKIPPING_ON};
+use crate::lookup_table::{QUERY_REPETITIONS, SKIP_MODE};
 use crate::{
     engine::{Compiler, RsonpathEngine},
     input::OwnedBytes,
@@ -16,17 +16,28 @@ use crate::{
 };
 use std::fs;
 
-pub const COUNTER_FILE_PATH: &str = ".a_lut_tests/performance/skip_tracker/COUNTER_";
-
-// Make sure SkipMode==COUNT
-// Run with: cargo run --bin lut --release -- analyse-distance-distribution-per-query res/json res/data/analysis/distance_distribution_per_query
+/// Runs the analysis of distance distributions per query.
+///
+/// This function executes all queries in the query set according to the selected mode:
+/// - **COUNT**: Tracks how many jumps occur.
+/// - **TRACK**: Tracks each jump distance individually in a data structure (slower).
+/// - **TRACKTIMED**: Tracks each jump distance individually and also measures the time per jump (slowest).
+///
+/// Results are written to the specified output directory.
+///
+/// # Arguments
+/// * `json_dir_path` - Path to the folder containing the JSON files.
+/// * `base_path` - Path where the analysis results will be stored.
+/// * `cutoff` - Cutoff value used by the LUT implementation.
+///
+/// # Example
+/// ```bash
+/// cargo run --bin lut --release -- analyse-distance-distribution-per-query res/json res/data/analysis/distance_distribution_per_query 0
+/// ```
 #[inline]
-pub fn run(json_dir_path: &str, base_path: &str) {
-    // Input
-    let cutoff = 0;
-
+pub fn run(json_dir_path: &str, base_path: &str, cutoff: usize) {
     // Abort conditions
-    if !TRACK_SKIPPING_ON {
+    if !cfg! {feature = "track-skipping"} {
         println!("TRACK_SKIPPING_ON = FALSE, so abort. Set it to TRUE if you want this to work.");
         return;
     }

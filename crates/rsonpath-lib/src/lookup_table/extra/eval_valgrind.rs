@@ -1,5 +1,4 @@
-use crate::lookup_table::SkipMode::OFF;
-use crate::lookup_table::{LookUpTable, LUT, QUERY_REPETITIONS, SKIP_MODE, TRACK_SKIPPING_ON};
+use crate::lookup_table::{LookUpTable, LUT, QUERY_REPETITIONS};
 use crate::{
     engine::{Compiler, Engine, RsonpathEngine},
     input::OwnedBytes,
@@ -28,7 +27,7 @@ pub fn run() {
     // let query_google_15 = "$[*].routes[*].legs[*]..lat";
 
     // Abort conditions
-    if TRACK_SKIPPING_ON || SKIP_MODE != OFF {
+    if cfg! {feature = "track-skipping"} {
         println!("Disable tracking of skips before running because it slows down the algorithm.");
         return;
     }

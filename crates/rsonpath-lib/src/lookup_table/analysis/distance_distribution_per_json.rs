@@ -15,9 +15,10 @@ use crate::{
     FallibleIterator,
 };
 
-/// Run with: cargo run --bin lut --release -- distance-distribution res/json res/data/analysis/distance_distribution
+/// Run with: cargo run --bin lut --release -- distance-distribution res/json res/data/analysis/distance_distribution_per_json
 ///
 /// Count the distances for each json file of the given directory
+/// Saves the result in a csv file at "{result_dir_path}/{filename}_distances.csv"
 #[inline]
 pub fn run(json_dir_path: &str, result_dir_path: &str) {
     let dir = fs::read_dir(json_dir_path).expect("Failed to read directory");

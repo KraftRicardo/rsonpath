@@ -74,11 +74,14 @@ serde_json = { workspace = true }
 test-case = { workspace = true }
 
 [features]
+#default = ["simd", "serde"]
 #default = ["simd", "empty-list-opt"] # Added by Ricardo
-default = ["simd", "serde"]
+#default = ["simd", "track-skipping"] # Added by Ricardo
+default = ["simd", "empty-list-opt", "track-skipping"] # Added by Ricardo
 serde = ["dep:serde", "smallvec/serde", "rsonpath-syntax/serde"]
 simd = []
 empty-list-opt = []
+track-skipping = []
 
 [[example]]
 name = "approx_spans_usage"

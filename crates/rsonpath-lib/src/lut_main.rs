@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 use rsonpath::lookup_table::analysis::distance_distribution_per_query;
-use rsonpath::lookup_table::analysis::{distance_distribution, json_size_estimation_bits::print_estimation};
+use rsonpath::lookup_table::analysis::{distance_distribution_per_json, json_size_estimation_bits::print_estimation};
 use rsonpath::lookup_table::correctness::{lut_build_correctness, lut_query_correctness};
 use rsonpath::lookup_table::extra::{eval_valgrind, lut_test_hotness, query_with_lut};
 use rsonpath::lookup_table::speed::{
@@ -23,13 +23,14 @@ enum Commands {
     // ##############
     // ## Analysis ##
     // ##############
-    AnalyseDistanceDistribution {
+    AnalyseDistanceDistributionPerJson {
         json_dir_path: String,
         result_dir_path: String,
     },
     AnalyseDistanceDistributionPerQuery {
         json_dir_path: String,
         result_dir_path: String,
+        cutoff: usize,
     },
     EstimateIndexForJsonSize {},
     // ##############
@@ -86,17 +87,18 @@ fn main() -> Result<(), Box<dyn Error>> {
         // ##############
         // ## Analysis ##
         // ##############
-        Commands::AnalyseDistanceDistribution {
+        Commands::AnalyseDistanceDistributionPerJson {
             json_dir_path,
             result_dir_path,
         } => {
-            distance_distribution::run(json_dir_path, result_dir_path);
+            distance_distribution_per_json::run(json_dir_path, result_dir_path);
         }
         Commands::AnalyseDistanceDistributionPerQuery {
             json_dir_path,
             result_dir_path,
+            cutoff,
         } => {
-            distance_distribution_per_query::run(json_dir_path, result_dir_path);
+            distance_distribution_per_query::run(json_dir_path, result_dir_path, *cutoff);
         }
         Commands::EstimateIndexForJsonSize {} => {
             print_estimation();

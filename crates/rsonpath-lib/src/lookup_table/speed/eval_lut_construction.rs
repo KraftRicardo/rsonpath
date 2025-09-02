@@ -1,4 +1,4 @@
-use crate::lookup_table::analysis::distance_distribution;
+use crate::lookup_table::analysis::distance_distribution_per_json;
 use crate::lookup_table::extra::util_path;
 use crate::lookup_table::luts::lut_hash_map::LutHashMap;
 use crate::lookup_table::luts::lut_hash_map_double::LutHashMapDouble;
@@ -74,7 +74,7 @@ fn eval_all(data_dir_path: &str, final_dir_path: &str, query_data_csv: &str, cut
 
     let file = fs::File::open(&json_path).expect("Fail");
     let filename = util_path::extract_filename(&json_path);
-    let num_keys = distance_distribution::count_num_pairs(&json_path);
+    let num_keys = distance_distribution_per_json::count_num_pairs(&json_path);
 
     let mut head_line = String::from("name,input_size_bytes,num_keys,");
     let mut data_line = format!("{},{},{},", filename, file.metadata().expect("fail").len(), num_keys);

@@ -1,7 +1,6 @@
 use crate::lookup_table::speed::eval_lut_construction::HEAP_TRACKER;
 use crate::lookup_table::speed::query_data::*;
-use crate::lookup_table::SkipMode::OFF;
-use crate::lookup_table::{LookUpTable, BUILD_REPETITIONS, LUT, QUERY_REPETITIONS, SKIP_MODE, TRACK_SKIPPING_ON};
+use crate::lookup_table::{LookUpTable, BUILD_REPETITIONS, LUT, QUERY_REPETITIONS};
 use crate::{
     engine::{Compiler, Engine, RsonpathEngine},
     input::OwnedBytes,
@@ -41,7 +40,7 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
     // let cutoffs = vec![0, 64, 128, 512, 8192];
     let cutoffs = vec![0];
 
-    if TRACK_SKIPPING_ON || SKIP_MODE != OFF {
+    if cfg! {feature = "track-skipping"} {
         println!("Disable tracking of skips before running because it slows down the algorithm.");
         return;
     }
