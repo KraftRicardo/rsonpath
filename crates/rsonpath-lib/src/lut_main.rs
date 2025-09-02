@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use distance_distribution_per_json::analyse_distance_distribution_per_json;
 use distance_distribution_per_query::analyse_distance_distribution_per_query;
 use rsonpath::lookup_table::analysis::distance_distribution_per_query;
 use rsonpath::lookup_table::analysis::{distance_distribution_per_json, json_size_estimation_bits::print_estimation};
@@ -92,7 +93,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             json_dir_path,
             result_dir_path,
         } => {
-            distance_distribution_per_json::run(json_dir_path, result_dir_path);
+            analyse_distance_distribution_per_json(json_dir_path, result_dir_path);
         }
         Commands::AnalyseDistanceDistributionPerQuery {
             json_dir_path,

@@ -168,8 +168,10 @@ fn track_count(lut: LUT, json_path: &str, result_dir_path: &str, query_id: &str,
         skip_tracker::reset();
         // println!("Write to: {}", csv_path);
     } else if SKIP_MODE == TRACK {
-        let csv_path = format!("{result_dir_path}/{filename}_query={query_id}.csv");
+        // let csv_path = format!("{result_dir_path}/{filename}_query={query_id}.csv");
+        let csv_path = format!("{result_dir_path}/{filename}_scaled_query={query_id}.csv");
         _ = skip_tracker::save_track_to_csv(&csv_path);
+        println!("."); // Needed so the formatting in the console does not break
         skip_tracker::reset();
         // println!("Write to: {}", csv_path);
     }
@@ -201,6 +203,7 @@ fn track_timed(json_path: &str, result_dir_path: &str, query_id: &str, query_tex
     // Save to csv
     let filename = get_filename(json_path);
     let csv_path = format!("{result_dir_path}/{filename}_query={query_id}.csv");
+    // let csv_path = format!("{result_dir_path}/{filename}_scaled_query={query_id}.csv");
     _ = skip_tracker::save_track_timed_to_csv(&csv_path);
     skip_tracker::reset();
     println!("Write to: {csv_path}");

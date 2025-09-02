@@ -7,7 +7,7 @@ pub mod luts;
 pub mod speed;
 
 // CONFIG
-pub const SKIP_MODE: SkipMode = SkipMode::COUNT;
+pub const SKIP_MODE: SkipMode = SkipMode::TRACK;
 // pub const TRACK_SKIPPING_ON: bool = true;
 // pub const QUERY_REPETITIONS: usize = 20;
 pub const QUERY_REPETITIONS: usize = 1;

@@ -15,12 +15,25 @@ use crate::{
     FallibleIterator,
 };
 
-/// Run with: cargo run --bin lut --release -- distance-distribution res/json res/data/analysis/distance_distribution_per_json
+/// Runs the distance distribution analysis for all JSON files in a directory.
 ///
-/// Count the distances for each json file of the given directory
-/// Saves the result in a csv file at "{result_dir_path}/{filename}_distances.csv"
+/// For each JSON file in `json_dir_path`, this function counts the distances
+/// and writes the results to a CSV file at:
+///
+/// ```text
+/// {result_dir_path}/{filename}_distances.csv
+/// ```
+///
+/// # Arguments
+/// * `json_dir_path` - Path to the directory containing the JSON files.
+/// * `result_dir_path` - Path to the directory where the results will be saved.
+///
+/// # Example
+/// ```bash
+/// cargo run --bin lut --release -- analyse-distance-distribution-per-json res/json res/data/analysis/distance_distribution_per_json
+/// ```
 #[inline]
-pub fn run(json_dir_path: &str, result_dir_path: &str) {
+pub fn analyse_distance_distribution_per_json(json_dir_path: &str, result_dir_path: &str) {
     let dir = fs::read_dir(json_dir_path).expect("Failed to read directory");
 
     println!("Counting Distances:");
