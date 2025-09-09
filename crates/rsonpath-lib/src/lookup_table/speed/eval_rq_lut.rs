@@ -11,29 +11,59 @@ use std::path::Path;
 use std::time::Instant;
 use std::{fs, io::BufReader};
 
-// This was written in order to compare the speed (y-axis) of rq-lut vs. rq-legacy vs. optimal time
-// per query (x-axis).
-//
-// Run with: cargo run --bin lut --release -- eval-rq-lut res/json res/data/speed/local/rq_lut
-// Run with: cargo run --bin lut --release -- eval-rq-lut ricardo-jsons plot-results
-//
-// "data_dir_path" path to the folder holding the input JSON files.
-// "result_dir_path" path to the folder where the results will be saved
-//
-// Data will be saved in "{result_dir_path}/rq_lut_time.csv"
-// Example structure of the csv:
-//  JSON,CUTOFF,QUERY_ID,QUERY_TEXT,QUERY_TIME_SECONDS
-//  google_map_large_record_(1.1GB),0,0,$[4000].routes[*].bounds,0.00652
-//  google_map_large_record_(1.1GB),0,1,$[*].routes[*].legs[*].steps[*].html_instructions,0.47458
-//  ...
+/// Evaluates the query speed of rq-lut so it can be compared to rq-legacy and its optimal time.
+///
+/// The comparison is done by measuring speed (y-axis) against query time (x-axis).
+/// Results are saved as CSV files for further analysis.
+///
+/// # Arguments
+/// * `data_dir_path` - Path to the folder holding the input JSON files.
+/// * `result_dir_path` - Path to the folder where the results will be saved.
+///
+/// # Output
+/// Data will be saved in:
+///
+/// ```text
+/// {result_dir_path}/rq_lut_time.csv
+/// ```
+///
+/// # CSV Structure
+/// ```text
+/// JSON,CUTOFF,QUERY_ID,QUERY_TEXT,QUERY_TIME_SECONDS
+/// google_map_large_record_(1.1GB),0,0,$[4000].routes[*].bounds,0.00652
+/// google_map_large_record_(1.1GB),0,1,$[*].routes[*].legs[*].steps[*].html_instructions,0.47458
+/// ...
+/// ```
+///
+/// # Example
+/// ```bash
+/// cargo run --bin lut --release -- eval-rq-lut res/json res/data/speed/local/rq_lut
+/// cargo run --bin lut --release -- eval-rq-lut ricardo-jsons plot-results
+/// ```
 #[inline]
-pub fn run(data_dir_path: &str, result_dir_path: &str) {
+pub fn evaluate_rq_lut_query_speed(data_dir_path: &str, result_dir_path: &str) {
     println!("eval-rq-lut");
 
     // 2^40 = 1,099,511,627,776, we basically use a cutoff so high we do not trigger the skipping
     // with the lut. We want to see how slow the overall application is.
-    // let cutoffs = vec![0, 64, 128, 512, 1024, 2048, 4096, 8192, 1099511627776];
-    let cutoffs = vec![0, 64];
+    let cutoffs = vec![
+        0,
+        64,
+        128,
+        192,
+        256,
+        320,
+        384,
+        448,
+        512,
+        576,
+        640,
+        1024,
+        2048,
+        4096,
+        8192,
+        1099511627776,
+    ];
 
     if cfg! {feature = "track-skipping"} {
         println!("Disable tracking of skips before running because it slows down the algorithm.");
@@ -48,17 +78,17 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
     fs::create_dir_all(result_dir_path).expect("Failed to create directory");
 
     // GB_1
-    // evaluate(data_dir_path, result_dir_path, QUERY_BESTBUY, &cutoffs);
-    // evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF1, &cutoffs);
-    // evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF2, &cutoffs);
-    // evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF4, &cutoffs);
-    // evaluate(data_dir_path, result_dir_path, QUERY_GOOGLE, &cutoffs);
-    // evaluate(data_dir_path, result_dir_path, QUERY_NSPL, &cutoffs);
-    // evaluate(data_dir_path, result_dir_path, QUERY_TWITTER, &cutoffs);
-    // evaluate(data_dir_path, result_dir_path, QUERY_TWITTER_SINGLE, &cutoffs);
-    // evaluate(data_dir_path, result_dir_path, QUERY_WALMART, &cutoffs);
+    evaluate(data_dir_path, result_dir_path, QUERY_BESTBUY, &cutoffs);
+    evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF1, &cutoffs);
+    evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF2, &cutoffs);
+    evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF4, &cutoffs);
+    evaluate(data_dir_path, result_dir_path, QUERY_GOOGLE, &cutoffs);
+    evaluate(data_dir_path, result_dir_path, QUERY_NSPL, &cutoffs);
+    evaluate(data_dir_path, result_dir_path, QUERY_TWITTER, &cutoffs);
+    evaluate(data_dir_path, result_dir_path, QUERY_TWITTER_SINGLE, &cutoffs);
+    evaluate(data_dir_path, result_dir_path, QUERY_WALMART, &cutoffs);
     evaluate(data_dir_path, result_dir_path, QUERY_WALMART_SINGLE, &cutoffs);
-    // evaluate(data_dir_path, result_dir_path, QUERY_WIKI, &cutoffs);
+    evaluate(data_dir_path, result_dir_path, QUERY_WIKI, &cutoffs);
     evaluate(data_dir_path, result_dir_path, QUERY_WIKI_SINGLE, &cutoffs);
 
     println!("Done");

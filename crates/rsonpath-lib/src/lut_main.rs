@@ -130,7 +130,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             data_dir_path,
             result_dir_path,
         } => {
-            eval_rq_lut::run(data_dir_path, result_dir_path);
+            eval_rq_lut::evaluate_rq_lut_query_speed(data_dir_path, result_dir_path);
         }
         Commands::EvalRqLutNoLut {
             data_dir_path,
