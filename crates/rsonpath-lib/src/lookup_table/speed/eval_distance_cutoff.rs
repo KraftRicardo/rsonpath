@@ -58,8 +58,11 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
     eval_all(data_dir_path, result_dir_path, QUERY_GOOGLE, &cutoffs);
     eval_all(data_dir_path, result_dir_path, QUERY_NSPL, &cutoffs);
     eval_all(data_dir_path, result_dir_path, QUERY_TWITTER, &cutoffs);
+    eval_all(data_dir_path, result_dir_path, QUERY_TWITTER_SINGLE, &cutoffs);
     eval_all(data_dir_path, result_dir_path, QUERY_WALMART, &cutoffs);
+    eval_all(data_dir_path, result_dir_path, QUERY_WALMART_SINGLE, &cutoffs);
     eval_all(data_dir_path, result_dir_path, QUERY_WIKI, &cutoffs);
+    eval_all(data_dir_path, result_dir_path, QUERY_WIKI_SINGLE, &cutoffs);
 
     println!("Done");
 }

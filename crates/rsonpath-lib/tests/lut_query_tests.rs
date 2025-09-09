@@ -48,7 +48,7 @@ fn query_twitter() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn query_twitter_scaled() -> Result<(), Box<dyn Error>> {
-    compare_rq_lut_vs_rq_legacy(QUERY_TWITTER_SCALED)
+    compare_rq_lut_vs_rq_legacy(QUERY_TWITTER_SINGLE)
 }
 
 #[test]
@@ -58,7 +58,7 @@ fn query_walmart() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn query_walmart_scaled() -> Result<(), Box<dyn Error>> {
-    compare_rq_lut_vs_rq_legacy(QUERY_WALMART_SCALED)
+    compare_rq_lut_vs_rq_legacy(QUERY_WALMART_SINGLE)
 }
 
 #[test]
@@ -68,7 +68,7 @@ fn query_wiki() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn query_wiki_scaled() -> Result<(), Box<dyn Error>> {
-    compare_rq_lut_vs_rq_legacy(QUERY_WIKI_SCALED)
+    compare_rq_lut_vs_rq_legacy(QUERY_WIKI_SINGLE)
 }
 
 /// Run all with:

@@ -28,11 +28,11 @@ pub fn run(data_dir_path: &str) {
     test_query_correctness_count(data_dir_path, QUERY_GOOGLE, cutoff);
     test_query_correctness_count(data_dir_path, QUERY_NSPL, cutoff);
     test_query_correctness_count(data_dir_path, QUERY_TWITTER, cutoff);
-    test_query_correctness_count(data_dir_path, QUERY_TWITTER_SCALED, cutoff);
+    test_query_correctness_count(data_dir_path, QUERY_TWITTER_SINGLE, cutoff);
     test_query_correctness_count(data_dir_path, QUERY_WALMART, cutoff);
-    test_query_correctness_count(data_dir_path, QUERY_WALMART_SCALED, cutoff);
+    test_query_correctness_count(data_dir_path, QUERY_WALMART_SINGLE, cutoff);
     test_query_correctness_count(data_dir_path, QUERY_WIKI, cutoff);
-    test_query_correctness_count(data_dir_path, QUERY_WIKI_SCALED, cutoff);
+    test_query_correctness_count(data_dir_path, QUERY_WIKI_SINGLE, cutoff);
 
     // GB_1 - NODES
     test_query_correctness_nodes(data_dir_path, QUERY_BESTBUY, cutoff);
@@ -42,11 +42,11 @@ pub fn run(data_dir_path: &str) {
     test_query_correctness_nodes(data_dir_path, QUERY_GOOGLE, cutoff);
     test_query_correctness_nodes(data_dir_path, QUERY_NSPL, cutoff);
     test_query_correctness_nodes(data_dir_path, QUERY_TWITTER, cutoff);
-    test_query_correctness_nodes(data_dir_path, QUERY_TWITTER_SCALED, cutoff);
+    test_query_correctness_nodes(data_dir_path, QUERY_TWITTER_SINGLE, cutoff);
     test_query_correctness_nodes(data_dir_path, QUERY_WALMART, cutoff);
-    test_query_correctness_nodes(data_dir_path, QUERY_WALMART_SCALED, cutoff);
+    test_query_correctness_nodes(data_dir_path, QUERY_WALMART_SINGLE, cutoff);
     test_query_correctness_nodes(data_dir_path, QUERY_WIKI, cutoff);
-    test_query_correctness_nodes(data_dir_path, QUERY_WIKI_SCALED, cutoff);
+    test_query_correctness_nodes(data_dir_path, QUERY_WIKI_SINGLE, cutoff);
 }
 
 /// Compares the rq-lut vs. rq-legacy implementation whether they have the same COUNT results.

@@ -48,18 +48,18 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
     fs::create_dir_all(result_dir_path).expect("Failed to create directory");
 
     // GB_1
-    evaluate(data_dir_path, result_dir_path, QUERY_BESTBUY, &cutoffs);
+    // evaluate(data_dir_path, result_dir_path, QUERY_BESTBUY, &cutoffs);
     // evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF1, &cutoffs);
     // evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF2, &cutoffs);
     // evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF4, &cutoffs);
     // evaluate(data_dir_path, result_dir_path, QUERY_GOOGLE, &cutoffs);
     // evaluate(data_dir_path, result_dir_path, QUERY_NSPL, &cutoffs);
     // evaluate(data_dir_path, result_dir_path, QUERY_TWITTER, &cutoffs);
-    // evaluate(data_dir_path, result_dir_path, QUERY_TWITTER_SCALED, &cutoffs);
+    // evaluate(data_dir_path, result_dir_path, QUERY_TWITTER_SINGLE, &cutoffs);
     // evaluate(data_dir_path, result_dir_path, QUERY_WALMART, &cutoffs);
-    // evaluate(data_dir_path, result_dir_path, QUERY_WALMART_SCALED, &cutoffs);
+    evaluate(data_dir_path, result_dir_path, QUERY_WALMART_SINGLE, &cutoffs);
     // evaluate(data_dir_path, result_dir_path, QUERY_WIKI, &cutoffs);
-    // evaluate(data_dir_path, result_dir_path, QUERY_WIKI_SCALED, &cutoffs);
+    evaluate(data_dir_path, result_dir_path, QUERY_WIKI_SINGLE, &cutoffs);
 
     println!("Done");
 }

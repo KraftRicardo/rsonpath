@@ -59,11 +59,11 @@ pub const QUERY_CROSSREF4: &str = "crossref4_(2.1GB)";
 pub const QUERY_GOOGLE: &str = "google_map_large_record_(1.1GB)";
 pub const QUERY_NSPL: &str = "nspl_large_record_(1.2GB)";
 pub const QUERY_TWITTER: &str = "twitter_large_record_(843MB)";
-pub const QUERY_TWITTER_SCALED: &str = "twitter_large_record_(843MB)_scaled";
+pub const QUERY_TWITTER_SINGLE: &str = "twitter_large_record_(843MB)_single";
 pub const QUERY_WALMART: &str = "walmart_large_record_(995MB)";
-pub const QUERY_WALMART_SCALED: &str = "walmart_large_record_(995MB)_scaled";
+pub const QUERY_WALMART_SINGLE: &str = "walmart_large_record_(995MB)_single";
 pub const QUERY_WIKI: &str = "wiki_large_record_(1.1GB)";
-pub const QUERY_WIKI_SCALED: &str = "wiki_large_record_(1.1GB)_scaled";
+pub const QUERY_WIKI_SINGLE: &str = "wiki_large_record_(1.1GB)_single";
 
 // ##########
 // 25 GB
