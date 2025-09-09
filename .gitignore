@@ -1,5 +1,6 @@
 /target/*
 /.vscode/*.log
+/.idea
 
 # Added by Ricardo
 /.a_lut_tests/*
@@ -17,5 +18,4 @@ log.txt
 /res/json
 /res/tmp.json
 /res/notes.md
-
-/.idea
+/res/query2
