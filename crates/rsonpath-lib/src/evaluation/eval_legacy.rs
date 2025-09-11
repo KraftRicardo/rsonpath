@@ -11,7 +11,7 @@ use std::path::Path;
 use std::time::Instant;
 use std::{fs, io::BufReader};
 
-use crate::evaluation::track_config::{QUERY_REPETITIONS, TRACK_SKIPPING_ON};
+use crate::evaluation::track_config::QUERY_REPETITIONS;
 
 // Measures the time taken for rq for given JSON+Queries. "empty-list-opt" has here no effect.
 //
@@ -51,7 +51,7 @@ pub fn run(data_dir_path: &str, base_path: &str, use_empty_list_opt: bool) {
         );
         return;
     }
-    if TRACK_SKIPPING_ON {
+    if cfg! {feature = "track-skipping"} {
         println!("Disable tracking of skips before running because it slows down the algorithm.");
         return;
     }

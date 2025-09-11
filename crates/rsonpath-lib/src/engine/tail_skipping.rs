@@ -1,6 +1,5 @@
 #![allow(clippy::expect_used)] // Enforcing the classifier invariant is clunky without this.
 use crate::evaluation::eval_optimal;
-use crate::evaluation::track_config::TRACK_SKIPPING_ON;
 use crate::{
     classification::{
         depth::{DepthBlock, DepthIterator, DepthIteratorResumeOutcome},
@@ -38,7 +37,7 @@ where
 
     // Wrapper for skip_original
     pub(crate) fn skip(&mut self, opening: BracketType) -> Result<usize, EngineError> {
-        if TRACK_SKIPPING_ON {
+        if cfg! {feature = "track-skipping"} {
             let start_skip = Instant::now();
             let result = self.skip_original(opening)?;
             let skip_time = start_skip.elapsed().as_nanos() as u64;

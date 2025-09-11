@@ -1,5 +1,5 @@
 use crate::evaluation::lut_query_data::*;
-use crate::evaluation::track_config::{QUERY_REPETITIONS, TRACK_SKIPPING_ON};
+use crate::evaluation::track_config::QUERY_REPETITIONS;
 use crate::{
     engine::{Compiler, Engine, RsonpathEngine},
     input::OwnedBytes,
@@ -28,12 +28,12 @@ static ACCUMULATED_SKIP_TIME: AtomicU64 = AtomicU64::new(0);
 pub fn run(data_dir_path: &str, result_dir_path: &str) {
     println!("eval-optimal QUERY_REPETITIONS {QUERY_REPETITIONS}");
 
-    if !TRACK_SKIPPING_ON {
-        println!("Enable Skip Tracking. Abort");
+    if cfg! {feature = "track-skipping"} {
+        println!("Enable tracking of skips because otherwise this measurement does not work. Abort!");
         return;
     }
     if !cfg! {feature = "empty-list-opt"} {
-        println!("For fair comparisons with rsonpath-lut this feature needs to be enabled. Abort!");
+        println!("For fair comparisons with rq_legacy and rq_lut this feature needs to be enabled. Abort!");
         return;
     }
 

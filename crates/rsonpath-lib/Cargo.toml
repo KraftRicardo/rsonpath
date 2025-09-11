@@ -58,11 +58,13 @@ serde_json = { workspace = true }
 test-case = { workspace = true }
 
 [features]
-default = ["simd", "empty-list-opt"] # Added by Ricardo
+#default = ["simd", "empty-list-opt"] # Added by Ricardo
+default = ["simd", "empty-list-opt", "track-skipping"] # Added by Ricardo
 #default = ["simd"]
 serde = ["dep:serde", "smallvec/serde", "rsonpath-syntax/serde"]
 simd = []
-empty-list-opt = []
+empty-list-opt = [] # Changes skip bahavior to skip empty list even faster.
+track-skipping = [] # Slow the skipping code down by tracking the skip behavior additionally.
 
 [[example]]
 name = "approx_spans_usage"
