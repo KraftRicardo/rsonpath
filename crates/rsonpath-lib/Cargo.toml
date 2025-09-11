@@ -34,7 +34,7 @@ all-features = true
 [dependencies]
 cfg-if = { workspace = true }
 log = { workspace = true }
-memmap2 = "0.9.5"
+memmap2 = "0.9.8"
 rsonpath-syntax = { workspace = true }
 serde = { workspace = true, optional = true, features = ["derive", "rc"] }
 smallvec = { version = "1.15.1", features = ["union"] }

@@ -19,11 +19,11 @@ serde_json = { workspace = true }
 
 [dev-dependencies]
 pretty_assertions = { workspace = true }
-rsonpath-lib = { workspace = true }
+rsonpath-lib = { workspace = true, features = ["simd"] }
 rsonpath-syntax = { workspace = true }
 
 [build-dependencies]
 eyre = "0.6.12"
-glob = "0.3.1"
+glob = "0.3.3"
 md5 = "0.8.0"
 rsonpath-test-codegen = { version = "0.9.3", path = "../rsonpath-test-codegen" }
