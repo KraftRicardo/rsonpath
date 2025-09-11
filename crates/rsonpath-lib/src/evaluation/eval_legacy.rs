@@ -1,4 +1,4 @@
-use crate::evaluation::lut_query_data::*;
+use crate::evaluation::query_data::*;
 use crate::{
     engine::{Compiler, Engine, RsonpathEngine},
     input::OwnedBytes,
@@ -42,7 +42,7 @@ pub fn run(data_dir_path: &str, base_path: &str, use_empty_list_opt: bool) {
 
     // Abort conditions
     if use_empty_list_opt && cfg! {feature = "empty-list-opt"} != use_empty_list_opt {
-        println!("empty-list-opt is currently disabled. For fair comparisons with rsonpath-lut enable it.");
+        println!("empty-list-opt is currently disabled. For fair comparisons with rq_lut enable it.");
         return;
     }
     if !use_empty_list_opt && cfg! {feature = "empty-list-opt"} != use_empty_list_opt {
@@ -61,39 +61,35 @@ pub fn run(data_dir_path: &str, base_path: &str, use_empty_list_opt: bool) {
 
     // GB_1
     eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER_SCALED);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART_SCALED);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI_SCALED);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER_SINGLE);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART_SINGLE);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI_SINGLE);
 
     println!("Done");
 }
 
 pub fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str) {
-    // Extract input
-    let queries = read_queries(query_data_csv);
-    let json_name = format!("{}.json", remove_common_suffix(query_data_csv));
+    let (json_path, json_name, queries) = extract_input(data_dir_path, query_data_csv);
+    println!("JSON: {json_name}");
 
-    // All necessary paths to CSV and PNG
-    let json_path = format!("{data_dir_path}/{json_name}");
-    println!("JSON: {json_path}");
-
-    measure_query(&json_path, &result_dir_path, query_data_csv, &queries);
+    measure_query_count(&json_path, &result_dir_path, &json_name, &queries);
+    // measure_query_node(&json_path, &result_dir_path, query_data_csv, &queries);
 }
 
 // Measure query time
-fn measure_query(json_path: &str, result_dir_path: &str, query_data_csv: &str, queries: &[(String, String)]) {
+fn measure_query_count(json_path: &str, result_dir_path: &str, json_name: &str, queries: &[(String, String)]) {
     let query_csv_path = if cfg!(feature = "empty-list-opt") {
-        format!("{}/rq_legacy_time.csv", result_dir_path)
+        format!("{result_dir_path}/rq_legacy_time_repetitions={QUERY_REPETITIONS}.csv")
     } else {
-        format!("{}/rq_legacy_empty_list_opt_off_time.csv", result_dir_path)
+        format!("{result_dir_path}/rq_legacy_empty_list_opt_off_time_repetitions={QUERY_REPETITIONS}.csv")
     };
     let csv_exists = Path::new(&query_csv_path).exists();
 
@@ -141,15 +137,15 @@ fn measure_query(json_path: &str, result_dir_path: &str, query_data_csv: &str, q
 
         let avg_time = total_time / (QUERY_REPETITIONS as f64);
         println!(
-            "  - File: {}, Query {}: {}, Time = {:.5}s Result = {}",
-            query_data_csv, query_id, query_text, avg_time, result
+            "  - File: {}, Query {}: {}, Time = {}s Result = {}",
+            json_name, query_id, query_text, avg_time, result
         );
 
         wrt.write_record(&[
-            query_data_csv,
+            json_name,
             &query_id,
             &query_text,
-            &format!("{:.5}", avg_time),
+            &format!("{}", avg_time),
             &format!("{}", QUERY_REPETITIONS),
         ])
         .expect("Failed to write to CSV");
@@ -157,4 +153,8 @@ fn measure_query(json_path: &str, result_dir_path: &str, query_data_csv: &str, q
 
     wrt.flush().expect("Failed to flush CSV");
     println!("Generated: {}", query_csv_path);
+}
+
+fn measure_query_node(json_path: &str, result_dir_path: &str, query_data_csv: &str, queries: &[(String, String)]) {
+    todo!()
 }

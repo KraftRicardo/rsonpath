@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use rsonpath::evaluation::{eval_legacy, eval_optimal};
+use rsonpath::evaluation::{eval_legacy, eval_legacy_skip_time};
 use std::error::Error;
 
 #[derive(Parser)]
@@ -48,7 +48,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             data_dir_path,
             result_dir_path,
         } => {
-            eval_optimal::run(data_dir_path, result_dir_path);
+            eval_legacy_skip_time::run(data_dir_path, result_dir_path);
         }
     }
 

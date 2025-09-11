@@ -1,5 +1,5 @@
 #![allow(clippy::expect_used)] // Enforcing the classifier invariant is clunky without this.
-use crate::evaluation::eval_optimal;
+use crate::evaluation::eval_legacy_skip_time;
 use crate::{
     classification::{
         depth::{DepthBlock, DepthIterator, DepthIteratorResumeOutcome},
@@ -42,7 +42,7 @@ where
             let result = self.skip_original(opening)?;
             let skip_time = start_skip.elapsed().as_nanos() as u64;
 
-            eval_optimal::add_skip_time(skip_time);
+            eval_legacy_skip_time::add_skip_time(skip_time);
             Ok(result)
         } else {
             self.skip_original(opening)
