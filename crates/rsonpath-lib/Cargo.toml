@@ -59,9 +59,9 @@ test-case = { workspace = true }
 
 [features]
 #default = ["simd"]
-#default = ["simd", "empty-list-opt"] # Added by Ricardo
+default = ["simd", "empty-list-opt"] # Added by Ricardo
 #default = ["simd", "track-skipping"] # Added by Ricardo
-default = ["simd", "empty-list-opt", "track-skipping"] # Added by Ricardo
+#default = ["simd", "empty-list-opt", "track-skipping"] # Added by Ricardo
 serde = ["dep:serde", "smallvec/serde", "rsonpath-syntax/serde"]
 simd = []
 empty-list-opt = [] # Changes skip bahavior to skip empty list even faster.
