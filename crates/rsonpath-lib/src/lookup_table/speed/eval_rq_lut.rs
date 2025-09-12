@@ -46,24 +46,25 @@ pub fn evaluate_rq_lut_query_speed(data_dir_path: &str, result_dir_path: &str) {
 
     // 2^40 = 1,099,511,627,776, we basically use a cutoff so high we do not trigger the skipping
     // with the lut. We want to see how slow the overall application is.
-    let cutoffs = vec![
-        0,
-        64,
-        128,
-        192,
-        256,
-        320,
-        384,
-        448,
-        512,
-        576,
-        640,
-        1024,
-        2048,
-        4096,
-        8192,
-        1099511627776,
-    ];
+    let cutoffs = vec![0, 1024];
+    // let cutoffs = vec![
+    //     0,
+    //     64,
+    //     128,
+    //     192,
+    //     256,
+    //     320,
+    //     384,
+    //     448,
+    //     512,
+    //     576,
+    //     640,
+    //     1024,
+    //     2048,
+    //     4096,
+    //     8192,
+    //     1099511627776,
+    // ];
 
     if cfg! {feature = "track-skipping"} {
         println!("Disable tracking of skips before running because it slows down the algorithm.");
@@ -77,36 +78,65 @@ pub fn evaluate_rq_lut_query_speed(data_dir_path: &str, result_dir_path: &str) {
     // Create results dir
     fs::create_dir_all(result_dir_path).expect("Failed to create directory");
 
+    let use_count = false;
+
     // GB_1
-    // evaluate(data_dir_path, result_dir_path, QUERY_BESTBUY, &cutoffs);
-    // evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF1, &cutoffs);
-    // evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF2, &cutoffs);
-    // evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF4, &cutoffs);
-    // evaluate(data_dir_path, result_dir_path, QUERY_GOOGLE, &cutoffs);
-    // evaluate(data_dir_path, result_dir_path, QUERY_NSPL, &cutoffs);
-    evaluate(data_dir_path, result_dir_path, QUERY_TWITTER, &cutoffs);
-    evaluate(data_dir_path, result_dir_path, QUERY_TWITTER_SINGLE, &cutoffs);
-    evaluate(data_dir_path, result_dir_path, QUERY_WALMART, &cutoffs);
-    evaluate(data_dir_path, result_dir_path, QUERY_WALMART_SINGLE, &cutoffs);
-    evaluate(data_dir_path, result_dir_path, QUERY_WIKI, &cutoffs);
-    evaluate(data_dir_path, result_dir_path, QUERY_WIKI_SINGLE, &cutoffs);
+    evaluate(data_dir_path, result_dir_path, QUERY_BESTBUY, &cutoffs, use_count);
+    evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF1, &cutoffs, use_count);
+    evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF2, &cutoffs, use_count);
+    evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF4, &cutoffs, use_count);
+    evaluate(data_dir_path, result_dir_path, QUERY_GOOGLE, &cutoffs, use_count);
+    evaluate(data_dir_path, result_dir_path, QUERY_NSPL, &cutoffs, use_count);
+    evaluate(data_dir_path, result_dir_path, QUERY_TWITTER, &cutoffs, use_count);
+    evaluate(
+        data_dir_path,
+        result_dir_path,
+        QUERY_TWITTER_SINGLE,
+        &cutoffs,
+        use_count,
+    );
+    evaluate(data_dir_path, result_dir_path, QUERY_WALMART, &cutoffs, use_count);
+    evaluate(
+        data_dir_path,
+        result_dir_path,
+        QUERY_WALMART_SINGLE,
+        &cutoffs,
+        use_count,
+    );
+    evaluate(data_dir_path, result_dir_path, QUERY_WIKI, &cutoffs, use_count);
+    evaluate(data_dir_path, result_dir_path, QUERY_WIKI_SINGLE, &cutoffs, use_count);
 
     println!("Done");
 }
 
 /// Measure the query times of rq-lut for different cutoffs. Results will be written into a csv.
-fn evaluate(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str, cutoffs: &Vec<usize>) {
+fn evaluate(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str, cutoffs: &Vec<usize>, use_count: bool) {
     let (json_path, json_name, queries) = extract_input(data_dir_path, query_data_csv);
 
     // Measurements
     for cutoff in cutoffs {
-        measure_query(&json_path, result_dir_path, &json_name, &queries, *cutoff);
+        measure_query(&json_path, result_dir_path, &json_name, &queries, *cutoff, use_count);
     }
 }
 
 // Measure query time of rq-lut for the given queries and cutoff on a given json.
-fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries: &[(String, String)], cutoff: usize) {
-    let query_csv_path = format!("{result_dir_path}/rq_lut_time.csv");
+fn measure_query(
+    json_path: &str,
+    result_dir_path: &str,
+    filename: &str,
+    queries: &[(String, String)],
+    cutoff: usize,
+    use_count: bool,
+) {
+    let mut query_csv_path: String;
+    if use_count {
+        println!("Mode:COUNT");
+        query_csv_path = format!("{result_dir_path}/rq_lut_time.csv");
+    } else {
+        println!("Mode:NODE");
+        query_csv_path = format!("{result_dir_path}/rq_lut_time_node.csv");
+    }
+
     let csv_exists = Path::new(&query_csv_path).exists();
 
     // Open CSV in append mode
@@ -148,7 +178,14 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
 
         // Warm up
         for _ in 0..QUERY_REPETITIONS {
-            let _ = engine.count(&input).expect("Query execution failed");
+            if use_count {
+                // COUNT
+                let _ = engine.count(&input).expect("Query execution failed");
+            } else {
+                // NODE
+                let mut sink = vec![];
+                engine.matches(&input, &mut sink).expect("Fail @ engine matching.");
+            }
         }
 
         // Measure query time
@@ -156,9 +193,19 @@ fn measure_query(json_path: &str, result_dir_path: &str, filename: &str, queries
         let mut total_time = 0.0;
 
         for _ in 0..QUERY_REPETITIONS {
-            let start = Instant::now();
-            result = engine.count(&input).expect("Query execution failed");
-            total_time += start.elapsed().as_secs_f64();
+            if use_count {
+                // COUNT
+                let start = Instant::now();
+                result = engine.count(&input).expect("Query execution failed");
+                total_time += start.elapsed().as_secs_f64();
+            } else {
+                // NODE
+                let mut sink = vec![];
+                let start = Instant::now();
+                engine.matches(&input, &mut sink).expect("Fail @ engine matching.");
+                total_time += start.elapsed().as_secs_f64();
+                result = sink.len() as u64;
+            }
         }
 
         let avg_time = total_time / (QUERY_REPETITIONS as f64);

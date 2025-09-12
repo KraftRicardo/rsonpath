@@ -67,7 +67,6 @@
     just test-engine
 
 ## Run the tests with
-
     Define the environment variables first. This forces nosimd as used classifier:
         // no SIMD
         export RSONPATH_UNSAFE_FORCE_SIMD="nosimd;slow_quotes;slow_popcnt"
