@@ -3,8 +3,8 @@ use std::fs::File;
 use std::io::BufReader;
 
 // Where we expect to find the query sets csv files
-const QUERY_DATA_FOLDER: &str = "../rsonpath/res/query";
-const QUERY_DATA_FOLDER_TEST: &str = "../../../rsonpath/res/query";
+const QUERY_DATA_FOLDER: &str = "res/query";
+const QUERY_DATA_FOLDER_TEST: &str = "../../res/query";
 
 // ##########
 // 1 kB
