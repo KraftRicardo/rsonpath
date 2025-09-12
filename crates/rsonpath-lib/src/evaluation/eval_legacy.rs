@@ -85,18 +85,18 @@ pub fn evaluate_rq_query_speed(data_dir_path: &str, base_path: &str, use_empty_l
     let use_count = false;
 
     // GB_1
-    eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY, use_count);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1, use_count);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2, use_count);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4, use_count);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE, use_count);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL, use_count);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER, use_count);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER_SINGLE, use_count);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART, use_count);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART_SINGLE, use_count);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI, use_count);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI_SINGLE, use_count);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY, use_count);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1, use_count);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2, use_count);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4, use_count);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE, use_count);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL, use_count);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER, use_count);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER_SINGLE, use_count);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART, use_count);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART_SINGLE, use_count);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI, use_count);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI_SINGLE, use_count);
 
     println!("Done");
 }
