@@ -1,6 +1,8 @@
 use clap::{Parser, Subcommand};
 use distance_distribution_per_json::analyse_distance_distribution_per_json;
 use distance_distribution_per_query::analyse_distance_distribution_per_query;
+use eval_rq_lut::evaluate_rq_lut_query_speed;
+use eval_serde::evaluate_serde_json_query_and_build_speed;
 use rsonpath::lookup_table::analysis::distance_distribution_per_query;
 use rsonpath::lookup_table::analysis::{distance_distribution_per_json, json_size_estimation_bits::print_estimation};
 use rsonpath::lookup_table::correctness::{lut_build_correctness, lut_query_correctness};
@@ -130,7 +132,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             data_dir_path,
             result_dir_path,
         } => {
-            eval_rq_lut::evaluate_rq_lut_query_speed(data_dir_path, result_dir_path);
+            evaluate_rq_lut_query_speed(data_dir_path, result_dir_path);
         }
         Commands::EvalRqLutNoLut {
             data_dir_path,
@@ -142,7 +144,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             data_dir_path,
             result_dir_path,
         } => {
-            eval_serde::run(data_dir_path, result_dir_path);
+            evaluate_serde_json_query_and_build_speed(data_dir_path, result_dir_path);
         }
         // ###############
         // # Correctness #

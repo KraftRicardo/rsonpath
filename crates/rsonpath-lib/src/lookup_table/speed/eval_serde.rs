@@ -11,37 +11,70 @@ use std::path::Path;
 use std::time::Instant;
 use std::{fs, io::BufReader};
 
-/// Measures build time and query for given json and their queries using the serde crate.
-/// Output will be saved in build.csv and serde_time.csv.
-/// build.csv e.g.:
-///     JSON,BUILD_TIME_SECONDS,SIZE_IN_BYTES
-///     crossref1_(551MB),4.83730,3030361082
-///     bestbuy_large_record_(1GB),11.80644,5177256301
-///     ...
-/// serde_time.csv e.g.:
-///     JSON,QUERY_ID,QUERY_TEXT,QUERY_TIME_SECONDS,REPETITIONS
-///     bestbuy_large_record_(1GB),1,$..freeShipping,1.77164,1
-///     bestbuy_large_record_(1GB),2,$.products[*].videoChapters,0.13674,1
-///     bestbuy_large_record_(1GB),3,$.products[*].additionalFeatures[*],0.08287,1
-///     ...
-/// Run with: cargo run --bin lut --release -- eval-serde res/json res/data/speed/local/serde
-/// Run with: cargo run --bin lut --release -- eval-serde ricardo-jsons final-results-2
+/// Measures build time and query execution for JSON documents using the `serde` crate.
+///
+/// This function benchmarks:
+/// - The time required to build a `serde_json` structure from input JSON files.
+/// - The time required to run queries against those structures.
+///
+/// # Arguments
+///
+/// * `data_dir_path`: Path to the directory containing input JSON files.
+/// * `result_dir_path`: Path to the directory where CSV result files will be written.
+///
+/// Results are written into two CSV files in the provided result directory:
+///
+/// - `build.csv` — contains build times and sizes.
+/// - `serde_time.csv` — contains query execution times.
+///
+/// # Output format
+///
+/// Example contents of `build.csv`:
+///
+/// ```text
+/// JSON,BUILD_TIME_SECONDS,SIZE_IN_BYTES,REPETITIONS
+/// crossref1_(551MB),4.83730,3030361082,3
+/// bestbuy_large_record_(1GB),11.80644,5177256301,3
+/// ...
+/// ```
+///
+/// Example contents of `serde_time.csv`:
+///
+/// ```text
+/// JSON,QUERY_ID,QUERY_TEXT,QUERY_TIME_SECONDS,REPETITIONS
+/// bestbuy_large_record_(1GB),1,$..freeShipping,1.77164,1
+/// bestbuy_large_record_(1GB),2,$.products[*].videoChapters,0.13674,1
+/// bestbuy_large_record_(1GB),3,$.products[*].additionalFeatures[*],0.08287,1
+/// ...
+/// ```
+///
+/// # Examples
+///
+/// Run with local JSON data:
+///
+/// ```bash
+/// cargo run --bin lut --release -- eval-serde res/json res/data/speed/local/serde
+/// cargo run --bin lut --release -- eval-serde ricardo-jsons plot-results
+/// ```
 #[inline]
-pub fn run(data_dir_path: &str, result_dir_path: &str) {
+pub fn evaluate_serde_json_query_and_build_speed(data_dir_path: &str, result_dir_path: &str) {
     println!("eval-serde");
 
     fs::create_dir_all(result_dir_path).expect("Failed to create directory");
 
     // GB_1
     eval_all(data_dir_path, result_dir_path, QUERY_BESTBUY);
-    // eval_all(data_dir_path, result_dir_path, QUERY_CROSSREF1);
-    // eval_all(data_dir_path, result_dir_path, QUERY_CROSSREF2);
-    // eval_all(data_dir_path, result_dir_path, QUERY_CROSSREF4);
-    // eval_all(data_dir_path, result_dir_path, QUERY_GOOGLE);
-    // eval_all(data_dir_path, result_dir_path, QUERY_NSPL);
-    // eval_all(data_dir_path, result_dir_path, QUERY_TWITTER);
-    // eval_all(data_dir_path, result_dir_path, QUERY_WALMART);
-    // eval_all(data_dir_path, result_dir_path, QUERY_WIKI);
+    eval_all(data_dir_path, result_dir_path, QUERY_CROSSREF1);
+    eval_all(data_dir_path, result_dir_path, QUERY_CROSSREF2);
+    eval_all(data_dir_path, result_dir_path, QUERY_CROSSREF4);
+    eval_all(data_dir_path, result_dir_path, QUERY_GOOGLE);
+    eval_all(data_dir_path, result_dir_path, QUERY_NSPL);
+    eval_all(data_dir_path, result_dir_path, QUERY_TWITTER);
+    eval_all(data_dir_path, result_dir_path, QUERY_TWITTER_SINGLE);
+    eval_all(data_dir_path, result_dir_path, QUERY_WALMART);
+    eval_all(data_dir_path, result_dir_path, QUERY_WALMART_SINGLE);
+    eval_all(data_dir_path, result_dir_path, QUERY_WIKI);
+    eval_all(data_dir_path, result_dir_path, QUERY_WIKI_SINGLE);
 
     println!("Done");
 }
@@ -55,7 +88,7 @@ fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str) {
 
 // Measure query time
 fn measure_query(json_path: &str, result_dir_path: &str, query_data_csv: &str, queries: Vec<(String, String)>) {
-    let query_csv_path = format!("{result_dir_path}/serde_time.csv");
+    let query_csv_path = format!("{result_dir_path}/serde_time_repetitions={QUERY_REPETITIONS}.csv");
     let csv_exists = Path::new(&query_csv_path).exists();
 
     // Open CSV in append mode
@@ -117,7 +150,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, query_data_csv: &str, q
 
 /// Measure build time
 fn measure_build(json_path: &str, serde_dir_path: &str, query_data_csv: &str) {
-    let build_csv_path = format!("{serde_dir_path}/build.csv");
+    let build_csv_path = format!("{serde_dir_path}/serde_build_repetitions={BUILD_REPETITIONS}.csv");
     let file_exists = Path::new(&build_csv_path).exists();
 
     // Open CSV in append mode
@@ -131,8 +164,7 @@ fn measure_build(json_path: &str, serde_dir_path: &str, query_data_csv: &str) {
 
     // Write header if the file is new
     if !file_exists {
-        print!("File did not exist");
-        wtr.write_record(["JSON", "BUILD_TIME_SECONDS", "SIZE_IN_BYTES"])
+        wtr.write_record(["JSON", "BUILD_TIME_SECONDS", "SIZE_IN_BYTES", "REPETITIONS"])
             .expect("Failed to write header");
         wtr.flush().expect("Failed to flush build CSV");
     }
@@ -167,11 +199,16 @@ fn measure_build(json_path: &str, serde_dir_path: &str, query_data_csv: &str) {
     }
 
     let avg_time = total_time / BUILD_REPETITIONS as f64;
-    println!(" build time = {avg_time:.5}s, size = {heap_bytes} B");
+    println!(" - Build time:{avg_time:.5}s, Size:{heap_bytes}B, Repetitions:{QUERY_REPETITIONS}");
 
     // Write the results
-    wtr.write_record([query_data_csv, &format!("{avg_time:.5}"), &heap_bytes.to_string()])
-        .expect("Failed to write build record");
+    wtr.write_record([
+        query_data_csv,
+        &format!("{avg_time:.5}"),
+        &heap_bytes.to_string(),
+        &BUILD_REPETITIONS.to_string(),
+    ])
+    .expect("Failed to write build record");
 
     wtr.flush().expect("Failed to flush build CSV");
     println!("Generated: {build_csv_path}");
