@@ -36,13 +36,13 @@ fn main() -> Result<(), Box<dyn Error>> {
             data_dir_path,
             result_dir_path,
         } => {
-            eval_legacy::run(data_dir_path, result_dir_path, true);
+            eval_legacy::evaluate_rq_query_speed(data_dir_path, result_dir_path, true);
         }
         Commands::EvalLegacyEmptyListOptOff {
             data_dir_path,
             result_dir_path,
         } => {
-            eval_legacy::run(data_dir_path, result_dir_path, false);
+            eval_legacy::evaluate_rq_query_speed(data_dir_path, result_dir_path, false);
         }
         Commands::EvalOptimal {
             data_dir_path,

@@ -111,8 +111,8 @@ fn read_queries_from_csv(csv_path: &str) -> Vec<(String, String)> {
 #[must_use]
 pub fn extract_input(data_dir_path: &str, query_data_csv: &str) -> (String, String, Vec<(String, String)>) {
     let queries = read_queries(query_data_csv);
-    let json_name = format!("{}.json", remove_common_suffix(query_data_csv));
-    let json_path = format!("{data_dir_path}/{json_name}");
+    let json_name = format!("{}", remove_common_suffix(query_data_csv));
+    let json_path = format!("{data_dir_path}/{json_name}.json");
     println!("JSON: {json_path}");
 
     (json_path, json_name, queries)

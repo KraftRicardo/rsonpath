@@ -13,31 +13,54 @@ use std::{fs, io::BufReader};
 
 use crate::evaluation::track_config::QUERY_REPETITIONS;
 
-// Measures the time taken for rq for given JSON+Queries. "empty-list-opt" has here no effect.
-//
-// Run with: cargo run --bin eval --release -- eval-legacy ../rsonpath/res/json ../rsonpath/res/data/speed/local
-// Run with: cargo run --bin eval --release -- eval-legacy ricardo-jsons plot-results
-// OR WITH:
-// Run with: cargo run --bin eval --release -- eval-legacy-empty-list-opt-off ../rsonpath/res/json ../rsonpath/res/data/speed/local
-// Run with: cargo run --bin eval --release -- eval-legacy-empty-list-opt-off ricardo-jsons plot-results
-//
-// "data_dir_path" path to the folder holding the input JSON files.
-// "base_path" path to the folder where the results will be saved
-//
-// Data will be saved in "{base_path}/speed/rq-legacy/legacy_time.csv"
-// Example structure of the csv:
-//  JSON,QUERY_ID,QUERY_TEXT,QUERY_TIME_SECONDS
-//  crossref1_(551MB),1,$.items[2].resource.primary.URL,0.13103
-//  crossref1_(551MB),2,$.items[*].URL,0.13692
-//  ...
-pub fn run(data_dir_path: &str, base_path: &str, use_empty_list_opt: bool) {
+/// Measures the execution time of `rq` (no LUT) for a given set of JSON files and queries.
+///
+/// This function benchmarks query execution and saves the results to a CSV file.
+///
+/// # Parameters
+///
+/// - `data_dir_path`: Path to the folder holding the input JSON files.
+/// - `base_path`: Path to the folder where the results will be saved.
+/// - `use_empty_list_opt`: Enables or disables the empty-list optimization (no effect here).
+///
+/// # Output
+///
+/// Results are saved in:
+///
+/// ```text
+/// {base_path}/rq_legacy/rq_legacy_time_repetitions={QUERY_REPETITIONS}.csv
+/// OR
+/// {base_path}/rq_legacy_empty_list_opt_off/rq_legacy_empty_list_opt_off_time_repetitions={QUERY_REPETITIONS}.csv
+/// ```
+///
+/// The CSV has the following structure:
+///
+/// ```text
+/// JSON,QUERY_ID,QUERY_TEXT,QUERY_TIME_SECONDS
+/// crossref1_(551MB),1,$.items[2].resource.primary.URL,0.13103
+/// crossref1_(551MB),2,$.items[*].URL,0.13692
+/// ...
+/// ```
+///
+/// # Examples
+/// Running with predefined JSONs and plotting results:
+/// ```bash
+/// cargo run --bin eval --release -- eval-legacy ../rsonpath/res/json ../rsonpath/res/data/speed/local
+/// cargo run --bin eval --release -- eval-legacy ricardo-jsons plot-results
+/// ```
+/// Running with the empty-list optimization explicitly disabled:
+/// ```bash
+/// cargo run --bin eval --release -- eval-legacy-empty-list-opt-off ../rsonpath/res/json ../rsonpath/res/data/speed/local
+/// cargo run --bin eval --release -- eval-legacy-empty-list-opt-off ricardo-jsons plot-results
+/// ```
+pub fn evaluate_rq_query_speed(data_dir_path: &str, base_path: &str, use_empty_list_opt: bool) {
     let mut result_dir_path: String;
     if use_empty_list_opt {
         println!("rq-legacy QUERY_REPETITIONS {QUERY_REPETITIONS}");
-        result_dir_path = format!("{}/rq_legacy", base_path);
+        result_dir_path = format!("{base_path}/rq_legacy");
     } else {
         print!("rq-legacy-empty-list-opt-off QUERY_REPETITIONS {QUERY_REPETITIONS}");
-        result_dir_path = format!("{}/rq_legacy_empty_list_opt_off", base_path);
+        result_dir_path = format!("{base_path}/rq_legacy_empty_list_opt_off");
     }
 
     // Abort conditions
@@ -61,17 +84,17 @@ pub fn run(data_dir_path: &str, base_path: &str, use_empty_list_opt: bool) {
 
     // GB_1
     eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER_SINGLE);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART_SINGLE);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
-    // eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI_SINGLE);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER_SINGLE);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART_SINGLE);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI);
+    eval_all(&data_dir_path, &result_dir_path, QUERY_WIKI_SINGLE);
 
     println!("Done");
 }
@@ -145,8 +168,8 @@ fn measure_query_count(json_path: &str, result_dir_path: &str, json_name: &str, 
             json_name,
             &query_id,
             &query_text,
-            &format!("{}", avg_time),
-            &format!("{}", QUERY_REPETITIONS),
+            &format!("{avg_time}"),
+            &format!("{QUERY_REPETITIONS}"),
         ])
         .expect("Failed to write to CSV");
     }
