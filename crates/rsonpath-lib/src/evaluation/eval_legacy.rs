@@ -159,10 +159,7 @@ fn measure_query_count(json_path: &str, result_dir_path: &str, json_name: &str, 
         }
 
         let avg_time = total_time / (QUERY_REPETITIONS as f64);
-        println!(
-            "  - File: {}, Query {}: {}, Time = {}s Result = {}",
-            json_name, query_id, query_text, avg_time, result
-        );
+        println!("  - File:{json_name}, Query{query_id}:{query_text}, Time:{avg_time}s Result:{result}, Repetitions:{QUERY_REPETITIONS}",);
 
         wrt.write_record(&[
             json_name,

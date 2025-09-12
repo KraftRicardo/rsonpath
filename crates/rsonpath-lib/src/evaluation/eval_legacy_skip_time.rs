@@ -40,11 +40,11 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
     }
 
     eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
-    eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF1);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF2);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_CROSSREF4);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_GOOGLE);
+    // eval_all(&data_dir_path, &result_dir_path, QUERY_NSPL);
     // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER);
     // eval_all(&data_dir_path, &result_dir_path, QUERY_TWITTER_SINGLE);
     // eval_all(&data_dir_path, &result_dir_path, QUERY_WALMART);
