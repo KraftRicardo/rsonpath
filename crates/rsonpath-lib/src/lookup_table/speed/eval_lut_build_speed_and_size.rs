@@ -6,7 +6,7 @@ use crate::lookup_table::speed::eval_distance_cutoff::heap_value;
 use crate::lookup_table::speed::eval_lut_construction::HEAP_TRACKER;
 use crate::lookup_table::speed::query_data::{
     extract_input, QUERY_BESTBUY, QUERY_CROSSREF1, QUERY_CROSSREF2, QUERY_CROSSREF4, QUERY_GOOGLE, QUERY_NSPL,
-    QUERY_TWITTER, QUERY_WALMART, QUERY_WALMART_SINGLE, QUERY_WIKI, QUERY_WIKI_SINGLE,
+    QUERY_TWITTER, QUERY_WALMART, QUERY_WIKI, QUERY_WIKI_SINGLE,
 };
 use crate::lookup_table::{LookUpTable, BUILD_REPETITIONS, LUT};
 use csv::Writer;
@@ -49,10 +49,10 @@ use std::time::Instant;
 pub fn evaluate_lut_build_speed_and_size(data_dir_path: &str, result_dir_path: &str) {
     println!("eval_lut_build_speed_and_size");
 
-    // let cutoffs = vec![0, 64];
-    let cutoffs = vec![
-        0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 1024, 2048, 4096, 8192,
-    ];
+    let cutoffs = vec![0, 64];
+    // let cutoffs = vec![
+    //     0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 1024, 2048, 4096, 8192,
+    // ];
 
     if cfg! {feature = "track-skipping"} {
         println!("Disable tracking of skips before running because it slows down the algorithm.");
@@ -76,16 +76,6 @@ pub fn evaluate_lut_build_speed_and_size(data_dir_path: &str, result_dir_path: &
 }
 
 fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str, cutoffs: &Vec<usize>) {
-    eval_lut_build_speed_and_size(data_dir_path, result_dir_path, query_data_csv, cutoffs);
-    eval_pair_collection_speed(data_dir_path, result_dir_path, query_data_csv);
-}
-
-fn eval_lut_build_speed_and_size(
-    data_dir_path: &str,
-    result_dir_path: &str,
-    query_data_csv: &str,
-    cutoffs: &Vec<usize>,
-) {
     let (json_path, _, _) = extract_input(data_dir_path, query_data_csv);
 
     // All necessary paths to CSV and PNG
@@ -103,8 +93,15 @@ fn eval_lut_build_speed_and_size(
 
     // Write header if the file is new
     if !file_exists {
-        wtr.write_record(["JSON", "CUTOFF", "BUILD_TIME_SECONDS", "SIZE_IN_BYTES", "REPETITIONS"])
-            .expect("Failed to write header");
+        wtr.write_record([
+            "JSON",
+            "CUTOFF",
+            "BUILD_TIME_SECONDS",
+            "COLLECTION_TIME_SECONDS",
+            "SIZE_IN_BYTES",
+            "REPETITIONS",
+        ])
+        .expect("Failed to write header");
     }
 
     // Measurements
@@ -124,21 +121,35 @@ fn eval_lut_build_speed_and_size(
         }
 
         // Measure build time
-        let mut total_time = 0.0;
+        let mut total_time_build = 0.0;
         for _ in 0..BUILD_REPETITIONS {
             let start = Instant::now();
             let _ = LUT::build(&json_path, *cutoff).expect("Timed build failed");
-            total_time += start.elapsed().as_secs_f64();
+            total_time_build += start.elapsed().as_secs_f64();
+        }
+        let avg_time_build = total_time_build / BUILD_REPETITIONS as f64;
+
+        // Warm-up
+        for _ in 0..BUILD_REPETITIONS {
+            let _ = collect_without_result(&json_path);
         }
 
-        let avg_time = total_time / BUILD_REPETITIONS as f64;
-        println!(" build time = {avg_time:.5}s, size = {heap_bytes} B");
+        // Measure pair collection time
+        let mut total_time_collection = 0.0;
+        for _ in 0..BUILD_REPETITIONS {
+            let start = Instant::now();
+            let _ = collect_without_result(&json_path);
+            total_time_collection += start.elapsed().as_secs_f64();
+        }
+        let avg_time_collection = total_time_collection / BUILD_REPETITIONS as f64;
 
         // Write the results
+        println!(" build time:{avg_time_build:.5}s, collection:{avg_time_collection:.5}s, size:{heap_bytes}B");
         wtr.write_record([
             query_data_csv,
             &format!("{cutoff}"),
-            &format!("{avg_time:.5}"),
+            &format!("{avg_time_build}"),
+            &format!("{avg_time_collection}"),
             &heap_bytes.to_string(),
             &format!("{BUILD_REPETITIONS}"),
         ])
@@ -146,55 +157,6 @@ fn eval_lut_build_speed_and_size(
 
         wtr.flush().expect("Failed to flush build CSV");
     }
-}
-
-fn eval_pair_collection_speed(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str) {
-    let (json_path, _, _) = extract_input(data_dir_path, query_data_csv);
-
-    // All necessary paths to CSV and PNG
-    let build_csv = format!("{result_dir_path}/pair_collection_repetitions={BUILD_REPETITIONS}.csv");
-    let file_exists = Path::new(&build_csv).exists();
-
-    // Open CSV in append mode
-    let mut wtr = Writer::from_writer(
-        OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(&build_csv)
-            .expect("Failed to open build CSV"),
-    );
-
-    // Write header if the file is new
-    if !file_exists {
-        wtr.write_record(["JSON", "PAIR_COLLECTION_TIME_SECONDS", "REPETITIONS"])
-            .expect("Failed to write header");
-    }
-
-    // Warm-up
-    for _ in 0..BUILD_REPETITIONS {
-        let _ = collect_without_result(&json_path);
-    }
-
-    // Measure pair collection time
-    let mut total_time = 0.0;
-    for _ in 0..BUILD_REPETITIONS {
-        let start = Instant::now();
-        let _ = collect_without_result(&json_path);
-        total_time += start.elapsed().as_secs_f64();
-    }
-
-    let avg_time = total_time / BUILD_REPETITIONS as f64;
-    println!(" pair collection time = {avg_time:.5}s");
-
-    // Write the results
-    wtr.write_record([
-        query_data_csv,
-        &format!("{avg_time:.5}"),
-        &format!("{BUILD_REPETITIONS}"),
-    ])
-    .expect("Failed to write build record");
-
-    wtr.flush().expect("Failed to flush build CSV");
 }
 
 fn collect_without_result(json_path: &str) -> Result<(), Box<dyn std::error::Error>> {

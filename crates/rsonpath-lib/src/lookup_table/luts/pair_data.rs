@@ -67,7 +67,6 @@ where
     let mut curly_bracket_stack: SmallVec<[usize; 64]> = SmallVec::new();
 
     let mut pairs = PairData::new();
-    // let mut pairs = PairData::with_capacity(10_000_000, 2000);
 
     while let Some(event) = structural_classifier.next()? {
         match event {
