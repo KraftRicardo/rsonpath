@@ -3,6 +3,7 @@ use distance_distribution_per_json::analyse_distance_distribution_per_json;
 use distance_distribution_per_query::analyse_distance_distribution_per_query;
 use eval_lut_build_speed_and_size::evaluate_lut_build_speed_and_size;
 use eval_rq_lut::evaluate_rq_lut_query_speed;
+use eval_rq_lut_no_lut::evaluate_rq_lut_no_lut_query_speed;
 use eval_serde::evaluate_serde_json_query_and_build_speed;
 use rsonpath::lookup_table::analysis::distance_distribution_per_query;
 use rsonpath::lookup_table::analysis::{distance_distribution_per_json, json_size_estimation_bits::print_estimation};
@@ -150,7 +151,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             data_dir_path,
             result_dir_path,
         } => {
-            eval_rq_lut_no_lut::run(data_dir_path, result_dir_path);
+            evaluate_rq_lut_no_lut_query_speed(data_dir_path, result_dir_path);
         }
         Commands::EvalSerde {
             data_dir_path,

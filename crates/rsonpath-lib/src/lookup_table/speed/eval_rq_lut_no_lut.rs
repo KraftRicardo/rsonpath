@@ -13,17 +13,31 @@ use std::{
     io::{BufReader, Read},
 };
 
-/// Run with: cargo run --bin lut --release -- eval-rq-lut-no-lut res/json res/data/speed/local/rq_lut_no_lut
+/// Runs the `rq-lut` benchmark without using a lookup table (LUT), executing queries using
+/// the standard non-LUT implementation. This allows measuring potential speed changes
+/// introduced in the base query execution code.
 ///
-/// Run rq-lut without using a LUT but just using the non-lut version of rq. This is to see whether
-/// there is a measurable speed change in the changes of the base code.
-/// Output is one csv per json file. Structure e.g. :
-///     QUERY_ID,QUERY_TEXT,QUERY_TIME_SECONDS
-///     1,$..freeShipping,0.08720
-///     2,$.products[*].videoChapters,0.79716
-///     ...
+/// Each JSON file in `data_dir_path` is processed, and query execution times are recorded
+/// in a separate CSV file in `result_dir_path`. CSV files follow the structure:
+///
+/// ```text
+/// JSON,QUERY_ID,QUERY_TEXT,QUERY_TIME_SECONDS,REPETITIONS
+/// 1,$..freeShipping,0.08720,1
+/// 2,$.products[*].videoChapters,0.79716,1
+/// ...
+/// ```
+///
+/// # Parameters
+/// - `data_dir_path`: Path to the directory containing JSON input files and query definitions.
+/// - `result_dir_path`: Path to the directory where CSV results should be saved.
+///
+/// # Example
+/// ```bash
+/// cargo run --bin lut --release -- eval-rq-lut-no-lut res/json res/data/speed/local/rq_lut_no_lut
+/// cargo run --bin lut --release -- eval-rq-lut ricardo-jsons plot-results
+/// ```
 #[inline]
-pub fn run(data_dir_path: &str, result_dir_path: &str) {
+pub fn evaluate_rq_lut_no_lut_query_speed(data_dir_path: &str, result_dir_path: &str) {
     println!("rq-lut-no-lut");
 
     if cfg! {feature = "track-skipping"} {
