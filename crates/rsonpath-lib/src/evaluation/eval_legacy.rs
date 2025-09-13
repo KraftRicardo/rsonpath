@@ -82,7 +82,7 @@ pub fn evaluate_rq_query_speed(data_dir_path: &str, base_path: &str, use_empty_l
     // Create results dir
     fs::create_dir_all(&result_dir_path).expect("Failed to create directory");
 
-    let use_count = false;
+    let use_count = true;
 
     // GB_1
     eval_all(&data_dir_path, &result_dir_path, QUERY_BESTBUY, use_count);
