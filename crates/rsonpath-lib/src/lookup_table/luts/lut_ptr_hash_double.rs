@@ -73,12 +73,6 @@ impl LutPtrHashDouble {
             ) -> Result<LutPtrHashDouble, error::InputError> where
             I: Input,
             V: Simd, {
-                    // let start_search = std::time::Instant::now();
-                    // let pair_data = pair_data::find_pairs(&input, simd, cutoff)?;
-                    // let search_time = start_search.elapsed().as_secs_f64();
-                    // println!("    - Search time:     {search_time}");
-                    // Ok(LutPtrHashDouble::build_double(pair_data, cutoff))
-
                     debug!("Finding Pairs ...");
                     let pair_data = pair_data::find_pairs(input, simd, cutoff)?;
                     debug!("Building ...");

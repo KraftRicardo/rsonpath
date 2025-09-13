@@ -1,6 +1,7 @@
 use clap::{Parser, Subcommand};
 use distance_distribution_per_json::analyse_distance_distribution_per_json;
 use distance_distribution_per_query::analyse_distance_distribution_per_query;
+use eval_lut_build_speed_and_size::evaluate_lut_build_speed_and_size;
 use eval_rq_lut::evaluate_rq_lut_query_speed;
 use eval_serde::evaluate_serde_json_query_and_build_speed;
 use rsonpath::lookup_table::analysis::distance_distribution_per_query;
@@ -8,7 +9,8 @@ use rsonpath::lookup_table::analysis::{distance_distribution_per_json, json_size
 use rsonpath::lookup_table::correctness::{lut_build_correctness, lut_query_correctness};
 use rsonpath::lookup_table::extra::{eval_valgrind, lut_test_hotness, query_with_lut};
 use rsonpath::lookup_table::speed::{
-    eval_distance_cutoff, eval_final, eval_lut_construction, eval_rq_lut, eval_rq_lut_no_lut, eval_serde,
+    eval_distance_cutoff, eval_final, eval_lut_build_speed_and_size, eval_lut_construction, eval_rq_lut,
+    eval_rq_lut_no_lut, eval_serde,
 };
 use std::error::Error;
 
@@ -45,6 +47,10 @@ enum Commands {
         result_dir_path: String,
     },
     EvalFinal {
+        data_dir_path: String,
+        result_dir_path: String,
+    },
+    EvalLutBuildSpeedAndSize {
         data_dir_path: String,
         result_dir_path: String,
     },
@@ -121,6 +127,12 @@ fn main() -> Result<(), Box<dyn Error>> {
             result_dir_path,
         } => {
             eval_final::run(data_dir_path, result_dir_path);
+        }
+        Commands::EvalLutBuildSpeedAndSize {
+            data_dir_path,
+            result_dir_path,
+        } => {
+            evaluate_lut_build_speed_and_size(data_dir_path, result_dir_path);
         }
         Commands::EvalLutConstruction {
             data_dir_path,
