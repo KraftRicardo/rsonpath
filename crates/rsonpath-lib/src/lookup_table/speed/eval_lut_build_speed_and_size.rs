@@ -49,10 +49,10 @@ use std::time::Instant;
 pub fn evaluate_lut_build_speed_and_size(data_dir_path: &str, result_dir_path: &str) {
     println!("eval_lut_build_speed_and_size");
 
-    let cutoffs = vec![0, 64];
-    // let cutoffs = vec![
-    //     0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 1024, 2048, 4096, 8192,
-    // ];
+    // let cutoffs = vec![0, 64];
+    let cutoffs = vec![
+        0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 1024, 2048, 4096, 8192,
+    ];
 
     if cfg! {feature = "track-skipping"} {
         println!("Disable tracking of skips before running because it slows down the algorithm.");
@@ -106,13 +106,10 @@ fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str, cu
 
     // Measurements
     for cutoff in cutoffs {
-        println!("  cutoff: {cutoff}");
-
         // Measure size
         let start_heap = Region::new(HEAP_TRACKER);
         let lut = LUT::build(&json_path, *cutoff).expect("Failed to build LUT");
         let heap_bytes = heap_value(start_heap.change());
-        println!("Measured heap with cutoff={}", lut.get_cutoff());
         drop(lut);
 
         // Warm-up
@@ -144,7 +141,7 @@ fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str, cu
         let avg_time_collection = total_time_collection / BUILD_REPETITIONS as f64;
 
         // Write the results
-        println!(" build time:{avg_time_build:.5}s, collection:{avg_time_collection:.5}s, size:{heap_bytes}B");
+        println!(" cutoff:{cutoff}, build time:{avg_time_build:.5}s, collection:{avg_time_collection:.5}s, size:{heap_bytes}B");
         wtr.write_record([
             query_data_csv,
             &format!("{cutoff}"),
