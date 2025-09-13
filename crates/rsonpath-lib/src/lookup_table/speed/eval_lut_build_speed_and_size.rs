@@ -6,7 +6,7 @@ use crate::lookup_table::speed::eval_distance_cutoff::heap_value;
 use crate::lookup_table::speed::eval_lut_construction::HEAP_TRACKER;
 use crate::lookup_table::speed::query_data::{
     extract_input, QUERY_BESTBUY, QUERY_CROSSREF1, QUERY_CROSSREF2, QUERY_CROSSREF4, QUERY_GOOGLE, QUERY_NSPL,
-    QUERY_TWITTER, QUERY_WALMART, QUERY_WIKI, QUERY_WIKI_SINGLE,
+    QUERY_TWITTER, QUERY_WALMART, QUERY_WIKI,
 };
 use crate::lookup_table::{LookUpTable, BUILD_REPETITIONS, LUT};
 use csv::Writer;
@@ -139,9 +139,10 @@ fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str, cu
             total_time_collection += start.elapsed().as_secs_f64();
         }
         let avg_time_collection = total_time_collection / BUILD_REPETITIONS as f64;
+        let diff = avg_time_build - avg_time_collection;
 
         // Write the results
-        println!(" cutoff:{cutoff}, build time:{avg_time_build:.5}s, collection:{avg_time_collection:.5}s, size:{heap_bytes}B");
+        println!(" cutoff:{cutoff}, build time:{avg_time_build:.5}s, collection:{avg_time_collection:.5}s, diff: {diff:.5}, size:{heap_bytes}B");
         wtr.write_record([
             query_data_csv,
             &format!("{cutoff}"),
