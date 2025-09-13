@@ -46,8 +46,11 @@ pub fn run(data_dir_path: &str, result_dir_path: &str) {
     eval_all(data_dir_path, result_dir_path, QUERY_GOOGLE);
     eval_all(data_dir_path, result_dir_path, QUERY_NSPL);
     eval_all(data_dir_path, result_dir_path, QUERY_TWITTER);
+    eval_all(data_dir_path, result_dir_path, QUERY_TWITTER_SINGLE);
     eval_all(data_dir_path, result_dir_path, QUERY_WALMART);
+    eval_all(data_dir_path, result_dir_path, QUERY_WALMART_SINGLE);
     eval_all(data_dir_path, result_dir_path, QUERY_WIKI);
+    eval_all(data_dir_path, result_dir_path, QUERY_WIKI_SINGLE);
 
     println!("Done");
 }
@@ -60,7 +63,7 @@ fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str) {
 
 // Measure query time
 fn measure_query(json_path: &str, result_dir_path: &str, query_data_csv: &str, queries: Vec<(String, String)>) {
-    let query_csv_path = format!("{result_dir_path}/rq_lut_no_lut_time.csv");
+    let query_csv_path = format!("{result_dir_path}/rq_lut_no_lut_time_repetitions={QUERY_REPETITIONS}.csv");
     let csv_exists = Path::new(&query_csv_path).exists();
 
     // Open CSV in append mode
@@ -106,9 +109,7 @@ fn measure_query(json_path: &str, result_dir_path: &str, query_data_csv: &str, q
         }
 
         let avg_time = total_time / (QUERY_REPETITIONS as f64);
-        println!(
-            "  - File: {query_data_csv}, Query {query_id}: {query_text}, Time = {avg_time:.5}s, Result = {result}",
-        );
+        println!("  - File: {query_data_csv}, Query {query_id}: {query_text}, Time = {avg_time}s, Result = {result}",);
 
         wrt.write_record(&[
             query_data_csv.to_string(),

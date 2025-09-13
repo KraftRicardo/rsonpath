@@ -78,33 +78,21 @@ pub fn evaluate_rq_lut_query_speed(data_dir_path: &str, result_dir_path: &str) {
     // Create results dir
     fs::create_dir_all(result_dir_path).expect("Failed to create directory");
 
-    let use_count = false;
+    let count = false;
 
     // GB_1
-    evaluate(data_dir_path, result_dir_path, QUERY_BESTBUY, &cutoffs, use_count);
-    evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF1, &cutoffs, use_count);
-    evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF2, &cutoffs, use_count);
-    evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF4, &cutoffs, use_count);
-    evaluate(data_dir_path, result_dir_path, QUERY_GOOGLE, &cutoffs, use_count);
-    evaluate(data_dir_path, result_dir_path, QUERY_NSPL, &cutoffs, use_count);
-    evaluate(data_dir_path, result_dir_path, QUERY_TWITTER, &cutoffs, use_count);
-    evaluate(
-        data_dir_path,
-        result_dir_path,
-        QUERY_TWITTER_SINGLE,
-        &cutoffs,
-        use_count,
-    );
-    evaluate(data_dir_path, result_dir_path, QUERY_WALMART, &cutoffs, use_count);
-    evaluate(
-        data_dir_path,
-        result_dir_path,
-        QUERY_WALMART_SINGLE,
-        &cutoffs,
-        use_count,
-    );
-    evaluate(data_dir_path, result_dir_path, QUERY_WIKI, &cutoffs, use_count);
-    evaluate(data_dir_path, result_dir_path, QUERY_WIKI_SINGLE, &cutoffs, use_count);
+    evaluate(data_dir_path, result_dir_path, QUERY_BESTBUY, &cutoffs, count);
+    evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF1, &cutoffs, count);
+    evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF2, &cutoffs, count);
+    evaluate(data_dir_path, result_dir_path, QUERY_CROSSREF4, &cutoffs, count);
+    evaluate(data_dir_path, result_dir_path, QUERY_GOOGLE, &cutoffs, count);
+    evaluate(data_dir_path, result_dir_path, QUERY_NSPL, &cutoffs, count);
+    evaluate(data_dir_path, result_dir_path, QUERY_TWITTER, &cutoffs, count);
+    evaluate(data_dir_path, result_dir_path, QUERY_TWITTER_SINGLE, &cutoffs, count);
+    evaluate(data_dir_path, result_dir_path, QUERY_WALMART, &cutoffs, count);
+    evaluate(data_dir_path, result_dir_path, QUERY_WALMART_SINGLE, &cutoffs, count);
+    evaluate(data_dir_path, result_dir_path, QUERY_WIKI, &cutoffs, count);
+    evaluate(data_dir_path, result_dir_path, QUERY_WIKI_SINGLE, &cutoffs, count);
 
     println!("Done");
 }
