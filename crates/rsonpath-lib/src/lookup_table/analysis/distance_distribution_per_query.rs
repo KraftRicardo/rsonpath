@@ -33,6 +33,7 @@ use std::fs;
 /// # Example
 /// ```bash
 /// cargo run --bin lut --release -- analyse-distance-distribution-per-query res/json res/data/analysis/distance_distribution_per_query 0
+/// cargo run --bin lut --release -- analyse-distance-distribution-per-query ricardo-jsons plot-results 0
 /// ```
 #[inline]
 pub fn analyse_distance_distribution_per_query(json_dir_path: &str, base_path: &str, cutoff: usize) {
