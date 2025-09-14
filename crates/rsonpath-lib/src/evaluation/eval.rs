@@ -1,4 +1,6 @@
 use clap::{Parser, Subcommand};
+use eval_legacy::evaluate_rq_query_speed;
+use eval_legacy_skip_time::evaluate_rq_legacy_skip_time_speed;
 use rsonpath::evaluation::{eval_legacy, eval_legacy_skip_time};
 use std::error::Error;
 
@@ -36,19 +38,19 @@ fn main() -> Result<(), Box<dyn Error>> {
             data_dir_path,
             result_dir_path,
         } => {
-            eval_legacy::evaluate_rq_query_speed(data_dir_path, result_dir_path, true);
+            evaluate_rq_query_speed(data_dir_path, result_dir_path, true);
         }
         Commands::EvalLegacyEmptyListOptOff {
             data_dir_path,
             result_dir_path,
         } => {
-            eval_legacy::evaluate_rq_query_speed(data_dir_path, result_dir_path, false);
+            evaluate_rq_query_speed(data_dir_path, result_dir_path, false);
         }
         Commands::EvalOptimal {
             data_dir_path,
             result_dir_path,
         } => {
-            eval_legacy_skip_time::run(data_dir_path, result_dir_path);
+            evaluate_rq_legacy_skip_time_speed(data_dir_path, result_dir_path);
         }
     }
 
