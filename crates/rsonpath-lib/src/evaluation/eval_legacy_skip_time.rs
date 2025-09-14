@@ -149,6 +149,7 @@ fn eval(data_dir_path: &str, results_dir_path: &str, query_data_csv: &str, use_c
             }
 
             // Measurement
+            ACCUMULATED_SKIP_TIME.store(0, Ordering::Relaxed);
             for _ in 0..QUERY_REPETITIONS {
                 let mut sink = vec![];
                 engine.matches(&input, &mut sink).expect("Fail @ engine matching.");
