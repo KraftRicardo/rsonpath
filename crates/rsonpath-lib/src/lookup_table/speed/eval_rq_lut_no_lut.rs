@@ -34,7 +34,7 @@ use std::{
 /// # Example
 /// ```bash
 /// cargo run --bin lut --release -- eval-rq-lut-no-lut res/json res/data/speed/local/rq_lut_no_lut
-/// cargo run --bin lut --release -- eval-rq-lut ricardo-jsons plot-results
+/// cargo run --bin lut --release -- eval-rq-lut-no-lut ricardo-jsons plot-results
 /// ```
 #[inline]
 pub fn evaluate_rq_lut_no_lut_query_speed(data_dir_path: &str, result_dir_path: &str) {

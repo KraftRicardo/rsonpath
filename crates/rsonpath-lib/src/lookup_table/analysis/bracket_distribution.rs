@@ -3,21 +3,17 @@ use std::ffi::OsStr;
 use std::fs::{self, File};
 use std::io::{BufWriter, Write};
 
-const RESULTS_FOLDER: &str = ".a_lut_tests/analysis";
-
+// cargo run --bin lut --release -- analyse-bracket-distribution res/json res/data/analysis/bracket-distribution
 #[inline]
-pub fn create_json_size_csv(json_folder_path: &str) {
-    eval(json_folder_path, RESULTS_FOLDER);
-}
-
-fn eval(json_folder_path: &str, result_folder_path: &str) {
+pub fn analyse_bracket_distribution(json_folder_path: &str, result_folder_path: &str) {
     // Create CSV file
-    let output_path = format!("{result_folder_path}/json_size_analysis.csv");
+    fs::create_dir_all(result_folder_path).expect("Failed to create directory");
+    let output_path = format!("{result_folder_path}/bracket_distribution.csv");
     let file = File::create(&output_path).expect("Could not create output CSV file");
     let mut writer = BufWriter::new(file);
 
     // Write header
-    writeln!(writer, "NAME,SIZE_BYTES,NUM_BRACKETS,CURLY_PERCENT,SQUARY_PERCENT").expect("Could not write CSV header");
+    writeln!(writer, "JSON,SIZE_BYTES,NUM_BRACKETS,CURLY_PERCENT,SQUARY_PERCENT").expect("Could not write CSV header");
 
     // Iterate over every .json file in the folder
     let paths = fs::read_dir(json_folder_path).expect("Failed to read input directory");
@@ -34,7 +30,8 @@ fn eval(json_folder_path: &str, result_folder_path: &str) {
             let metadata = fs::metadata(&path).expect("Could not read file metadata");
             let size_bytes = metadata.len();
 
-            let (num_curly, num_squary) = pair_data::count_brackets(json_path, 0).expect("Error while counting");
+            let (num_curly, num_squary) =
+                pair_data::count_curly_and_squary_brackets(json_path, 0).expect("Error while counting");
             let total = num_curly + num_squary;
 
             if total == 0 {
@@ -45,6 +42,7 @@ fn eval(json_folder_path: &str, result_folder_path: &str) {
             let curly_percent = (num_curly as f64) / (total as f64) * 100.0;
             let squary_percent = (num_squary as f64) / (total as f64) * 100.0;
 
+            println!("Json:{file_name}, Size:{size_bytes}, #Brackets:{total}, Curly%:{curly_percent:.2}, Squary%:{squary_percent:.2}");
             writeln!(
                 writer,
                 "{file_name},{size_bytes},{total},{curly_percent:.2},{squary_percent:.2}",

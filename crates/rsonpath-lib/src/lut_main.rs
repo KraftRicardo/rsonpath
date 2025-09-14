@@ -5,13 +5,14 @@ use eval_lut_build_speed_and_size::evaluate_lut_build_speed_and_size;
 use eval_rq_lut::evaluate_rq_lut_query_speed;
 use eval_rq_lut_no_lut::evaluate_rq_lut_no_lut_query_speed;
 use eval_serde::evaluate_serde_json_query_and_build_speed;
+use rsonpath::lookup_table::analysis::bracket_distribution::analyse_bracket_distribution;
 use rsonpath::lookup_table::analysis::distance_distribution_per_query;
 use rsonpath::lookup_table::analysis::{distance_distribution_per_json, json_size_estimation_bits::print_estimation};
 use rsonpath::lookup_table::correctness::{lut_build_correctness, lut_query_correctness};
 use rsonpath::lookup_table::extra::{eval_valgrind, lut_test_hotness, query_with_lut};
 use rsonpath::lookup_table::speed::{
-    eval_distance_cutoff, eval_final, eval_lut_build_speed_and_size, eval_lut_construction, eval_rq_lut,
-    eval_rq_lut_no_lut, eval_serde,
+    eval_distance_cutoff, eval_lut_build_speed_and_size, eval_lut_construction, eval_rq_lut, eval_rq_lut_no_lut,
+    eval_serde,
 };
 use std::error::Error;
 
@@ -30,6 +31,10 @@ enum Commands {
     // ##############
     // ## Analysis ##
     // ##############
+    AnalyseBracketDistribution {
+        json_dir_path: String,
+        result_dir_path: String,
+    },
     AnalyseDistanceDistributionPerJson {
         json_dir_path: String,
         result_dir_path: String,
@@ -44,10 +49,6 @@ enum Commands {
     // # Evaluation #
     // ##############
     EvalDistanceCutoff {
-        data_dir_path: String,
-        result_dir_path: String,
-    },
-    EvalFinal {
         data_dir_path: String,
         result_dir_path: String,
     },
@@ -98,6 +99,12 @@ fn main() -> Result<(), Box<dyn Error>> {
         // ##############
         // ## Analysis ##
         // ##############
+        Commands::AnalyseBracketDistribution {
+            json_dir_path,
+            result_dir_path,
+        } => {
+            analyse_bracket_distribution(json_dir_path, result_dir_path);
+        }
         Commands::AnalyseDistanceDistributionPerJson {
             json_dir_path,
             result_dir_path,
@@ -122,12 +129,6 @@ fn main() -> Result<(), Box<dyn Error>> {
             result_dir_path,
         } => {
             eval_distance_cutoff::run(data_dir_path, result_dir_path);
-        }
-        Commands::EvalFinal {
-            data_dir_path,
-            result_dir_path,
-        } => {
-            eval_final::run(data_dir_path, result_dir_path);
         }
         Commands::EvalLutBuildSpeedAndSize {
             data_dir_path,

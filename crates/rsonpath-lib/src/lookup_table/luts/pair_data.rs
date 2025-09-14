@@ -273,7 +273,10 @@ pub fn get_pairs_absolute(
 }
 
 #[inline]
-pub fn count_brackets(json_path: &str, cutoff: usize) -> Result<(usize, usize), Box<dyn std::error::Error>> {
+pub fn count_curly_and_squary_brackets(
+    json_path: &str,
+    cutoff: usize,
+) -> Result<(usize, usize), Box<dyn std::error::Error>> {
     let file = std::fs::File::open(json_path).expect("Fail at opening file");
     // SAFETY: We keep the file open throughout the entire duration.
     let input = unsafe { input::MmapInput::map_file(&file)? };
@@ -287,7 +290,7 @@ pub fn count_brackets(json_path: &str, cutoff: usize) -> Result<(usize, usize), 
         ) -> Result<(usize, usize), error::InputError> where
         I: Input,
         V: Simd,{
-                count_brackets_curly_squary::<I, V>(&input, simd, cutoff)
+                count_brackets::<I, V>(&input, simd, cutoff)
             })
     })
     .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
@@ -295,11 +298,7 @@ pub fn count_brackets(json_path: &str, cutoff: usize) -> Result<(usize, usize), 
 
 /// Count the number of curly and squary individually.
 #[inline]
-pub(crate) fn count_brackets_curly_squary<I, V>(
-    input: &I,
-    simd: V,
-    cutoff: usize,
-) -> Result<(usize, usize), error::InputError>
+pub(crate) fn count_brackets<I, V>(input: &I, simd: V, cutoff: usize) -> Result<(usize, usize), error::InputError>
 where
     I: Input,
     V: Simd,
