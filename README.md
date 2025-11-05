@@ -51,7 +51,7 @@ could be incorporated as a feature into the [rsonpath][rsonpath-link] project, d
 
 ---
 
-[thesis-link]: https://drive.google.com/file/d/1AO_k5XLi6oBXz1GNqs724G-VeWgigvvt/view?usp=sharing
+[thesis-link]: https://drive.google.com/file/d/17jjy5IgjDskoWYIooL_KzjboQGCFHhkX/view?usp=sharing
 [jana-link]: https://www.professoren.tum.de/g/giceva-jana
 [mateusz-link]: https://db.in.tum.de/~gienieczko/?lang=de
 [rsonpath-link]: https://github.com/rsonquery/rsonpath
