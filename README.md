@@ -1,7 +1,7 @@
 
 # 🎓 Master Thesis: *RSONPath with a Touch of DOM*
 
-rsonpath-lut is at the moment a fork of the original rsonpath and was worked on as project for my master thesis.
+[rsonpath-lut][rsonpath-lut-link] is at the moment a fork of the original [rsonpath][rsonpath-link] and was worked on as project for my master thesis.
 This version contains the lut implementation and all the involved benchmarks and additional measurements.
 
 > **Download the current version of the thesis:**  
