@@ -128,14 +128,14 @@ fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str, cu
 
         // Warm-up
         for _ in 0..BUILD_REPETITIONS {
-            let _ = collect_without_result(&json_path);
+            let _ = collect_without_result(&json_path, *cutoff);
         }
 
         // Measure pair collection time
         let mut total_time_collection = 0.0;
         for _ in 0..BUILD_REPETITIONS {
             let start = Instant::now();
-            let _ = collect_without_result(&json_path);
+            let _ = collect_without_result(&json_path, *cutoff);
             total_time_collection += start.elapsed().as_secs_f64();
         }
         let avg_time_collection = total_time_collection / BUILD_REPETITIONS as f64;
@@ -157,20 +157,21 @@ fn eval_all(data_dir_path: &str, result_dir_path: &str, query_data_csv: &str, cu
     }
 }
 
-fn collect_without_result(json_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+fn collect_without_result(json_path: &str, cutoff: usize) -> Result<(), Box<dyn std::error::Error>> {
     let file = fs::File::open(json_path).expect("Failed to open file");
     // SAFETY: We keep the file open throughout the entire duration.
     let input = unsafe { input::MmapInput::map_file(&file)? };
     let simd_c = classification::simd::configure();
 
     classification::simd::config_simd!(simd_c => |simd| {
-        classification::simd::dispatch_simd!(simd; &input, simd => fn<I, V>(
+        classification::simd::dispatch_simd!(simd; &input, simd, cutoff => fn<I, V>(
             input: &I,
             simd: V,
+            cutoff: usize,
         ) -> Result<(), error::InputError> where
         I: Input,
         V: Simd, {
-                let _ = pair_data::find_pairs(input, simd, 0)?;
+                let _ = pair_data::find_pairs(input, simd, cutoff)?;
                 Ok(())
             })
     })
