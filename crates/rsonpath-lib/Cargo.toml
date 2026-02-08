@@ -74,7 +74,7 @@ serde_json = { workspace = true }
 test-case = { workspace = true }
 
 [features]
-#default = ["simd", "serde"]
+default = ["simd", "serde"]
 #default = ["simd", "serde", "empty-list-opt"]
 #default = ["simd", "serde", "track-skipping"]
 #default = ["simd", "serde", "empty-list-opt", "track-skipping"]
